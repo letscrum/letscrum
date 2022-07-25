@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+import "api/general/v1/letscrum.proto";
+
+service Letscrum {
+  rpc GetVersion(google.protobuf.Empty) returns (letscrum.api.general.v1.GetVersionResponse) {
+    option (google.api.http) = {
+      get: "/apis/v1/version"
+    };
+  }
+}

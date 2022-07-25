@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package letscrum.api.general.v1;
+
+message Cluster {
+  string id = 1;
+  string name = 2;
+}
+
+enum Test {
+  TEST = 0;
+  TEST1 = 1;
+}
