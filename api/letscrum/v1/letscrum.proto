@@ -3,11 +3,20 @@ syntax = "proto3";
 import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
 import "api/general/v1/letscrum.proto";
+import "api/project/v1/project.proto";
 
 service Letscrum {
   rpc GetVersion(google.protobuf.Empty) returns (letscrum.api.general.v1.GetVersionResponse) {
     option (google.api.http) = {
       get: "/apis/v1/version"
+    };
+  }
+}
+
+service Project {
+  rpc CreateProject(letscrum.api.project.v1.CreateProjectRequest) returns (letscrum.api.project.v1.CreateProjectResponse) {
+    option (google.api.http) = {
+      post: "/apis/v1/projects"
     };
   }
 }
