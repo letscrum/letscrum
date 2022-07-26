@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package letscrum.api.general.v1;
 
+option go_package = "github.com/letscrum/letscrum/api/general/v1";
+
 message Cluster {
   string id = 1;
   string name = 2;

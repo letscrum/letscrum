@@ -1,5 +1,4 @@
 node_modules
-dist
 .DB_store
 .DS_Store
 /.idea
@@ -298,5 +297,43 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
-dist
-sdk/*/*
+
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+#*.out
+
+# Dependency directories (remove the comment below to include it)
+# vendor/
+.idea/
+.vscode/
+dist/*.tgz
+dist/*.out
+dist/*.xml
+dist/*.html
+dist/*.awk
+dist/sdk/api/hive/*
+dist/sdk/*.json
+charts/*.tgz
+*.tgz
+
+# protobuf gen files
+api/*/*/*.go
+api/*/*/*.json
+api/*/*.go
+api/*/*.json
+third_party/swagger-ui/*.json
+go.work
+*.ts
+
+# documentation
+_book/
+.DS_Store

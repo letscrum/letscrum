@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package letscrum.api.project.v1;
 
+option go_package = "github.com/letscrum/letscrum/api/project/v1";
+
 message Project {
   int64 id = 1;
   string name = 2;
@@ -14,6 +16,42 @@ message CreateProjectRequest {
 }
 
 message CreateProjectResponse {
+  Project project = 1;
+}
+
+message UpdateProjectRequest {
+  string name = 1;
+  string display_name = 2;
+}
+
+message UpdateProjectResponse {
+  Project project = 1;
+}
+
+message DeleteProjectRequest {
+  string name = 1;
+  string display_name = 2;
+}
+
+message DeleteProjectResponse {
+  Project project = 1;
+}
+
+message ListProjectRequest {
+  string name = 1;
+  string display_name = 2;
+}
+
+message ListProjectResponse {
+  Project project = 1;
+}
+
+message GetProjectRequest {
+  string name = 1;
+  string display_name = 2;
+}
+
+message GetProjectResponse {
   Project project = 1;
 }
 
