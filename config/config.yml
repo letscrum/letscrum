@@ -1,0 +1,21 @@
+server:
+  http:
+    addr: 0.0.0.0:8081
+    timeout: 1s
+  grpc:
+    addr: 0.0.0.0:9091
+    timeout: 1s
+
+data:
+  database:
+    driver: mysql
+    # dev mysql address
+    host: localhost
+    port: 3306
+    database: minibook
+    user: root
+    password: aaaaaa
+    max-idle-connections: 150
+    max-open-connections: 150
+    max-connection-lifetime: 20
+    log-level: 2 # GORM log level, 1: silent, 2:error, 3:warn, 4:info
