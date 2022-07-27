@@ -1,10 +1,12 @@
 package setting
 
 import (
+	"fmt"
 	"log"
 	"time"
 
 	"github.com/go-ini/ini"
+	"github.com/spf13/viper"
 )
 
 type App struct {
@@ -63,7 +65,15 @@ var RedisSetting = &Redis{}
 var cfg *ini.File
 
 // Setup initialize the configuration instance
-func Setup() {
+func Setup(configPath string) {
+	viper.SetConfigFile(configPath)
+	viper.AutomaticEnv()
+	if err := viper.ReadInConfig(); err == nil {
+		fmt.Println("Using config file:", viper.ConfigFileUsed())
+	}
+	config := viper.GetString("data.database.host")
+	fmt.Println("This is all configurations:" + config)
+
 	var err error
 	cfg, err = ini.Load("config/app.ini")
 	if err != nil {

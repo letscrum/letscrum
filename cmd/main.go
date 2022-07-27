@@ -16,7 +16,7 @@ import (
 )
 
 func init() {
-	setting.Setup()
+	setting.Setup("./config/config.yaml")
 	models.Setup()
 	logging.Setup()
 	gredis.Setup()
