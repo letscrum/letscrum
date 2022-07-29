@@ -45,4 +45,10 @@ service Project {
       get: "/apis/v1/projects/{name}"
     };
   }
+
+  rpc GetSprint(letscrum.api.project.v1.CreateSprintRequest) returns (letscrum.api.project.v1.CreateSprintResponse) {
+    option (google.api.http) = {
+      get: "/apis/v1/projects/{name}/sprints"
+    };
+  }
 }
