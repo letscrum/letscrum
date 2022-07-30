@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	generalV1 "github.com/letscrum/letscrum/apis/general/v1"
 	projectV1 "github.com/letscrum/letscrum/apis/project/v1"
+	"github.com/letscrum/letscrum/pkg/errors"
 	projectService "github.com/letscrum/letscrum/services/project"
 	"net/http"
 )
@@ -14,7 +15,8 @@ func CreateProject(ctx *gin.Context) {
 
 	errRequest := ctx.ShouldBindJSON(&request)
 	if errRequest != nil {
-		ctx.JSON(http.StatusInternalServerError, nil)
+		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(errRequest))
+		return
 	}
 
 	err := projectService.Create(&projectV1.Project{
@@ -22,7 +24,8 @@ func CreateProject(ctx *gin.Context) {
 		DisplayName: request.DisplayName,
 	})
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, nil)
+		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
+		return
 	}
 
 	ctx.JSON(http.StatusOK, projectV1.CreateProjectResponse{
@@ -38,7 +41,8 @@ func ListProject(ctx *gin.Context) {
 
 	errRequest := ctx.ShouldBindWith(&request, binding.Form)
 	if errRequest != nil {
-		ctx.JSON(http.StatusInternalServerError, nil)
+		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(errRequest))
+		return
 	}
 
 	if request.Page <= 0 {
@@ -53,7 +57,8 @@ func ListProject(ctx *gin.Context) {
 		PageSize: request.PageSize,
 	})
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, nil)
+		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
+		return
 	}
 
 	ctx.JSON(http.StatusOK, projectV1.ListProjectResponse{

@@ -3,7 +3,7 @@ package app
 import (
 	"github.com/gin-gonic/gin"
 
-	"github.com/letscrum/letscrum/pkg/e"
+	"github.com/letscrum/letscrum/pkg/errors"
 )
 
 type Gin struct {
@@ -20,7 +20,7 @@ type Response struct {
 func (g *Gin) Response(httpCode, errCode int, data interface{}) {
 	g.C.JSON(httpCode, Response{
 		Code: errCode,
-		Msg:  e.GetMsg(errCode),
+		Msg:  errors.GetMsg(errCode),
 		Data: data,
 	})
 	return

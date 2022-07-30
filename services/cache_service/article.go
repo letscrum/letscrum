@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/letscrum/letscrum/pkg/e"
+	"github.com/letscrum/letscrum/pkg/errors"
 )
 
 type Article struct {
@@ -17,12 +17,12 @@ type Article struct {
 }
 
 func (a *Article) GetArticleKey() string {
-	return e.CACHE_ARTICLE + "_" + strconv.Itoa(a.ID)
+	return errors.CACHE_ARTICLE + "_" + strconv.Itoa(a.ID)
 }
 
 func (a *Article) GetArticlesKey() string {
 	keys := []string{
-		e.CACHE_ARTICLE,
+		errors.CACHE_ARTICLE,
 		"LIST",
 	}
 

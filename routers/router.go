@@ -1,7 +1,6 @@
 package routers
 
 import (
-	"github.com/letscrum/letscrum/middlewares/jwt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -35,7 +34,7 @@ func InitRouter() *gin.Engine {
 	{
 		apisV1.GET("/projects", v1.ListProject)
 	}
-	apisV1.Use(jwt.JWT())
+	apisV1.Use()
 	{
 		//获取标签列表
 		apisV1.GET("/tags", v1.GetTags)

@@ -6,25 +6,25 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"net/http"
 
-	"github.com/letscrum/letscrum/pkg/e"
+	"github.com/letscrum/letscrum/pkg/errors"
 )
 
 // BindAndValid binds and validates data
 func BindAndValid(c *gin.Context, form interface{}) (int, int) {
 	err := c.BindWith(form, binding.Form)
 	if err != nil {
-		return http.StatusBadRequest, e.INVALID_PARAMS
+		return http.StatusBadRequest, errors.INVALID_PARAMS
 	}
 
 	valid := validation.Validation{}
 	check, err := valid.Valid(form)
 	if err != nil {
-		return http.StatusInternalServerError, e.ERROR
+		return http.StatusInternalServerError, errors.ERROR
 	}
 	if !check {
 		MarkErrors(valid.Errors)
-		return http.StatusBadRequest, e.INVALID_PARAMS
+		return http.StatusBadRequest, errors.INVALID_PARAMS
 	}
 
-	return http.StatusOK, e.SUCCESS
+	return http.StatusOK, errors.SUCCESS
 }

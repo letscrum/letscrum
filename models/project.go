@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	generalV1 "github.com/letscrum/letscrum/apis/general/v1"
 	projectV1 "github.com/letscrum/letscrum/apis/project/v1"
 	"gorm.io/gorm"
@@ -18,6 +19,13 @@ func CreateProject(project *projectV1.Project) error {
 		Name:        project.Name,
 		DisplayName: project.DisplayName,
 	}
+
+	var pInDB *Project
+	errPName := db.Where("name = ?", p.Name).First(&pInDB).Error
+	if (errPName != nil && errPName != gorm.ErrRecordNotFound) || pInDB.Name == p.Name {
+		return fmt.Errorf("duplicate project name")
+	}
+
 	if err := db.Create(&p).Error; err != nil {
 		return err
 	}

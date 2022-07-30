@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/letscrum/letscrum/pkg/e"
+	"github.com/letscrum/letscrum/pkg/errors"
 )
 
 type Tag struct {
@@ -18,7 +18,7 @@ type Tag struct {
 
 func (t *Tag) GetTagsKey() string {
 	keys := []string{
-		e.CACHE_TAG,
+		errors.CACHE_TAG,
 		"LIST",
 	}
 

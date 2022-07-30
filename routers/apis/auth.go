@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/letscrum/letscrum/pkg/app"
-	"github.com/letscrum/letscrum/pkg/e"
+	"github.com/letscrum/letscrum/pkg/errors"
 	"github.com/letscrum/letscrum/pkg/utils"
 	"github.com/letscrum/letscrum/services/auth_service"
 )
@@ -36,29 +36,29 @@ func GetAuth(c *gin.Context) {
 
 	if !ok {
 		app.MarkErrors(valid.Errors)
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		appG.Response(http.StatusBadRequest, errors.INVALID_PARAMS, nil)
 		return
 	}
 
 	authService := auth_service.Auth{Username: username, Password: password}
 	isExist, err := authService.Check()
 	if err != nil {
-		appG.Response(http.StatusInternalServerError, e.ERROR_AUTH_CHECK_TOKEN_FAIL, nil)
+		appG.Response(http.StatusInternalServerError, errors.ERROR_AUTH_CHECK_TOKEN_FAIL, nil)
 		return
 	}
 
 	if !isExist {
-		appG.Response(http.StatusUnauthorized, e.ERROR_AUTH, nil)
+		appG.Response(http.StatusUnauthorized, errors.ERROR_AUTH, nil)
 		return
 	}
 
 	token, err := utils.GenerateToken(username, password)
 	if err != nil {
-		appG.Response(http.StatusInternalServerError, e.ERROR_AUTH_TOKEN, nil)
+		appG.Response(http.StatusInternalServerError, errors.ERROR_AUTH_TOKEN, nil)
 		return
 	}
 
-	appG.Response(http.StatusOK, e.SUCCESS, map[string]string{
+	appG.Response(http.StatusOK, errors.SUCCESS, map[string]string{
 		"token": token,
 	})
 }

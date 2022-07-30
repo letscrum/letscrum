@@ -8,7 +8,7 @@ import (
 	"github.com/unknwon/com"
 
 	"github.com/letscrum/letscrum/pkg/app"
-	"github.com/letscrum/letscrum/pkg/e"
+	"github.com/letscrum/letscrum/pkg/errors"
 	"github.com/letscrum/letscrum/pkg/export"
 	"github.com/letscrum/letscrum/pkg/logging"
 	"github.com/letscrum/letscrum/pkg/settings"
@@ -39,17 +39,17 @@ func GetTags(c *gin.Context) {
 	}
 	tags, err := tagService.GetAll()
 	if err != nil {
-		appG.Response(http.StatusInternalServerError, e.ERROR_GET_TAGS_FAIL, nil)
+		appG.Response(http.StatusInternalServerError, errors.ERROR_GET_TAGS_FAIL, nil)
 		return
 	}
 
 	count, err := tagService.Count()
 	if err != nil {
-		appG.Response(http.StatusInternalServerError, e.ERROR_COUNT_TAG_FAIL, nil)
+		appG.Response(http.StatusInternalServerError, errors.ERROR_COUNT_TAG_FAIL, nil)
 		return
 	}
 
-	appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{
+	appG.Response(http.StatusOK, errors.SUCCESS, map[string]interface{}{
 		"lists": tags,
 		"total": count,
 	})
@@ -76,7 +76,7 @@ func AddTag(c *gin.Context) {
 	)
 
 	httpCode, errCode := app.BindAndValid(c, &form)
-	if errCode != e.SUCCESS {
+	if errCode != errors.SUCCESS {
 		appG.Response(httpCode, errCode, nil)
 		return
 	}
@@ -88,21 +88,21 @@ func AddTag(c *gin.Context) {
 	}
 	exists, err := tagService.ExistByName()
 	if err != nil {
-		appG.Response(http.StatusInternalServerError, e.ERROR_EXIST_TAG_FAIL, nil)
+		appG.Response(http.StatusInternalServerError, errors.ERROR_EXIST_TAG_FAIL, nil)
 		return
 	}
 	if exists {
-		appG.Response(http.StatusOK, e.ERROR_EXIST_TAG, nil)
+		appG.Response(http.StatusOK, errors.ERROR_EXIST_TAG, nil)
 		return
 	}
 
 	err = tagService.Add()
 	if err != nil {
-		appG.Response(http.StatusInternalServerError, e.ERROR_ADD_TAG_FAIL, nil)
+		appG.Response(http.StatusInternalServerError, errors.ERROR_ADD_TAG_FAIL, nil)
 		return
 	}
 
-	appG.Response(http.StatusOK, e.SUCCESS, nil)
+	appG.Response(http.StatusOK, errors.SUCCESS, nil)
 }
 
 type EditTagForm struct {
@@ -128,7 +128,7 @@ func EditTag(c *gin.Context) {
 	)
 
 	httpCode, errCode := app.BindAndValid(c, &form)
-	if errCode != e.SUCCESS {
+	if errCode != errors.SUCCESS {
 		appG.Response(httpCode, errCode, nil)
 		return
 	}
@@ -142,22 +142,22 @@ func EditTag(c *gin.Context) {
 
 	exists, err := tagService.ExistByID()
 	if err != nil {
-		appG.Response(http.StatusInternalServerError, e.ERROR_EXIST_TAG_FAIL, nil)
+		appG.Response(http.StatusInternalServerError, errors.ERROR_EXIST_TAG_FAIL, nil)
 		return
 	}
 
 	if !exists {
-		appG.Response(http.StatusOK, e.ERROR_NOT_EXIST_TAG, nil)
+		appG.Response(http.StatusOK, errors.ERROR_NOT_EXIST_TAG, nil)
 		return
 	}
 
 	err = tagService.Edit()
 	if err != nil {
-		appG.Response(http.StatusInternalServerError, e.ERROR_EDIT_TAG_FAIL, nil)
+		appG.Response(http.StatusInternalServerError, errors.ERROR_EDIT_TAG_FAIL, nil)
 		return
 	}
 
-	appG.Response(http.StatusOK, e.SUCCESS, nil)
+	appG.Response(http.StatusOK, errors.SUCCESS, nil)
 }
 
 // @Summary Delete article tag
@@ -174,27 +174,27 @@ func DeleteTag(c *gin.Context) {
 
 	if valid.HasErrors() {
 		app.MarkErrors(valid.Errors)
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		appG.Response(http.StatusBadRequest, errors.INVALID_PARAMS, nil)
 	}
 
 	tagService := tag_service.Tag{ID: id}
 	exists, err := tagService.ExistByID()
 	if err != nil {
-		appG.Response(http.StatusInternalServerError, e.ERROR_EXIST_TAG_FAIL, nil)
+		appG.Response(http.StatusInternalServerError, errors.ERROR_EXIST_TAG_FAIL, nil)
 		return
 	}
 
 	if !exists {
-		appG.Response(http.StatusOK, e.ERROR_NOT_EXIST_TAG, nil)
+		appG.Response(http.StatusOK, errors.ERROR_NOT_EXIST_TAG, nil)
 		return
 	}
 
 	if err := tagService.Delete(); err != nil {
-		appG.Response(http.StatusInternalServerError, e.ERROR_DELETE_TAG_FAIL, nil)
+		appG.Response(http.StatusInternalServerError, errors.ERROR_DELETE_TAG_FAIL, nil)
 		return
 	}
 
-	appG.Response(http.StatusOK, e.SUCCESS, nil)
+	appG.Response(http.StatusOK, errors.SUCCESS, nil)
 }
 
 // @Summary Export article tag
@@ -219,11 +219,11 @@ func ExportTag(c *gin.Context) {
 
 	filename, err := tagService.Export()
 	if err != nil {
-		appG.Response(http.StatusInternalServerError, e.ERROR_EXPORT_TAG_FAIL, nil)
+		appG.Response(http.StatusInternalServerError, errors.ERROR_EXPORT_TAG_FAIL, nil)
 		return
 	}
 
-	appG.Response(http.StatusOK, e.SUCCESS, map[string]string{
+	appG.Response(http.StatusOK, errors.SUCCESS, map[string]string{
 		"export_url":      export.GetExcelFullUrl(filename),
 		"export_save_url": export.GetExcelPath() + filename,
 	})
@@ -241,7 +241,7 @@ func ImportTag(c *gin.Context) {
 	file, _, err := c.Request.FormFile("file")
 	if err != nil {
 		logging.Warn(err)
-		appG.Response(http.StatusInternalServerError, e.ERROR, nil)
+		appG.Response(http.StatusInternalServerError, errors.ERROR, nil)
 		return
 	}
 
@@ -249,9 +249,9 @@ func ImportTag(c *gin.Context) {
 	err = tagService.Import(file)
 	if err != nil {
 		logging.Warn(err)
-		appG.Response(http.StatusInternalServerError, e.ERROR_IMPORT_TAG_FAIL, nil)
+		appG.Response(http.StatusInternalServerError, errors.ERROR_IMPORT_TAG_FAIL, nil)
 		return
 	}
 
-	appG.Response(http.StatusOK, e.SUCCESS, nil)
+	appG.Response(http.StatusOK, errors.SUCCESS, nil)
 }
