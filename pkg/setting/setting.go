@@ -75,7 +75,7 @@ func Setup(configPath string) {
 	fmt.Println("This is all configurations:" + config)
 
 	var err error
-	cfg, err = ini.Load("config/app.ini")
+	cfg, err = ini.Load("configs/app.ini")
 	if err != nil {
 		log.Fatalf("setting.Setup, fail to parse 'config/app.ini': %v", err)
 	}

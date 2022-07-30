@@ -3,18 +3,18 @@ package v1
 import (
 	"net/http"
 
-	"github.com/unknwon/com"
 	"github.com/astaxie/beego/validation"
 	"github.com/boombuler/barcode/qr"
 	"github.com/gin-gonic/gin"
+	"github.com/unknwon/com"
 
 	"github.com/letscrum/letscrum/pkg/app"
 	"github.com/letscrum/letscrum/pkg/e"
 	"github.com/letscrum/letscrum/pkg/qrcode"
 	"github.com/letscrum/letscrum/pkg/setting"
 	"github.com/letscrum/letscrum/pkg/util"
-	"github.com/letscrum/letscrum/service/article_service"
-	"github.com/letscrum/letscrum/service/tag_service"
+	"github.com/letscrum/letscrum/services/article_service"
+	"github.com/letscrum/letscrum/services/tag_service"
 )
 
 // @Summary Get a single article
@@ -92,7 +92,7 @@ func GetArticles(c *gin.Context) {
 		PageSize: setting.AppSetting.PageSize,
 	}
 
-	total, err := articleService.Count()
+	err := articleService.Count()
 	if err != nil {
 		appG.Response(http.StatusInternalServerError, e.ERROR_COUNT_ARTICLE_FAIL, nil)
 		return
@@ -106,7 +106,6 @@ func GetArticles(c *gin.Context) {
 
 	data := make(map[string]interface{})
 	data["lists"] = articles
-	data["total"] = total
 
 	appG.Response(http.StatusOK, e.SUCCESS, data)
 }

@@ -1,6 +1,6 @@
 Use letscrum;
 
-CREATE TABLE `users` (
+CREATE TABLE `user` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
   `password` varchar(50) NOT NULL,

@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package letscrum.api.general.v1;
+package letscrum.apis.general.v1;
 
-option go_package = "github.com/letscrum/letscrum/api/general/v1";
+option go_package = "github.com/letscrum/letscrum/apis/general/v1";
 
 message Version {
   string version = 1;

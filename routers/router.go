@@ -8,7 +8,6 @@ import (
 	"github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 
-	"github.com/letscrum/letscrum/middleware/jwt"
 	"github.com/letscrum/letscrum/pkg/export"
 	"github.com/letscrum/letscrum/pkg/qrcode"
 	"github.com/letscrum/letscrum/pkg/upload"
@@ -31,7 +30,7 @@ func InitRouter() *gin.Engine {
 	r.POST("/upload", api.UploadImage)
 
 	apiv1 := r.Group("/api/v1")
-	apiv1.Use(jwt.JWT())
+	apiv1.Use()
 	{
 		//获取标签列表
 		apiv1.GET("/tags", v1.GetTags)
@@ -58,6 +57,7 @@ func InitRouter() *gin.Engine {
 		apiv1.DELETE("/articles/:id", v1.DeleteArticle)
 		//生成文章海报
 		apiv1.POST("/articles/poster/generate", v1.GenerateArticlePoster)
+		apiv1.POST("/projects", v1.CreateProject)
 	}
 
 	return r

@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 type Article struct {
@@ -35,13 +35,12 @@ func ExistArticleByID(id int) (bool, error) {
 }
 
 // GetArticleTotal gets the total number of articles based on the constraints
-func GetArticleTotal(maps interface{}) (int, error) {
-	var count int
-	if err := db.Model(&Article{}).Where(maps).Count(&count).Error; err != nil {
-		return 0, err
+func GetArticleTotal(maps interface{}) error {
+	if err := db.Model(&Article{}).Where(maps).Error; err != nil {
+		return err
 	}
 
-	return count, nil
+	return nil
 }
 
 // GetArticles gets a list of articles based on paging constraints
@@ -63,7 +62,7 @@ func GetArticle(id int) (*Article, error) {
 		return nil, err
 	}
 
-	err = db.Model(&article).Related(&article.Tag).Error
+	err = db.Model(&article).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}

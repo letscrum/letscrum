@@ -3,9 +3,9 @@ package v1
 import (
 	"net/http"
 
-	"github.com/unknwon/com"
 	"github.com/astaxie/beego/validation"
 	"github.com/gin-gonic/gin"
+	"github.com/unknwon/com"
 
 	"github.com/letscrum/letscrum/pkg/app"
 	"github.com/letscrum/letscrum/pkg/e"
@@ -13,7 +13,7 @@ import (
 	"github.com/letscrum/letscrum/pkg/logging"
 	"github.com/letscrum/letscrum/pkg/setting"
 	"github.com/letscrum/letscrum/pkg/util"
-	"github.com/letscrum/letscrum/service/tag_service"
+	"github.com/letscrum/letscrum/services/tag_service"
 )
 
 // @Summary Get multiple article tags

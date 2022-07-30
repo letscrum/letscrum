@@ -1,6 +1,6 @@
 Use letscrum;
 
-CREATE TABLE `projects` (
+CREATE TABLE `project` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
   `display_name` varchar(50) NOT NULL,
@@ -9,7 +9,7 @@ CREATE TABLE `projects` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `project_members` (
+CREATE TABLE `project_member` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` bigint(20) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -17,7 +17,7 @@ CREATE TABLE `project_members` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `sprints` (
+CREATE TABLE `sprint` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `project_id` bigint(20) DEFAULT NULL,
   `name` varchar(50) NOT NULL,
@@ -26,7 +26,7 @@ CREATE TABLE `sprints` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `sprint_members` (
+CREATE TABLE `sprint_member` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` bigint(20) DEFAULT NULL,
   `capacity` int(11) DEFAULT 0,

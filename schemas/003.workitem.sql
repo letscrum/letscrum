@@ -1,6 +1,6 @@
 Use letscrum;
 
-CREATE TABLE `epics` (
+CREATE TABLE `epic` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `title` varchar(50) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -8,7 +8,7 @@ CREATE TABLE `epics` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `features` (
+CREATE TABLE `feature` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `title` varchar(50) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -16,7 +16,7 @@ CREATE TABLE `features` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `bugs` (
+CREATE TABLE `bug` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `title` varchar(50) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -24,7 +24,7 @@ CREATE TABLE `bugs` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `backlogs` (
+CREATE TABLE `backlog` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `title` varchar(50) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -32,7 +32,7 @@ CREATE TABLE `backlogs` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `tasks` (
+CREATE TABLE `task` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `title` varchar(50) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -40,7 +40,7 @@ CREATE TABLE `tasks` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `relations` (
+CREATE TABLE `relation` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `parent_type` varchar(50) NOT NULL,
   `parent_id` varchar(50) NOT NULL,

@@ -1,6 +1,4 @@
-node_modules
 .DB_store
-.DS_Store
 /.idea
 Homestead.json
 Homestead.yaml
@@ -31,7 +29,6 @@ node_modules
 coverage
 
 # misc
-.DS_Store
 .env
 npm-debug.log
 
@@ -176,9 +173,6 @@ publish/
 # Publish Web Output
 *.[Pp]ublish.xml
 *.azurePubxml
-# TODO: Comment the next line if you want to checkin your web deploy settings
-# but database connection strings (with potential passwords) will be unencrypted
-#*.pubxml
 *.publishproj
 
 # Microsoft Azure Web App publish settings. Comment the next line if you want to
@@ -230,7 +224,6 @@ ClientBin/
 *.jfm
 *.pfx
 *.publishsettings
-node_modules/
 orleans.codegen.cs
 
 # Since there are multiple workflows, uncomment next line to ignore bower_components
@@ -288,7 +281,6 @@ paket-files/
 .fake/
 
 # JetBrains Rider
-.idea/
 *.sln.iml
 
 # CodeRush
@@ -320,20 +312,16 @@ dist/*.out
 dist/*.xml
 dist/*.html
 dist/*.awk
-dist/sdk/api/hive/*
 dist/sdk/*.json
 charts/*.tgz
 *.tgz
 
 # protobuf gen files
-api/*/*/*.go
-api/*/*/*.json
-api/*/*.go
-api/*/*.json
+dist/sdk/apis
 third_party/swagger-ui/*.json
 go.work
 *.ts
 
 # documentation
 _book/
-.DS_Store
+apis

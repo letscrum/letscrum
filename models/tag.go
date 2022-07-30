@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 type Tag struct {
@@ -65,7 +65,7 @@ func GetTags(pageNum int, pageSize int, maps interface{}) ([]Tag, error) {
 // GetTagTotal counts the total number of tags based on the constraint
 func GetTagTotal(maps interface{}) (int, error) {
 	var count int
-	if err := db.Model(&Tag{}).Where(maps).Count(&count).Error; err != nil {
+	if err := db.Model(&Tag{}).Where(maps).Error; err != nil {
 		return 0, err
 	}
 

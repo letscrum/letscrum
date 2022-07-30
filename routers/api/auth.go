@@ -9,7 +9,7 @@ import (
 	"github.com/letscrum/letscrum/pkg/app"
 	"github.com/letscrum/letscrum/pkg/e"
 	"github.com/letscrum/letscrum/pkg/util"
-	"github.com/letscrum/letscrum/service/auth_service"
+	"github.com/letscrum/letscrum/services/auth_service"
 )
 
 type auth struct {

@@ -6,7 +6,7 @@ import (
 	"github.com/letscrum/letscrum/models"
 	"github.com/letscrum/letscrum/pkg/gredis"
 	"github.com/letscrum/letscrum/pkg/logging"
-	"github.com/letscrum/letscrum/service/cache_service"
+	"github.com/letscrum/letscrum/services/cache_service"
 )
 
 type Article struct {
@@ -118,7 +118,7 @@ func (a *Article) ExistByID() (bool, error) {
 	return models.ExistArticleByID(a.ID)
 }
 
-func (a *Article) Count() (int, error) {
+func (a *Article) Count() error {
 	return models.GetArticleTotal(a.getMaps())
 }
 

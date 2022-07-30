@@ -14,7 +14,7 @@ import (
 	"github.com/letscrum/letscrum/pkg/file"
 	"github.com/letscrum/letscrum/pkg/gredis"
 	"github.com/letscrum/letscrum/pkg/logging"
-	"github.com/letscrum/letscrum/service/cache_service"
+	"github.com/letscrum/letscrum/services/cache_service"
 )
 
 type Tag struct {
@@ -116,9 +116,7 @@ func (t *Tag) Export() (string, error) {
 			strconv.Itoa(v.ID),
 			v.Name,
 			v.CreatedBy,
-			strconv.Itoa(v.CreatedOn),
 			v.ModifiedBy,
-			strconv.Itoa(v.ModifiedOn),
 		}
 
 		row = sheet.AddRow()
