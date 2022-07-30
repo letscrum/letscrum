@@ -1,8 +1,8 @@
-package util
+package utils
 
-import "github.com/letscrum/letscrum/pkg/setting"
+import "github.com/letscrum/letscrum/pkg/settings"
 
-// Setup Initialize the util
+// Setup Initialize the utils
 func Setup() {
-	jwtSecret = []byte(setting.AppSetting.JwtSecret)
+	jwtSecret = []byte(settings.AppSetting.JwtSecret)
 }

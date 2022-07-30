@@ -11,7 +11,7 @@ import (
 
 	"github.com/letscrum/letscrum/pkg/file"
 	"github.com/letscrum/letscrum/pkg/qrcode"
-	"github.com/letscrum/letscrum/pkg/setting"
+	"github.com/letscrum/letscrum/pkg/settings"
 )
 
 type ArticlePoster struct {
@@ -94,7 +94,7 @@ type DrawText struct {
 }
 
 func (a *ArticlePosterBg) DrawPoster(d *DrawText, fontName string) error {
-	fontSource := setting.AppSetting.RuntimeRootPath + setting.AppSetting.FontSavePath + fontName
+	fontSource := settings.AppSetting.RuntimeRootPath + settings.AppSetting.FontSavePath + fontName
 	fontSourceBytes, err := ioutil.ReadFile(fontSource)
 	if err != nil {
 		return err

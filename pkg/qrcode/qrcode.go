@@ -7,8 +7,8 @@ import (
 	"github.com/boombuler/barcode/qr"
 
 	"github.com/letscrum/letscrum/pkg/file"
-	"github.com/letscrum/letscrum/pkg/setting"
-	"github.com/letscrum/letscrum/pkg/util"
+	"github.com/letscrum/letscrum/pkg/settings"
+	"github.com/letscrum/letscrum/pkg/utils"
 )
 
 type QrCode struct {
@@ -38,22 +38,22 @@ func NewQrCode(url string, width, height int, level qr.ErrorCorrectionLevel, mod
 
 // GetQrCodePath get save path
 func GetQrCodePath() string {
-	return setting.AppSetting.QrCodeSavePath
+	return settings.AppSetting.QrCodeSavePath
 }
 
 // GetQrCodeFullPath get full save path
 func GetQrCodeFullPath() string {
-	return setting.AppSetting.RuntimeRootPath + setting.AppSetting.QrCodeSavePath
+	return settings.AppSetting.RuntimeRootPath + settings.AppSetting.QrCodeSavePath
 }
 
 // GetQrCodeFullUrl get the full access path
 func GetQrCodeFullUrl(name string) string {
-	return setting.AppSetting.PrefixUrl + "/" + GetQrCodePath() + name
+	return settings.AppSetting.PrefixUrl + "/" + GetQrCodePath() + name
 }
 
 // GetQrCodeFileName get qr file name
 func GetQrCodeFileName(value string) string {
-	return util.EncodeMD5(value)
+	return utils.EncodeMD5(value)
 }
 
 // GetQrCodeExt get qr file ext

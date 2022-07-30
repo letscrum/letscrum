@@ -1,4 +1,4 @@
-package api
+package apis
 
 import (
 	"net/http"
@@ -16,7 +16,7 @@ import (
 // @Param image formData file true "Image File"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
-// @Router /api/v1/tags/import [post]
+// @Router /apis/v1/tags/import [post]
 func UploadImage(c *gin.Context) {
 	appG := app.Gin{C: c}
 	file, image, err := c.Request.FormFile("image")

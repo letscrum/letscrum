@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/letscrum/letscrum/pkg/e"
-	"github.com/letscrum/letscrum/pkg/util"
+	"github.com/letscrum/letscrum/pkg/utils"
 )
 
 // JWT is jwt middleware
@@ -21,7 +21,7 @@ func JWT() gin.HandlerFunc {
 		if token == "" {
 			code = e.INVALID_PARAMS
 		} else {
-			_, err := util.ParseToken(token)
+			_, err := utils.ParseToken(token)
 			if err != nil {
 				switch err.(*jwt.ValidationError).Errors {
 				case jwt.ValidationErrorExpired:

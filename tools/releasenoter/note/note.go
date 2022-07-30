@@ -14,7 +14,7 @@ import (
 
 var (
 	noteKindLevel = map[string]int{"bug-fix": 1, "security-fix": 2, "feature": 3, "test": 4, "other": 5}
-	noteAreaLevel = map[string]int{"api": 1, "architecture": 2, "infrastructure": 3, "installation": 4, "documentation": 5, "others": 6}
+	noteAreaLevel = map[string]int{"apis": 1, "architecture": 2, "infrastructure": 3, "installation": 4, "documentation": 5, "others": 6}
 )
 
 type Note struct {

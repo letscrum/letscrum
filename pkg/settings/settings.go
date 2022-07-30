@@ -1,4 +1,4 @@
-package setting
+package settings
 
 import (
 	"fmt"
@@ -77,7 +77,7 @@ func Setup(configPath string) {
 	var err error
 	cfg, err = ini.Load("configs/app.ini")
 	if err != nil {
-		log.Fatalf("setting.Setup, fail to parse 'config/app.ini': %v", err)
+		log.Fatalf("settings.Setup, fail to parse 'config/app.ini': %v", err)
 	}
 
 	mapTo("app", AppSetting)

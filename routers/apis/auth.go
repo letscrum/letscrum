@@ -1,4 +1,4 @@
-package api
+package apis
 
 import (
 	"net/http"
@@ -8,7 +8,7 @@ import (
 
 	"github.com/letscrum/letscrum/pkg/app"
 	"github.com/letscrum/letscrum/pkg/e"
-	"github.com/letscrum/letscrum/pkg/util"
+	"github.com/letscrum/letscrum/pkg/utils"
 	"github.com/letscrum/letscrum/services/auth_service"
 )
 
@@ -52,7 +52,7 @@ func GetAuth(c *gin.Context) {
 		return
 	}
 
-	token, err := util.GenerateToken(username, password)
+	token, err := utils.GenerateToken(username, password)
 	if err != nil {
 		appG.Response(http.StatusInternalServerError, e.ERROR_AUTH_TOKEN, nil)
 		return

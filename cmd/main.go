@@ -10,17 +10,17 @@ import (
 	"github.com/letscrum/letscrum/models"
 	"github.com/letscrum/letscrum/pkg/gredis"
 	"github.com/letscrum/letscrum/pkg/logging"
-	"github.com/letscrum/letscrum/pkg/setting"
-	"github.com/letscrum/letscrum/pkg/util"
+	"github.com/letscrum/letscrum/pkg/settings"
+	"github.com/letscrum/letscrum/pkg/utils"
 	"github.com/letscrum/letscrum/routers"
 )
 
 func init() {
-	setting.Setup("./config/config.yaml")
+	settings.Setup("./config/config.yaml")
 	models.Setup()
 	logging.Setup()
 	gredis.Setup()
-	util.Setup()
+	utils.Setup()
 }
 
 // @title Golang Gin API
@@ -30,12 +30,12 @@ func init() {
 // @license.name MIT
 // @license.url https://github.com/letscrum/letscrum/blob/master/LICENSE
 func main() {
-	gin.SetMode(setting.ServerSetting.RunMode)
+	gin.SetMode(settings.ServerSetting.RunMode)
 
 	routersInit := routers.InitRouter()
-	readTimeout := setting.ServerSetting.ReadTimeout
-	writeTimeout := setting.ServerSetting.WriteTimeout
-	endPoint := fmt.Sprintf(":%d", setting.ServerSetting.HttpPort)
+	readTimeout := settings.ServerSetting.ReadTimeout
+	writeTimeout := settings.ServerSetting.WriteTimeout
+	endPoint := fmt.Sprintf(":%d", settings.ServerSetting.HttpPort)
 	maxHeaderBytes := 1 << 20
 
 	server := &http.Server{

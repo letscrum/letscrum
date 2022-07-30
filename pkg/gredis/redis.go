@@ -6,7 +6,7 @@ import (
 
 	"github.com/gomodule/redigo/redis"
 
-	"github.com/letscrum/letscrum/pkg/setting"
+	"github.com/letscrum/letscrum/pkg/settings"
 )
 
 var RedisConn *redis.Pool
@@ -14,16 +14,16 @@ var RedisConn *redis.Pool
 // Setup Initialize the Redis instance
 func Setup() error {
 	RedisConn = &redis.Pool{
-		MaxIdle:     setting.RedisSetting.MaxIdle,
-		MaxActive:   setting.RedisSetting.MaxActive,
-		IdleTimeout: setting.RedisSetting.IdleTimeout,
+		MaxIdle:     settings.RedisSetting.MaxIdle,
+		MaxActive:   settings.RedisSetting.MaxActive,
+		IdleTimeout: settings.RedisSetting.IdleTimeout,
 		Dial: func() (redis.Conn, error) {
-			c, err := redis.Dial("tcp", setting.RedisSetting.Host)
+			c, err := redis.Dial("tcp", settings.RedisSetting.Host)
 			if err != nil {
 				return nil, err
 			}
-			if setting.RedisSetting.Password != "" {
-				if _, err := c.Do("AUTH", setting.RedisSetting.Password); err != nil {
+			if settings.RedisSetting.Password != "" {
+				if _, err := c.Do("AUTH", settings.RedisSetting.Password); err != nil {
 					c.Close()
 					return nil, err
 				}

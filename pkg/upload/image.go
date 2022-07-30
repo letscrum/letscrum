@@ -10,38 +10,38 @@ import (
 
 	"github.com/letscrum/letscrum/pkg/file"
 	"github.com/letscrum/letscrum/pkg/logging"
-	"github.com/letscrum/letscrum/pkg/setting"
-	"github.com/letscrum/letscrum/pkg/util"
+	"github.com/letscrum/letscrum/pkg/settings"
+	"github.com/letscrum/letscrum/pkg/utils"
 )
 
 // GetImageFullUrl get the full access path
 func GetImageFullUrl(name string) string {
-	return setting.AppSetting.PrefixUrl + "/" + GetImagePath() + name
+	return settings.AppSetting.PrefixUrl + "/" + GetImagePath() + name
 }
 
 // GetImageName get image name
 func GetImageName(name string) string {
 	ext := path.Ext(name)
 	fileName := strings.TrimSuffix(name, ext)
-	fileName = util.EncodeMD5(fileName)
+	fileName = utils.EncodeMD5(fileName)
 
 	return fileName + ext
 }
 
 // GetImagePath get save path
 func GetImagePath() string {
-	return setting.AppSetting.ImageSavePath
+	return settings.AppSetting.ImageSavePath
 }
 
 // GetImageFullPath get full save path
 func GetImageFullPath() string {
-	return setting.AppSetting.RuntimeRootPath + GetImagePath()
+	return settings.AppSetting.RuntimeRootPath + GetImagePath()
 }
 
 // CheckImageExt check image file ext
 func CheckImageExt(fileName string) bool {
 	ext := file.GetExt(fileName)
-	for _, allowExt := range setting.AppSetting.ImageAllowExts {
+	for _, allowExt := range settings.AppSetting.ImageAllowExts {
 		if strings.ToUpper(allowExt) == strings.ToUpper(ext) {
 			return true
 		}
@@ -59,7 +59,7 @@ func CheckImageSize(f multipart.File) bool {
 		return false
 	}
 
-	return size <= setting.AppSetting.ImageMaxSize
+	return size <= settings.AppSetting.ImageMaxSize
 }
 
 // CheckImage check if the file exists

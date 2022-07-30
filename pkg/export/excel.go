@@ -1,20 +1,20 @@
 package export
 
-import "github.com/letscrum/letscrum/pkg/setting"
+import "github.com/letscrum/letscrum/pkg/settings"
 
 const EXT = ".xlsx"
 
 // GetExcelFullUrl get the full access path of the Excel file
 func GetExcelFullUrl(name string) string {
-	return setting.AppSetting.PrefixUrl + "/" + GetExcelPath() + name
+	return settings.AppSetting.PrefixUrl + "/" + GetExcelPath() + name
 }
 
 // GetExcelPath get the relative save path of the Excel file
 func GetExcelPath() string {
-	return setting.AppSetting.ExportSavePath
+	return settings.AppSetting.ExportSavePath
 }
 
 // GetExcelFullPath Get the full save path of the Excel file
 func GetExcelFullPath() string {
-	return setting.AppSetting.RuntimeRootPath + GetExcelPath()
+	return settings.AppSetting.RuntimeRootPath + GetExcelPath()
 }

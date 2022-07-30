@@ -1,6 +1,10 @@
 package models
 
-import v1 "github.com/letscrum/letscrum/apis/project/v1"
+import (
+	generalV1 "github.com/letscrum/letscrum/apis/general/v1"
+	projectV1 "github.com/letscrum/letscrum/apis/project/v1"
+	"gorm.io/gorm"
+)
 
 type Project struct {
 	Model
@@ -9,7 +13,7 @@ type Project struct {
 	DisplayName string `json:"display_name"`
 }
 
-func CreateProject(project *v1.Project) error {
+func CreateProject(project *projectV1.Project) error {
 	p := Project{
 		Name:        project.Name,
 		DisplayName: project.DisplayName,
@@ -20,6 +24,11 @@ func CreateProject(project *v1.Project) error {
 	return nil
 }
 
-func ListProject() error {
-
+func ListProject(pagination *generalV1.Pagination) ([]*Project, error) {
+	var projects []*Project
+	err := db.Limit(int(pagination.PageSize)).Offset(int((pagination.Page - 1) * pagination.PageSize)).Find(&projects).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
+	return projects, nil
 }

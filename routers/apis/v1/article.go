@@ -11,8 +11,8 @@ import (
 	"github.com/letscrum/letscrum/pkg/app"
 	"github.com/letscrum/letscrum/pkg/e"
 	"github.com/letscrum/letscrum/pkg/qrcode"
-	"github.com/letscrum/letscrum/pkg/setting"
-	"github.com/letscrum/letscrum/pkg/util"
+	"github.com/letscrum/letscrum/pkg/settings"
+	"github.com/letscrum/letscrum/pkg/utils"
 	"github.com/letscrum/letscrum/services/article_service"
 	"github.com/letscrum/letscrum/services/tag_service"
 )
@@ -22,7 +22,7 @@ import (
 // @Param id path int true "ID"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
-// @Router /api/v1/articles/{id} [get]
+// @Router /apis/v1/articles/{id} [get]
 func GetArticle(c *gin.Context) {
 	appG := app.Gin{C: c}
 	id := com.StrTo(c.Param("id")).MustInt()
@@ -62,7 +62,7 @@ func GetArticle(c *gin.Context) {
 // @Param created_by body int false "CreatedBy"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
-// @Router /api/v1/articles [get]
+// @Router /apis/v1/articles [get]
 func GetArticles(c *gin.Context) {
 	appG := app.Gin{C: c}
 	valid := validation.Validation{}
@@ -88,8 +88,8 @@ func GetArticles(c *gin.Context) {
 	articleService := article_service.Article{
 		TagID:    tagId,
 		State:    state,
-		PageNum:  util.GetPage(c),
-		PageSize: setting.AppSetting.PageSize,
+		PageNum:  utils.GetPage(c),
+		PageSize: settings.AppSetting.PageSize,
 	}
 
 	err := articleService.Count()
@@ -130,7 +130,7 @@ type AddArticleForm struct {
 // @Param state body int true "State"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
-// @Router /api/v1/articles [post]
+// @Router /apis/v1/articles [post]
 func AddArticle(c *gin.Context) {
 	var (
 		appG = app.Gin{C: c}
@@ -194,7 +194,7 @@ type EditArticleForm struct {
 // @Param state body int false "State"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
-// @Router /api/v1/articles/{id} [put]
+// @Router /apis/v1/articles/{id} [put]
 func EditArticle(c *gin.Context) {
 	var (
 		appG = app.Gin{C: c}
@@ -253,7 +253,7 @@ func EditArticle(c *gin.Context) {
 // @Param id path int true "ID"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
-// @Router /api/v1/articles/{id} [delete]
+// @Router /apis/v1/articles/{id} [delete]
 func DeleteArticle(c *gin.Context) {
 	appG := app.Gin{C: c}
 	valid := validation.Validation{}

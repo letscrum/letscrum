@@ -11,8 +11,8 @@ import (
 	"github.com/letscrum/letscrum/pkg/e"
 	"github.com/letscrum/letscrum/pkg/export"
 	"github.com/letscrum/letscrum/pkg/logging"
-	"github.com/letscrum/letscrum/pkg/setting"
-	"github.com/letscrum/letscrum/pkg/util"
+	"github.com/letscrum/letscrum/pkg/settings"
+	"github.com/letscrum/letscrum/pkg/utils"
 	"github.com/letscrum/letscrum/services/tag_service"
 )
 
@@ -22,7 +22,7 @@ import (
 // @Param state query int false "State"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
-// @Router /api/v1/tags [get]
+// @Router /apis/v1/tags [get]
 func GetTags(c *gin.Context) {
 	appG := app.Gin{C: c}
 	name := c.Query("name")
@@ -34,8 +34,8 @@ func GetTags(c *gin.Context) {
 	tagService := tag_service.Tag{
 		Name:     name,
 		State:    state,
-		PageNum:  util.GetPage(c),
-		PageSize: setting.AppSetting.PageSize,
+		PageNum:  utils.GetPage(c),
+		PageSize: settings.AppSetting.PageSize,
 	}
 	tags, err := tagService.GetAll()
 	if err != nil {
@@ -68,7 +68,7 @@ type AddTagForm struct {
 // @Param created_by body int false "CreatedBy"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
-// @Router /api/v1/tags [post]
+// @Router /apis/v1/tags [post]
 func AddTag(c *gin.Context) {
 	var (
 		appG = app.Gin{C: c}
@@ -120,7 +120,7 @@ type EditTagForm struct {
 // @Param modified_by body string true "ModifiedBy"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
-// @Router /api/v1/tags/{id} [put]
+// @Router /apis/v1/tags/{id} [put]
 func EditTag(c *gin.Context) {
 	var (
 		appG = app.Gin{C: c}
@@ -165,7 +165,7 @@ func EditTag(c *gin.Context) {
 // @Param id path int true "ID"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
-// @Router /api/v1/tags/{id} [delete]
+// @Router /apis/v1/tags/{id} [delete]
 func DeleteTag(c *gin.Context) {
 	appG := app.Gin{C: c}
 	valid := validation.Validation{}
@@ -203,7 +203,7 @@ func DeleteTag(c *gin.Context) {
 // @Param state body int false "State"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
-// @Router /api/v1/tags/export [post]
+// @Router /apis/v1/tags/export [post]
 func ExportTag(c *gin.Context) {
 	appG := app.Gin{C: c}
 	name := c.PostForm("name")
@@ -234,7 +234,7 @@ func ExportTag(c *gin.Context) {
 // @Param file body file true "Excel File"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
-// @Router /api/v1/tags/import [post]
+// @Router /apis/v1/tags/import [post]
 func ImportTag(c *gin.Context) {
 	appG := app.Gin{C: c}
 
