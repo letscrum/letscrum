@@ -324,4 +324,7 @@ go.work
 
 # documentation
 _book/
-apis
+apis/*/*/*.go
+apis/*/*/*.json
+apis/*/*.go
+apis/*/*.json
