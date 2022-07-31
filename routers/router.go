@@ -62,6 +62,7 @@ func InitRouter() *gin.Engine {
 		//生成文章海报
 		apisV1.POST("/articles/poster/generate", v1.GenerateArticlePoster)
 		apisV1.POST("/projects", v1.CreateProject)
+		apisV1.PUT("/projects/:name", v1.UpdateProject)
 	}
 
 	return r

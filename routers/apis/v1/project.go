@@ -71,3 +71,30 @@ func ListProject(ctx *gin.Context) {
 	})
 	return
 }
+
+func UpdateProject(ctx *gin.Context) {
+	request := projectV1.UpdateProjectRequest{}
+
+	errRequest := ctx.ShouldBindJSON(&request)
+	if errRequest != nil {
+		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(errRequest))
+		return
+	}
+	request.Name = ctx.Param("name")
+
+	err := projectService.Update(&projectV1.Project{
+		Name:        request.Name,
+		DisplayName: request.DisplayName,
+	})
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, projectV1.UpdateProjectResponse{
+		Item: &projectV1.Project{
+			Name:        request.Name,
+			DisplayName: request.DisplayName,
+		},
+	})
+}

@@ -27,7 +27,7 @@ message UpdateProjectRequest {
 }
 
 message UpdateProjectResponse {
-  Project project = 1;
+  Project item = 1;
 }
 
 message DeleteProjectRequest {
@@ -36,7 +36,7 @@ message DeleteProjectRequest {
 }
 
 message DeleteProjectResponse {
-  Project project = 1;
+  Project item = 1;
 }
 
 message ListProjectRequest {

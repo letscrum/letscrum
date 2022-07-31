@@ -30,3 +30,11 @@ func List(pagination *generalV1.Pagination) ([]*projectV1.Project, int64, error)
 	count := models.CountProject()
 	return list, count, nil
 }
+
+func Update(project *projectV1.Project) error {
+	if err := models.UpdateProject(project.Name, project); err != nil {
+		return err
+	}
+
+	return nil
+}

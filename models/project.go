@@ -49,3 +49,15 @@ func CountProject() int64 {
 	db.Model(&Project{}).Count(&count)
 	return count
 }
+
+func UpdateProject(name string, project *projectV1.Project) error {
+	p := Project{
+		DisplayName: project.DisplayName,
+	}
+
+	if err := db.Model(&Project{}).Where("name = ?", name).Update("display_name", p.DisplayName).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
