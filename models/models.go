@@ -12,7 +12,7 @@ import (
 	"github.com/letscrum/letscrum/pkg/settings"
 )
 
-var db *gorm.DB
+var DB *gorm.DB
 
 type Model struct {
 	Id        int64     `json:"id" gorm:"primary_key"`
@@ -44,5 +44,5 @@ func Setup() {
 	sqlDB.SetConnMaxLifetime(10)
 	sqlDB.SetMaxIdleConns(10)
 
-	db = conn
+	DB = conn
 }

@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 import "apis/general/v1/common.proto";
+import "apis/user/v1/user.proto";
 
 package letscrum.apis.project.v1;
 
@@ -13,6 +14,7 @@ message Project {
   int64 created_by = 4;
   int64 created_at = 5;
   int64 updated_at = 6;
+  repeated letscrum.apis.user.v1.User members = 7;
 }
 
 message CreateProjectRequest {

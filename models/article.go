@@ -22,7 +22,7 @@ type Article struct {
 // ExistArticleByID checks if an article exists based on ID
 func ExistArticleByID(id int) (bool, error) {
 	var article Article
-	err := db.Select("id").Where("id = ? AND deleted_on = ? ", id, 0).First(&article).Error
+	err := DB.Select("id").Where("id = ? AND deleted_on = ? ", id, 0).First(&article).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return false, err
 	}
@@ -36,7 +36,7 @@ func ExistArticleByID(id int) (bool, error) {
 
 // GetArticleTotal gets the total number of articles based on the constraints
 func GetArticleTotal(maps interface{}) error {
-	if err := db.Model(&Article{}).Where(maps).Error; err != nil {
+	if err := DB.Model(&Article{}).Where(maps).Error; err != nil {
 		return err
 	}
 
@@ -46,7 +46,7 @@ func GetArticleTotal(maps interface{}) error {
 // GetArticles gets a list of articles based on paging constraints
 func GetArticles(pageNum int, pageSize int, maps interface{}) ([]*Article, error) {
 	var articles []*Article
-	err := db.Preload("Tag").Where(maps).Offset(pageNum).Limit(pageSize).Find(&articles).Error
+	err := DB.Preload("Tag").Where(maps).Offset(pageNum).Limit(pageSize).Find(&articles).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
@@ -57,12 +57,12 @@ func GetArticles(pageNum int, pageSize int, maps interface{}) ([]*Article, error
 // GetArticle Get a single article based on ID
 func GetArticle(id int) (*Article, error) {
 	var article Article
-	err := db.Where("id = ? AND deleted_on = ? ", id, 0).First(&article).Error
+	err := DB.Where("id = ? AND deleted_on = ? ", id, 0).First(&article).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
 
-	err = db.Model(&article).Error
+	err = DB.Model(&article).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func GetArticle(id int) (*Article, error) {
 
 // EditArticle modify a single article
 func EditArticle(id int, data interface{}) error {
-	if err := db.Model(&Article{}).Where("id = ? AND deleted_on = ? ", id, 0).Updates(data).Error; err != nil {
+	if err := DB.Model(&Article{}).Where("id = ? AND deleted_on = ? ", id, 0).Updates(data).Error; err != nil {
 		return err
 	}
 
@@ -90,7 +90,7 @@ func AddArticle(data map[string]interface{}) error {
 		State:         data["state"].(int),
 		CoverImageUrl: data["cover_image_url"].(string),
 	}
-	if err := db.Create(&article).Error; err != nil {
+	if err := DB.Create(&article).Error; err != nil {
 		return err
 	}
 
@@ -99,7 +99,7 @@ func AddArticle(data map[string]interface{}) error {
 
 // DeleteArticle delete a single article
 func DeleteArticle(id int) error {
-	if err := db.Where("id = ?", id).Delete(Article{}).Error; err != nil {
+	if err := DB.Where("id = ?", id).Delete(Article{}).Error; err != nil {
 		return err
 	}
 
@@ -108,7 +108,7 @@ func DeleteArticle(id int) error {
 
 // CleanAllArticle clear all article
 func CleanAllArticle() error {
-	if err := db.Unscoped().Where("deleted_on != ? ", 0).Delete(&Article{}).Error; err != nil {
+	if err := DB.Unscoped().Where("deleted_on != ? ", 0).Delete(&Article{}).Error; err != nil {
 		return err
 	}
 

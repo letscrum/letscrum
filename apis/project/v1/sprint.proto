@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+import "apis/general/v1/common.proto";
+import "apis/user/v1/user.proto";
+
+package letscrum.apis.project.v1;
+
+option go_package = "github.com/letscrum/letscrum/apis/project/v1";
+
+message Sprint {
+  int64 id = 1;
+  string name = 2;
+}

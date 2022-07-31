@@ -11,7 +11,7 @@ type Auth struct {
 // CheckAuth checks if authentication information exists
 func CheckAuth(username, password string) (bool, error) {
 	var auth Auth
-	err := db.Select("id").Where(Auth{Username: username, Password: password}).First(&auth).Error
+	err := DB.Select("id").Where(Auth{Username: username, Password: password}).First(&auth).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return false, err
 	}
