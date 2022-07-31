@@ -3,7 +3,6 @@ package models
 import (
 	generalV1 "github.com/letscrum/letscrum/apis/general/v1"
 	projectV1 "github.com/letscrum/letscrum/apis/project/v1"
-	"gorm.io/gorm"
 )
 
 type Project struct {
@@ -11,12 +10,14 @@ type Project struct {
 
 	Name        string `json:"name"`
 	DisplayName string `json:"display_name"`
+	CreatedBy   int64  `json:"created_by"`
 }
 
 func CreateProject(project *projectV1.Project) error {
 	p := Project{
 		Name:        project.Name,
 		DisplayName: project.DisplayName,
+		CreatedBy:   project.CreatedBy,
 	}
 
 	//var pInDB *Project
@@ -31,14 +32,13 @@ func CreateProject(project *projectV1.Project) error {
 	if err := db.Create(&p).Error; err != nil {
 		return err
 	}
-
 	return nil
 }
 
 func ListProject(pagination *generalV1.Pagination) ([]*Project, error) {
 	var projects []*Project
 	err := db.Limit(int(pagination.PageSize)).Offset(int((pagination.Page - 1) * pagination.PageSize)).Find(&projects).Error
-	if err != nil && err != gorm.ErrRecordNotFound {
+	if err != nil {
 		return nil, err
 	}
 	return projects, nil
@@ -54,10 +54,23 @@ func UpdateProject(name string, project *projectV1.Project) error {
 	p := Project{
 		DisplayName: project.DisplayName,
 	}
-
 	if err := db.Model(&Project{}).Where("name = ?", name).Update("display_name", p.DisplayName).Error; err != nil {
 		return err
 	}
-
 	return nil
+}
+
+func DeleteProject(name string) error {
+	if err := db.Where("name = ?", name).Delete(&Project{}).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetProject(name string) (*Project, error) {
+	var p *Project
+	if err := db.Where("name = ?", name).Find(&p).Error; err != nil {
+		return nil, err
+	}
+	return p, nil
 }

@@ -113,7 +113,7 @@ func (t *Tag) Export() (string, error) {
 
 	for _, v := range tags {
 		values := []string{
-			strconv.Itoa(int(v.ID)),
+			strconv.Itoa(int(v.Id)),
 			v.Name,
 			v.CreatedBy,
 			v.ModifiedBy,

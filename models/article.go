@@ -27,7 +27,7 @@ func ExistArticleByID(id int) (bool, error) {
 		return false, err
 	}
 
-	if article.ID > 0 {
+	if article.Id > 0 {
 		return true, nil
 	}
 

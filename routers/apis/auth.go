@@ -8,7 +8,6 @@ import (
 
 	"github.com/letscrum/letscrum/pkg/app"
 	"github.com/letscrum/letscrum/pkg/errors"
-	"github.com/letscrum/letscrum/pkg/utils"
 	"github.com/letscrum/letscrum/services/auth_service"
 )
 
@@ -51,14 +50,4 @@ func GetAuth(c *gin.Context) {
 		appG.Response(http.StatusUnauthorized, errors.ERROR_AUTH, nil)
 		return
 	}
-
-	token, err := utils.GenerateToken(username, password)
-	if err != nil {
-		appG.Response(http.StatusInternalServerError, errors.ERROR_AUTH_TOKEN, nil)
-		return
-	}
-
-	appG.Response(http.StatusOK, errors.SUCCESS, map[string]string{
-		"token": token,
-	})
 }

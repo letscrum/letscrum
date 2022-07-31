@@ -11,7 +11,6 @@ require (
 	github.com/go-ini/ini v1.32.1-0.20180214101753-32e4be5f41bb
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/gomodule/redigo v2.0.1-0.20180401191855-9352ab68be13+incompatible
-	github.com/jinzhu/gorm v0.0.0-20180213101209-6e1387b44c64
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/viper v1.12.0
 	github.com/swaggo/gin-swagger v1.2.0

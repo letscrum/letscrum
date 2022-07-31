@@ -43,7 +43,7 @@ api_gen:
 		--openapiv2_out=logtostderr=true:. \
 		--grpc-gateway-ts_out=paths=source_relative:./dist/sdk/ \
 		--validate_out=lang=go,paths=source_relative:. \
-		apis/general/v1/common.proto apis/general/v1/letscrum.proto apis/letscrum/v1/letscrum.proto apis/project/v1/project.proto \
+		apis/general/v1/common.proto apis/general/v1/letscrum.proto apis/letscrum/v1/letscrum.proto apis/project/v1/project.proto apis/user/v1/user.proto \
 
 	find api -type f -name "*.swagger.json" | xargs -I {} cp {} third_party/swagger-ui/
 

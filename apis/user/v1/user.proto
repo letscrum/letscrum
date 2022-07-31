@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+import "apis/general/v1/common.proto";
+
+package letscrum.apis.user.v1;
+
+option go_package = "github.com/letscrum/letscrum/apis/user/v1";
+
+message User {
+  int64 id = 1;
+  string name = 2;
+  string email = 3;
+  string password = 4;
+  int64 created_at = 5;
+  int64 updated_at = 6;
+  Token token = 7;
+}
+
+message Token {
+  string access_token = 1;
+  string refresh_token = 2;
+}
+
+message CreateUserRequest {
+  string name = 1;
+  string email = 2;
+}
+
+message CreateUserResponse {
+  User item = 1;
+}
+
+message SignInRequest {
+  string name = 1;
+  string password = 2;
+}
+
+message SignInResponse {
+  User item = 1;
+}

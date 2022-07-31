@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"github.com/letscrum/letscrum/middlewares/jwt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -32,9 +33,9 @@ func InitRouter() *gin.Engine {
 	apisV1 := r.Group("/apis/v1")
 	apisV1.Use()
 	{
-		apisV1.GET("/projects", v1.ListProject)
+		apisV1.GET("/signin", v1.SignIn)
 	}
-	apisV1.Use()
+	apisV1.Use(jwtMiddleware.JWT())
 	{
 		//获取标签列表
 		apisV1.GET("/tags", v1.GetTags)
@@ -62,7 +63,10 @@ func InitRouter() *gin.Engine {
 		//生成文章海报
 		apisV1.POST("/articles/poster/generate", v1.GenerateArticlePoster)
 		apisV1.POST("/projects", v1.CreateProject)
+		apisV1.GET("/projects", v1.ListProject)
 		apisV1.PUT("/projects/:name", v1.UpdateProject)
+		apisV1.DELETE("/projects/:name", v1.DeleteProject)
+		apisV1.GET("/projects/:name", v1.GetProject)
 	}
 
 	return r

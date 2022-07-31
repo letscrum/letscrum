@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gorm.io/gorm/schema"
 	"log"
+	"time"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -14,7 +15,9 @@ import (
 var db *gorm.DB
 
 type Model struct {
-	ID int64 `json:"id" gorm:"primary_key"`
+	Id        int64     `json:"id" gorm:"primary_key"`
+	CreatedAt time.Time `json:"created_at" gorm:"default:null"`
+	UpdatedAt time.Time `json:"updated_at" gorm:"default:null"`
 }
 
 // Setup initializes the database instance

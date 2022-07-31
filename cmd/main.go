@@ -11,7 +11,6 @@ import (
 	"github.com/letscrum/letscrum/pkg/gredis"
 	"github.com/letscrum/letscrum/pkg/logging"
 	"github.com/letscrum/letscrum/pkg/settings"
-	"github.com/letscrum/letscrum/pkg/utils"
 	"github.com/letscrum/letscrum/routers"
 )
 
@@ -20,7 +19,6 @@ func init() {
 	models.Setup()
 	logging.Setup()
 	gredis.Setup()
-	utils.Setup()
 }
 
 // @title Golang Gin API

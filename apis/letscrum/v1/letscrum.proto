@@ -4,6 +4,7 @@ import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
 import "apis/general/v1/letscrum.proto";
 import "apis/project/v1/project.proto";
+import "apis/user/v1/user.proto";
 
 option go_package = "github.com/letscrum/letscrum/apis/letscrum/v1";
 
@@ -11,6 +12,12 @@ service Letscrum {
   rpc GetVersion(google.protobuf.Empty) returns (letscrum.apis.general.v1.GetVersionResponse) {
     option (google.api.http) = {
       get: "/apis/v1/version"
+    };
+  }
+
+  rpc SignIn(letscrum.apis.user.v1.SignInRequest) returns (letscrum.apis.user.v1.SignInResponse) {
+    option (google.api.http) = {
+      get: "/apis/v1/signin"
     };
   }
 }

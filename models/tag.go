@@ -21,7 +21,7 @@ func ExistTagByName(name string) (bool, error) {
 		return false, err
 	}
 
-	if tag.ID > 0 {
+	if tag.Id > 0 {
 		return true, nil
 	}
 
@@ -79,7 +79,7 @@ func ExistTagByID(id int) (bool, error) {
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return false, err
 	}
-	if tag.ID > 0 {
+	if tag.Id > 0 {
 		return true, nil
 	}
 

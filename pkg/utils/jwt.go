@@ -6,45 +6,38 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-var jwtSecret []byte
-
-type Claims struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-	jwt.StandardClaims
-}
-
-// GenerateToken generate tokens used for auth
-func GenerateToken(username, password string) (string, error) {
+func GenerateTokens(userId string) (string, string, error) {
 	nowTime := time.Now()
-	expireTime := nowTime.Add(3 * time.Hour)
-
-	claims := Claims{
-		EncodeMD5(username),
-		EncodeMD5(password),
-		jwt.StandardClaims{
-			ExpiresAt: expireTime.Unix(),
-			Issuer:    "gin-blog",
-		},
+	accessTokenExpireTime := nowTime.Add(time.Hour * 720)
+	accessTokenClaims := jwt.StandardClaims{
+		ExpiresAt: accessTokenExpireTime.Unix(),
+		Id:        userId,
 	}
-
-	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	token, err := tokenClaims.SignedString(jwtSecret)
-
-	return token, err
+	refreshTokenExpireTime := nowTime.Add(time.Hour * 720 * 2)
+	refreshTokenClaims := jwt.StandardClaims{
+		ExpiresAt: refreshTokenExpireTime.Unix(),
+		Id:        userId,
+	}
+	accessToken, errAccessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessTokenClaims).SignedString([]byte("golang"))
+	if errAccessToken != nil {
+		return "", "", errAccessToken
+	}
+	refreshToken, errRefreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshTokenClaims).SignedString([]byte("golang"))
+	if errRefreshToken != nil {
+		return "", "", errRefreshToken
+	}
+	return accessToken, refreshToken, nil
 }
 
 // ParseToken parsing token
-func ParseToken(token string) (*Claims, error) {
-	tokenClaims, err := jwt.ParseWithClaims(token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return jwtSecret, nil
+func ParseToken(token string) (*jwt.StandardClaims, error) {
+	tokenClaims, err := jwt.ParseWithClaims(token, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte("golang"), nil
 	})
-
 	if tokenClaims != nil {
-		if claims, ok := tokenClaims.Claims.(*Claims); ok && tokenClaims.Valid {
+		if claims, ok := tokenClaims.Claims.(*jwt.StandardClaims); ok && tokenClaims.Valid {
 			return claims, nil
 		}
 	}
-
 	return nil, err
 }
