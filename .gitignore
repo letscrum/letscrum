@@ -318,7 +318,6 @@ charts/*.tgz
 
 # protobuf gen files
 dist/sdk/apis
-third_party/swagger-ui/*.json
 go.work
 *.ts
 
