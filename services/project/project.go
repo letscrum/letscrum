@@ -14,10 +14,10 @@ func Create(project *projectV1.Project) error {
 	return nil
 }
 
-func List(pagination *generalV1.Pagination) ([]*projectV1.Project, error) {
+func List(pagination *generalV1.Pagination) ([]*projectV1.Project, int64, error) {
 	projects, err := models.ListProject(pagination)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	var list []*projectV1.Project
 	for _, project := range projects {
@@ -27,5 +27,6 @@ func List(pagination *generalV1.Pagination) ([]*projectV1.Project, error) {
 			DisplayName: project.DisplayName,
 		})
 	}
-	return list, nil
+	count := models.CountProject()
+	return list, count, nil
 }

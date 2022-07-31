@@ -24,13 +24,13 @@ service Project {
 
   rpc UpdateProject(letscrum.apis.project.v1.UpdateProjectRequest) returns (letscrum.apis.project.v1.UpdateProjectResponse) {
     option (google.api.http) = {
-      put: "/apis/v1/projects"
+      put: "/apis/v1/projects/{name}"
     };
   }
 
   rpc DeleteProject(letscrum.apis.project.v1.DeleteProjectRequest) returns (letscrum.apis.project.v1.DeleteProjectResponse) {
     option (google.api.http) = {
-      delete: "/apis/v1/projects"
+      delete: "/apis/v1/projects/{name}"
     };
   }
 

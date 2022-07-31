@@ -52,7 +52,7 @@ func ListProject(ctx *gin.Context) {
 		request.PageSize = 10
 	}
 
-	list, err := projectService.List(&generalV1.Pagination{
+	list, count, err := projectService.List(&generalV1.Pagination{
 		Page:     request.Page,
 		PageSize: request.PageSize,
 	})
@@ -66,6 +66,8 @@ func ListProject(ctx *gin.Context) {
 		Pagination: &generalV1.Pagination{
 			Page:     request.Page,
 			PageSize: request.PageSize,
+			Total:    int32(count),
 		},
 	})
+	return
 }

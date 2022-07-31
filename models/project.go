@@ -43,3 +43,9 @@ func ListProject(pagination *generalV1.Pagination) ([]*Project, error) {
 	}
 	return projects, nil
 }
+
+func CountProject() int64 {
+	count := int64(0)
+	db.Model(&Project{}).Count(&count)
+	return count
+}
