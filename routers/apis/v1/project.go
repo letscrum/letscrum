@@ -20,8 +20,8 @@ func CreateProject(ctx *gin.Context) {
 		return
 	}
 	err := projectService.Create(&projectV1.Project{
-		Name:        request.Name,
-		DisplayName: request.DisplayName,
+		Name:        request.Project.Name,
+		DisplayName: request.Project.DisplayName,
 		CreatedUser: &userV1.User{
 			Id: ctx.GetInt64("userId"),
 		},
@@ -33,8 +33,8 @@ func CreateProject(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, projectV1.CreateProjectResponse{
 		Item: &projectV1.Project{
-			Name:        request.Name,
-			DisplayName: request.DisplayName,
+			Name:        request.Project.Name,
+			DisplayName: request.Project.DisplayName,
 			CreatedUser: &userV1.User{
 				Id: ctx.GetInt64("userId"),
 			},
@@ -97,7 +97,7 @@ func UpdateProject(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, projectV1.UpdateProjectResponse{
-		Project: &projectV1.Project{
+		Item: &projectV1.Project{
 			Name:        request.ProjectName,
 			DisplayName: request.Project.DisplayName,
 		},
@@ -106,7 +106,7 @@ func UpdateProject(ctx *gin.Context) {
 
 func DeleteProject(ctx *gin.Context) {
 	request := projectV1.DeleteProjectRequest{}
-	request.ProjectName = ctx.Param("name")
+	request.ProjectName = ctx.Param("project_name")
 
 	err := projectService.Delete(request.ProjectName)
 	if err != nil {
@@ -115,7 +115,7 @@ func DeleteProject(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, projectV1.DeleteProjectResponse{
-		Project: &projectV1.Project{
+		Item: &projectV1.Project{
 			Name: request.ProjectName,
 		},
 	})
@@ -132,7 +132,7 @@ func GetProject(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, projectV1.GetProjectResponse{
-		Project: project,
+		Item: project,
 	})
 }
 

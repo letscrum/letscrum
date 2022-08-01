@@ -18,8 +18,7 @@ message Project {
 }
 
 message CreateProjectRequest {
-  string name = 1;
-  string display_name = 2;
+  Project project = 2;
 }
 
 message CreateProjectResponse {
@@ -32,7 +31,7 @@ message UpdateProjectRequest {
 }
 
 message UpdateProjectResponse {
-  Project project = 1;
+  Project item = 1;
 }
 
 message DeleteProjectRequest {
@@ -40,7 +39,7 @@ message DeleteProjectRequest {
 }
 
 message DeleteProjectResponse {
-  Project project = 1;
+  Project item = 1;
 }
 
 message ListProjectRequest {
@@ -58,11 +57,11 @@ message GetProjectRequest {
 }
 
 message GetProjectResponse {
-  Project project = 1;
+  Project item = 1;
 }
 
 message ListProjectMemberRequest {
-  int64 project_id = 1;
+  string project_name = 1;
 }
 
 message ListProjectMemberResponse {
