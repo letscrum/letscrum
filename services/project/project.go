@@ -7,11 +7,12 @@ import (
 	projectModel "github.com/letscrum/letscrum/models/project"
 )
 
-func Create(project *projectV1.Project) error {
-	if err := projectModel.CreateProject(project.Name, project.DisplayName, project.CreatedUser.Id); err != nil {
-		return err
+func Create(project *projectV1.Project) (int64, error) {
+	projectId, err := projectModel.CreateProject(project.Name, project.DisplayName, project.CreatedUser.Id)
+	if err != nil {
+		return 0, err
 	}
-	return nil
+	return projectId, nil
 }
 
 func List(pagination *generalV1.Pagination) ([]*projectV1.Project, int64, error) {
@@ -38,21 +39,21 @@ func List(pagination *generalV1.Pagination) ([]*projectV1.Project, int64, error)
 }
 
 func Update(project *projectV1.Project) error {
-	if err := projectModel.UpdateProject(project.Name, project.DisplayName); err != nil {
+	if err := projectModel.UpdateProject(project.Id, project.DisplayName); err != nil {
 		return err
 	}
 	return nil
 }
 
-func Delete(name string) error {
-	if err := projectModel.DeleteProject(name); err != nil {
+func Delete(id int64) error {
+	if err := projectModel.DeleteProject(id); err != nil {
 		return err
 	}
 	return nil
 }
 
-func Get(name string) (*projectV1.Project, error) {
-	p, err := projectModel.GetProject(name)
+func Get(id int64) (*projectV1.Project, error) {
+	p, err := projectModel.GetProject(id)
 	if err != nil {
 		return nil, err
 	}

@@ -24,10 +24,10 @@ func InitRouter() *gin.Engine {
 		apisV1.POST("/users", v1.CreateUser)
 		apisV1.POST("/projects", v1.CreateProject)
 		apisV1.GET("/projects", v1.ListProject)
-		apisV1.PUT("/projects/:project_name", v1.UpdateProject)
-		apisV1.DELETE("/projects/:project_name", v1.DeleteProject)
-		apisV1.GET("/projects/:project_name", v1.GetProject)
-		apisV1.GET("/projects/:project_name/members", v1.ListProjectMembers)
+		apisV1.PUT("/projects/:project_id", v1.UpdateProject)
+		apisV1.DELETE("/projects/:project_id", v1.DeleteProject)
+		apisV1.GET("/projects/:project_id", v1.GetProject)
+		apisV1.GET("/projects/:project_id/members", v1.ListProjectMembers)
 	}
 
 	return r
