@@ -7,7 +7,7 @@ import (
 	projectV1 "github.com/letscrum/letscrum/apis/project/v1"
 	userV1 "github.com/letscrum/letscrum/apis/user/v1"
 	"github.com/letscrum/letscrum/pkg/errors"
-	projectService "github.com/letscrum/letscrum/services/project"
+	projectService "github.com/letscrum/letscrum/services/projectService"
 	"net/http"
 	"strconv"
 )
@@ -151,4 +151,8 @@ func GetProject(ctx *gin.Context) {
 
 func ListProjectMembers(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, "")
+}
+
+func ListUserProject() {
+
 }

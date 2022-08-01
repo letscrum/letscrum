@@ -1,10 +1,10 @@
-package project
+package projectService
 
 import (
 	generalV1 "github.com/letscrum/letscrum/apis/general/v1"
 	projectV1 "github.com/letscrum/letscrum/apis/project/v1"
 	userV1 "github.com/letscrum/letscrum/apis/user/v1"
-	projectModel "github.com/letscrum/letscrum/models/project"
+	projectModel "github.com/letscrum/letscrum/models/projectModel"
 )
 
 func Create(project *projectV1.Project) (int64, error) {

@@ -17,8 +17,11 @@ type Project struct {
 type ProjectMember struct {
 	models.Model
 
-	ProjectId int64 `json:"project_id"`
-	UserId    int64 `json:"user_id"`
+	ProjectId int64          `json:"project_id"`
+	UserId    int64          `json:"user_id"`
+	IsAdmin   bool           `json:"is_admin"`
+	User      userModel.User `gorm:"foreignKey:UserId"`
+	Project   userModel.User `gorm:"foreignKey:ProjectId"`
 }
 
 func CreateProject(name string, displayName string, createdUserId int64) (int64, error) {
@@ -59,10 +62,7 @@ func CountProject() int64 {
 }
 
 func UpdateProject(id int64, displayName string) error {
-	p := Project{
-		DisplayName: displayName,
-	}
-	if err := models.DB.Model(&Project{}).Where("id = ?", id).Update("display_name", p.DisplayName).Error; err != nil {
+	if err := models.DB.Model(&Project{}).Where("id = ?", id).Update("display_name", displayName).Error; err != nil {
 		return err
 	}
 	return nil
@@ -83,10 +83,11 @@ func GetProject(id int64) (*Project, error) {
 	return p, nil
 }
 
-func CreateProjectMember(projectId int64, userId int64) error {
+func CreateProjectMember(projectId int64, userId int64, isAdmin bool) error {
 	pm := ProjectMember{
 		ProjectId: projectId,
 		UserId:    userId,
+		IsAdmin:   isAdmin,
 	}
 	if err := models.DB.Create(&pm).Error; err != nil {
 		return err
@@ -94,9 +95,32 @@ func CreateProjectMember(projectId int64, userId int64) error {
 	return nil
 }
 
-func ListProjectMember(projectId int64) ([]*ProjectMember, error) {
+func UpdateProjectMember(projectId int64, userId int64, isAdmin bool) error {
+	if err := models.DB.Model(&ProjectMember{}).Where("project_id = ?", projectId).Where("user_id = ?", userId).Update("is_admin", isAdmin).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func DeleteProjectMember(projectId int64, userId int64) error {
+	if err := models.DB.Where("project_id = ?", projectId).Where("user_id = ?", userId).Delete(&Project{}).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func ListProjectMemberByProject(projectId int64, page int32, pageSize int32) ([]*ProjectMember, error) {
 	var projectMembers []*ProjectMember
-	err := models.DB.Where("project_id", projectId).Find(&projectMembers).Error
+	err := models.DB.Where("project_id", projectId).Limit(int(pageSize)).Offset(int((page - 1) * pageSize)).Preload("User").Find(&projectMembers).Error
+	if err != nil {
+		return nil, err
+	}
+	return projectMembers, nil
+}
+
+func ListProjectMemberByUser(userId int64, page int32, pageSize int32) ([]*ProjectMember, error) {
+	var projectMembers []*ProjectMember
+	err := models.DB.Where("user_id", userId).Limit(int(pageSize)).Offset(int((page - 1) * pageSize)).Preload("Project").Find(&projectMembers).Error
 	if err != nil {
 		return nil, err
 	}
