@@ -9,7 +9,7 @@ import (
 )
 
 func Create(user *userV1.User) error {
-	if err := userModel.CreateUser(user.Name, user.Email, user.Password); err != nil {
+	if err := userModel.CreateUser(user.Name, user.Email, user.Password, user.IsSuperAdmin); err != nil {
 		return err
 	}
 	return nil
@@ -73,11 +73,12 @@ func SignIn(name string, password string) (*userV1.User, error) {
 		return nil, errGenTokens
 	}
 	user := &userV1.User{
-		Id:        u.Id,
-		Name:      u.Name,
-		Email:     u.Email,
-		CreatedAt: u.CreatedAt.Unix(),
-		UpdatedAt: u.UpdatedAt.Unix(),
+		Id:           u.Id,
+		Name:         u.Name,
+		Email:        u.Email,
+		IsSuperAdmin: u.IsSuperAdmin,
+		CreatedAt:    u.CreatedAt.Unix(),
+		UpdatedAt:    u.UpdatedAt.Unix(),
 		Token: &userV1.Token{
 			AccessToken:  accessToken,
 			RefreshToken: refreshToken,

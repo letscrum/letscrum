@@ -8,7 +8,7 @@ import (
 )
 
 func Create(project *projectV1.Project) error {
-	if err := projectModel.CreateProject(project.Name, project.DisplayName, project.CreatedBy); err != nil {
+	if err := projectModel.CreateProject(project.Name, project.DisplayName, project.CreatedUser.Id); err != nil {
 		return err
 	}
 	return nil
@@ -25,8 +25,12 @@ func List(pagination *generalV1.Pagination) ([]*projectV1.Project, int64, error)
 			Id:          p.Id,
 			Name:        p.Name,
 			DisplayName: p.DisplayName,
-			CreatedAt:   p.CreatedAt.Unix(),
-			UpdatedAt:   p.UpdatedAt.Unix(),
+			CreatedUser: &userV1.User{
+				Id:   p.CreatedUser.Id,
+				Name: p.CreatedUser.Name,
+			},
+			CreatedAt: p.CreatedAt.Unix(),
+			UpdatedAt: p.UpdatedAt.Unix(),
 		})
 	}
 	count := projectModel.CountProject()
@@ -52,23 +56,16 @@ func Get(name string) (*projectV1.Project, error) {
 	if err != nil {
 		return nil, err
 	}
-	projectMembers, errGetMembers := projectModel.ListProjectMember(p.Id)
-	if errGetMembers != nil {
-		return nil, err
-	}
-	var list []*userV1.User
-	for _, pm := range projectMembers {
-		list = append(list, &userV1.User{
-			Id: pm.UserId,
-		})
-	}
 	project := &projectV1.Project{
 		Id:          p.Id,
 		Name:        p.Name,
 		DisplayName: p.DisplayName,
-		CreatedAt:   p.CreatedAt.Unix(),
-		UpdatedAt:   p.UpdatedAt.Unix(),
-		Members:     list,
+		CreatedUser: &userV1.User{
+			Id:   p.CreatedUser.Id,
+			Name: p.CreatedUser.Name,
+		},
+		CreatedAt: p.CreatedAt.Unix(),
+		UpdatedAt: p.UpdatedAt.Unix(),
 	}
 	return project, nil
 }

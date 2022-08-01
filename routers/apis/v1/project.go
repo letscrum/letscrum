@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	generalV1 "github.com/letscrum/letscrum/apis/general/v1"
 	projectV1 "github.com/letscrum/letscrum/apis/project/v1"
+	userV1 "github.com/letscrum/letscrum/apis/user/v1"
 	"github.com/letscrum/letscrum/pkg/errors"
 	projectService "github.com/letscrum/letscrum/services/project"
 	"net/http"
@@ -21,7 +22,9 @@ func CreateProject(ctx *gin.Context) {
 	err := projectService.Create(&projectV1.Project{
 		Name:        request.Name,
 		DisplayName: request.DisplayName,
-		CreatedBy:   ctx.GetInt64("userId"),
+		CreatedUser: &userV1.User{
+			Id: ctx.GetInt64("userId"),
+		},
 	})
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
@@ -32,7 +35,9 @@ func CreateProject(ctx *gin.Context) {
 		Item: &projectV1.Project{
 			Name:        request.Name,
 			DisplayName: request.DisplayName,
-			CreatedBy:   ctx.GetInt64("userId"),
+			CreatedUser: &userV1.User{
+				Id: ctx.GetInt64("userId"),
+			},
 		},
 	})
 }
@@ -80,11 +85,11 @@ func UpdateProject(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(errRequest))
 		return
 	}
-	request.Name = ctx.Param("name")
+	request.ProjectName = ctx.Param("project_name")
 
 	err := projectService.Update(&projectV1.Project{
-		Name:        request.Name,
-		DisplayName: request.DisplayName,
+		Name:        request.ProjectName,
+		DisplayName: request.Project.DisplayName,
 	})
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
@@ -92,41 +97,45 @@ func UpdateProject(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, projectV1.UpdateProjectResponse{
-		Item: &projectV1.Project{
-			Name:        request.Name,
-			DisplayName: request.DisplayName,
+		Project: &projectV1.Project{
+			Name:        request.ProjectName,
+			DisplayName: request.Project.DisplayName,
 		},
 	})
 }
 
 func DeleteProject(ctx *gin.Context) {
 	request := projectV1.DeleteProjectRequest{}
-	request.Name = ctx.Param("name")
+	request.ProjectName = ctx.Param("name")
 
-	err := projectService.Delete(request.Name)
+	err := projectService.Delete(request.ProjectName)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
 		return
 	}
 
 	ctx.JSON(http.StatusOK, projectV1.DeleteProjectResponse{
-		Item: &projectV1.Project{
-			Name: request.Name,
+		Project: &projectV1.Project{
+			Name: request.ProjectName,
 		},
 	})
 }
 
 func GetProject(ctx *gin.Context) {
 	request := projectV1.GetProjectRequest{}
-	request.Name = ctx.Param("name")
+	request.ProjectName = ctx.Param("project_name")
 
-	project, err := projectService.Get(request.Name)
+	project, err := projectService.Get(request.ProjectName)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, projectV1.DeleteProjectResponse{
-		Item: project,
+	ctx.JSON(http.StatusOK, projectV1.GetProjectResponse{
+		Project: project,
 	})
+}
+
+func ListProjectMembers(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, "")
 }

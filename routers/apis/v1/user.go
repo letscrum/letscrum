@@ -26,3 +26,27 @@ func SignIn(ctx *gin.Context) {
 		Item: user,
 	})
 }
+
+func CreateUser(ctx *gin.Context) {
+	request := userV1.CreateUserRequest{}
+	errRequest := ctx.ShouldBindJSON(&request)
+	if errRequest != nil {
+		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(errRequest))
+		return
+	}
+	user := userV1.User{
+		Name:         request.Name,
+		Email:        request.Email,
+		Password:     request.Password,
+		IsSuperAdmin: request.IsSuperAdmin,
+	}
+	err := userService.Create(&user)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, userV1.CreateUserResponse{
+		Item: &user,
+	})
+}

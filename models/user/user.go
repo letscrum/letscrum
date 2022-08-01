@@ -5,16 +5,18 @@ import "github.com/letscrum/letscrum/models"
 type User struct {
 	models.Model
 
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Name         string `json:"name"`
+	Email        string `json:"email"`
+	Password     string `json:"password"`
+	IsSuperAdmin bool   `json:"is_super_admin"`
 }
 
-func CreateUser(name string, email string, password string) error {
+func CreateUser(name string, email string, password string, isSuperAdmin bool) error {
 	u := User{
-		Name:     name,
-		Email:    email,
-		Password: password,
+		Name:         name,
+		Email:        email,
+		Password:     password,
+		IsSuperAdmin: isSuperAdmin,
 	}
 
 	//var pInDB *Project

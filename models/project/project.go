@@ -1,13 +1,17 @@
 package projectModel
 
-import "github.com/letscrum/letscrum/models"
+import (
+	"github.com/letscrum/letscrum/models"
+	userModel "github.com/letscrum/letscrum/models/user"
+)
 
 type Project struct {
 	models.Model
 
-	Name        string `json:"name"`
-	DisplayName string `json:"display_name"`
-	CreatedBy   int64  `json:"created_by"`
+	Name        string         `json:"name"`
+	DisplayName string         `json:"display_name"`
+	CreatedBy   int64          `json:"created_by"`
+	CreatedUser userModel.User `gorm:"foreignKey:CreatedBy"`
 }
 
 type ProjectMember struct {
@@ -41,7 +45,7 @@ func CreateProject(name string, displayName string, createdUserId int64) error {
 
 func ListProject(page int32, pageSize int32) ([]*Project, error) {
 	var projects []*Project
-	err := models.DB.Limit(int(pageSize)).Offset(int((page - 1) * pageSize)).Find(&projects).Error
+	err := models.DB.Limit(int(pageSize)).Offset(int((page - 1) * pageSize)).Preload("CreatedUser").Find(&projects).Error
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +77,7 @@ func DeleteProject(name string) error {
 
 func GetProject(name string) (*Project, error) {
 	var p *Project
-	if err := models.DB.Where("name = ?", name).Find(&p).Error; err != nil {
+	if err := models.DB.Where("name = ?", name).Preload("CreatedUser").Find(&p).Error; err != nil {
 		return nil, err
 	}
 	return p, nil

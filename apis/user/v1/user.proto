@@ -11,9 +11,10 @@ message User {
   string name = 2;
   string email = 3;
   string password = 4;
-  int64 created_at = 5;
-  int64 updated_at = 6;
-  Token token = 7;
+  bool is_super_admin = 5;
+  int64 created_at = 6;
+  int64 updated_at = 7;
+  Token token = 8;
 }
 
 message Token {
@@ -24,6 +25,8 @@ message Token {
 message CreateUserRequest {
   string name = 1;
   string email = 2;
+  string password = 3;
+  bool is_super_admin = 4;
 }
 
 message CreateUserResponse {
