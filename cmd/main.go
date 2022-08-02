@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/joho/godotenv"
 	"log"
 	"net/http"
 
@@ -17,6 +18,7 @@ import (
 func init() {
 	settings.Setup("./config/config.yaml")
 	models.Setup()
+	godotenv.Load()
 	logging.Setup()
 	gredis.Setup()
 }
