@@ -6,6 +6,7 @@ import (
 	"github.com/letscrum/letscrum/pkg/utils"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/letscrum/letscrum/pkg/errors"
 )
@@ -13,7 +14,12 @@ import (
 // JWT is jwt middleware
 func JWT() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		token := ctx.GetHeader("Authorization")
+		bearerHeader := ctx.GetHeader("Authorization")
+		parts := strings.Split(bearerHeader, " ")
+		token := ""
+		if len(parts) == 2 {
+			token = parts[1]
+		}
 		if token == "" {
 			ctx.JSON(http.StatusUnauthorized, errors.HandleErr(fmt.Errorf("miss token")))
 			ctx.Abort()

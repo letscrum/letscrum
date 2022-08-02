@@ -76,7 +76,7 @@ service ProjectMember {
 
   rpc HardDeleteProjectMember(letscrum.apis.project.v1.DeleteProjectMemberRequest) returns (letscrum.apis.project.v1.DeleteProjectMemberResponse) {
     option (google.api.http) = {
-      delete: "/apis/v1/projects/{project_id}/members/{user_id}/hard"
+      delete: "/apis/v1/projects/{project_id}/members/{user_id}/delete"
     };
   }
 

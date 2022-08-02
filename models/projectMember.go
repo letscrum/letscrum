@@ -26,6 +26,13 @@ func DeleteProjectMember(projectId int64, userId int64) error {
 	return nil
 }
 
+func HardDeleteProjectMember(projectId int64, userId int64) error {
+	if err := DB.Unscoped().Where("project_id = ?", projectId).Where("user_id = ?", userId).Delete(&ProjectMember{}).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func DeleteProjectMemberByProject(projectId int64) error {
 	if err := DB.Where("project_id = ?", projectId).Delete(&ProjectMember{}).Error; err != nil {
 		return err
