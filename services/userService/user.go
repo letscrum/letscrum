@@ -1,22 +1,22 @@
-package user
+package userService
 
 import (
 	generalV1 "github.com/letscrum/letscrum/apis/general/v1"
 	userV1 "github.com/letscrum/letscrum/apis/user/v1"
-	userModel "github.com/letscrum/letscrum/models/user"
+	"github.com/letscrum/letscrum/models"
 	"github.com/letscrum/letscrum/pkg/utils"
 	"strconv"
 )
 
 func Create(user *userV1.User) error {
-	if err := userModel.CreateUser(user.Name, user.Email, user.Password, user.IsSuperAdmin); err != nil {
+	if err := models.CreateUser(user.Name, user.Email, user.Password, user.IsSuperAdmin); err != nil {
 		return err
 	}
 	return nil
 }
 
 func List(pagination *generalV1.Pagination) ([]*userV1.User, int64, error) {
-	users, err := userModel.ListUser(pagination.Page, pagination.PageSize)
+	users, err := models.ListUser(pagination.Page, pagination.PageSize)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -30,26 +30,26 @@ func List(pagination *generalV1.Pagination) ([]*userV1.User, int64, error) {
 			UpdatedAt: u.UpdatedAt.Unix(),
 		})
 	}
-	count := userModel.CountUser()
+	count := models.CountUser()
 	return list, count, nil
 }
 
 func Update(user *userV1.User) error {
-	if err := userModel.UpdateUser(user.Name, user.Email, user.Password); err != nil {
+	if err := models.UpdateUser(user.Name, user.Email, user.Password); err != nil {
 		return err
 	}
 	return nil
 }
 
 func Delete(name string) error {
-	if err := userModel.DeleteUser(name); err != nil {
+	if err := models.DeleteUser(name); err != nil {
 		return err
 	}
 	return nil
 }
 
 func Get(name string) (*userV1.User, error) {
-	u, err := userModel.GetUser(name)
+	u, err := models.GetUser(name)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func Get(name string) (*userV1.User, error) {
 }
 
 func SignIn(name string, password string) (*userV1.User, error) {
-	u, err := userModel.GetUserWithPassword(name, password)
+	u, err := models.GetUserWithPassword(name, password)
 	if err != nil {
 		return nil, err
 	}

@@ -22,7 +22,7 @@ message CreateProjectRequest {
 }
 
 message CreateProjectResponse {
-  Project item = 1;
+  int64 id = 1;
 }
 
 message UpdateProjectRequest {
@@ -31,7 +31,7 @@ message UpdateProjectRequest {
 }
 
 message UpdateProjectResponse {
-  Project item = 1;
+  int64 id = 1;
 }
 
 message DeleteProjectRequest {
@@ -39,7 +39,7 @@ message DeleteProjectRequest {
 }
 
 message DeleteProjectResponse {
-  Project item = 1;
+  int64 id = 1;
 }
 
 message ListProjectRequest {
@@ -67,7 +67,26 @@ message CreateProjectMemberRequest {
 }
 
 message CreateProjectMemberResponse {
-  letscrum.apis.user.v1.User item = 1;
+  int64 id = 1;
+}
+
+message UpdateProjectMemberRequest {
+  int64 project_id = 1;
+  int64 user_id = 2;
+  bool is_admin = 3;
+}
+
+message UpdateProjectMemberResponse {
+  int64 id = 1;
+}
+
+message DeleteProjectMemberRequest {
+  int64 project_id = 1;
+  int64 user_id = 2;
+}
+
+message DeleteProjectMemberResponse {
+  int64 id = 1;
 }
 
 message ListProjectMemberRequest {
@@ -76,6 +95,15 @@ message ListProjectMemberRequest {
 
 message ListProjectMemberResponse {
   repeated letscrum.apis.user.v1.User items = 1;
+  letscrum.apis.general.v1.Pagination pagination = 2;
+}
+
+message ListUserProjectRequest {
+  int64 user_id = 1;
+}
+
+message ListUserProjectResponse {
+  repeated letscrum.apis.project.v1.Project items = 1;
   letscrum.apis.general.v1.Pagination pagination = 2;
 }
 

@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	userV1 "github.com/letscrum/letscrum/apis/user/v1"
 	"github.com/letscrum/letscrum/pkg/errors"
-	userService "github.com/letscrum/letscrum/services/user"
+	"github.com/letscrum/letscrum/services/userService"
 	"net/http"
 )
 

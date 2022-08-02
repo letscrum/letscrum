@@ -1,9 +1,7 @@
-package userModel
-
-import "github.com/letscrum/letscrum/models"
+package models
 
 type User struct {
-	models.Model
+	Model
 
 	Name         string `json:"name"`
 	Email        string `json:"email"`
@@ -28,7 +26,7 @@ func CreateUser(name string, email string, password string, isSuperAdmin bool) e
 	//	return fmt.Errorf("duplicate project name")
 	//}
 
-	if err := models.DB.Create(&u).Error; err != nil {
+	if err := DB.Create(&u).Error; err != nil {
 		return err
 	}
 	return nil
@@ -36,7 +34,7 @@ func CreateUser(name string, email string, password string, isSuperAdmin bool) e
 
 func ListUser(page int32, pageSize int32) ([]*User, error) {
 	var users []*User
-	err := models.DB.Limit(int(pageSize)).Offset(int((page - 1) * pageSize)).Find(&users).Error
+	err := DB.Limit(int(pageSize)).Offset(int((page - 1) * pageSize)).Find(&users).Error
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +43,7 @@ func ListUser(page int32, pageSize int32) ([]*User, error) {
 
 func CountUser() int64 {
 	count := int64(0)
-	models.DB.Model(&User{}).Count(&count)
+	DB.Model(&User{}).Count(&count)
 	return count
 }
 
@@ -54,14 +52,14 @@ func UpdateUser(name string, email string, password string) error {
 		Email:    email,
 		Password: password,
 	}
-	if err := models.DB.Model(&User{}).Where("name = ?", name).Update("email", u.Email).Update("password", u.Password).Error; err != nil {
+	if err := DB.Model(&User{}).Where("name = ?", name).Update("email", u.Email).Update("password", u.Password).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
 func DeleteUser(name string) error {
-	if err := models.DB.Where("name = ?", name).Delete(&User{}).Error; err != nil {
+	if err := DB.Where("name = ?", name).Delete(&User{}).Error; err != nil {
 		return err
 	}
 	return nil
@@ -69,7 +67,7 @@ func DeleteUser(name string) error {
 
 func GetUser(name string) (*User, error) {
 	var u *User
-	if err := models.DB.Where("name = ?", name).Find(&u).Error; err != nil {
+	if err := DB.Where("name = ?", name).Find(&u).Error; err != nil {
 		return nil, err
 	}
 	return u, nil
@@ -77,7 +75,7 @@ func GetUser(name string) (*User, error) {
 
 func GetUserWithPassword(name string, password string) (*User, error) {
 	var u *User
-	if err := models.DB.Where("name = ?", name).Where("password = ?", password).Find(&u).Error; err != nil {
+	if err := DB.Where("name = ?", name).Where("password = ?", password).Find(&u).Error; err != nil {
 		return nil, err
 	}
 	return u, nil

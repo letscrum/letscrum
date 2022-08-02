@@ -41,3 +41,13 @@ message SignInRequest {
 message SignInResponse {
   User item = 1;
 }
+
+message ListUserRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+}
+
+message ListUserResponse {
+  repeated User items = 1;
+  letscrum.apis.general.v1.Pagination pagination = 2;
+}

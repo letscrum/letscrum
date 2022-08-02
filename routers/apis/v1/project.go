@@ -1,15 +1,15 @@
 package v1
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	generalV1 "github.com/letscrum/letscrum/apis/general/v1"
 	projectV1 "github.com/letscrum/letscrum/apis/project/v1"
-	userV1 "github.com/letscrum/letscrum/apis/user/v1"
 	"github.com/letscrum/letscrum/pkg/errors"
-	projectService "github.com/letscrum/letscrum/services/projectService"
+	"github.com/letscrum/letscrum/pkg/utils"
+	"github.com/letscrum/letscrum/services/projectService"
 	"net/http"
-	"strconv"
 )
 
 func CreateProject(ctx *gin.Context) {
@@ -20,22 +20,14 @@ func CreateProject(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(errRequest))
 		return
 	}
-	projectId, err := projectService.Create(&projectV1.Project{
-		Name:        request.Project.Name,
-		DisplayName: request.Project.DisplayName,
-		CreatedUser: &userV1.User{
-			Id: ctx.GetInt64("userId"),
-		},
-	})
+	projectId, err := projectService.Create(request.Project.Name, request.Project.DisplayName, ctx.GetInt64("userId"))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
 		return
 	}
 
 	ctx.JSON(http.StatusOK, projectV1.CreateProjectResponse{
-		Item: &projectV1.Project{
-			Id: projectId,
-		},
+		Id: projectId,
 	})
 }
 
@@ -55,10 +47,7 @@ func ListProject(ctx *gin.Context) {
 		request.PageSize = 10
 	}
 
-	list, count, err := projectService.List(&generalV1.Pagination{
-		Page:     request.Page,
-		PageSize: request.PageSize,
-	})
+	list, count, err := projectService.List(request.Page, request.PageSize)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
 		return
@@ -83,34 +72,29 @@ func UpdateProject(ctx *gin.Context) {
 		return
 	}
 
-	projectId, errGetParam := strconv.ParseInt(ctx.Param("project_id"), 10, 64)
-	if errGetParam != nil {
-		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(errGetParam))
+	projectId := utils.GetParamInt64(ctx, "project_id")
+	if projectId <= 0 {
+		ctx.JSON(http.StatusInternalServerError, fmt.Errorf("wrong id param"))
 		return
 	}
 	request.ProjectId = projectId
 
-	err := projectService.Update(&projectV1.Project{
-		Id:          request.ProjectId,
-		DisplayName: request.Project.DisplayName,
-	})
+	err := projectService.Update(request.ProjectId, request.Project.DisplayName)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
 		return
 	}
 
 	ctx.JSON(http.StatusOK, projectV1.UpdateProjectResponse{
-		Item: &projectV1.Project{
-			Id: request.ProjectId,
-		},
+		Id: request.ProjectId,
 	})
 }
 
 func DeleteProject(ctx *gin.Context) {
 	request := projectV1.DeleteProjectRequest{}
-	projectId, errGetParam := strconv.ParseInt(ctx.Param("project_id"), 10, 64)
-	if errGetParam != nil {
-		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(errGetParam))
+	projectId := utils.GetParamInt64(ctx, "project_id")
+	if projectId <= 0 {
+		ctx.JSON(http.StatusInternalServerError, fmt.Errorf("wrong id param"))
 		return
 	}
 	request.ProjectId = projectId
@@ -122,18 +106,36 @@ func DeleteProject(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, projectV1.DeleteProjectResponse{
-		Item: &projectV1.Project{
-			Id: request.ProjectId,
-		},
+		Id: request.ProjectId,
+	})
+}
+
+func HardDeleteProject(ctx *gin.Context) {
+	request := projectV1.DeleteProjectRequest{}
+	projectId := utils.GetParamInt64(ctx, "project_id")
+	if projectId <= 0 {
+		ctx.JSON(http.StatusInternalServerError, fmt.Errorf("wrong id param"))
+		return
+	}
+	request.ProjectId = projectId
+
+	err := projectService.HardDelete(request.ProjectId)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, projectV1.DeleteProjectResponse{
+		Id: request.ProjectId,
 	})
 }
 
 func GetProject(ctx *gin.Context) {
 	request := projectV1.GetProjectRequest{}
 
-	projectId, errGetParam := strconv.ParseInt(ctx.Param("project_id"), 10, 64)
-	if errGetParam != nil {
-		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(errGetParam))
+	projectId := utils.GetParamInt64(ctx, "project_id")
+	if projectId <= 0 {
+		ctx.JSON(http.StatusInternalServerError, fmt.Errorf("wrong id param"))
 		return
 	}
 	request.ProjectId = projectId
@@ -147,12 +149,4 @@ func GetProject(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, projectV1.GetProjectResponse{
 		Item: project,
 	})
-}
-
-func ListProjectMembers(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, "")
-}
-
-func ListUserProject() {
-
 }
