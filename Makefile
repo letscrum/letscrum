@@ -34,6 +34,7 @@ api_dep_install:
 	go install github.com/mwitkow/go-proto-validators/protoc-gen-govalidators@latest
 	go install github.com/envoyproxy/protoc-gen-validate@latest
 	go install github.com/grpc-ecosystem/protoc-gen-grpc-gateway-ts@latest
+	go install github.com/envoyproxy/protoc-gen-validate@latest
 
 api_gen:
 	protoc -I . -I third_party \
@@ -44,8 +45,6 @@ api_gen:
 		--grpc-gateway-ts_out=paths=source_relative:./dist/sdk/ \
 		--validate_out=lang=go,paths=source_relative:. \
 		apis/general/v1/common.proto apis/general/v1/letscrum.proto apis/letscrum/v1/letscrum.proto apis/project/v1/project.proto apis/user/v1/user.proto apis/project/v1/sprint.proto \
-
-	find api -type f -name "*.swagger.json" | xargs -I {} cp {} third_party/swagger-ui/
 
 api_clean:
 	rm -f apis/*/*/*.pb.go apis/*/*/*.pb.gw.go apis/*/*/*.swagger.json apis/*/*/*.pb.validate.go

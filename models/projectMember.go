@@ -1,5 +1,15 @@
 package models
 
+type ProjectMember struct {
+	Model
+
+	ProjectId int64   `json:"project_id"`
+	UserId    int64   `json:"user_id"`
+	IsAdmin   bool    `json:"is_admin"`
+	User      User    `gorm:"foreignKey:UserId"`
+	Project   Project `gorm:"foreignKey:ProjectId"`
+}
+
 func CreateProjectMember(projectId int64, userId int64, isAdmin bool) (int64, error) {
 	pm := ProjectMember{
 		ProjectId: projectId,
@@ -56,6 +66,12 @@ func ListProjectMemberByProject(projectId int64, page int32, pageSize int32) ([]
 	return projectMembers, nil
 }
 
+func CountProjectMemberByProject(projectId int64) int64 {
+	count := int64(0)
+	DB.Model(&ProjectMember{}).Where("project_id = ?", projectId).Count(&count)
+	return count
+}
+
 func ListProjectMemberByUser(userId int64, page int32, pageSize int32) ([]*ProjectMember, error) {
 	var projectMembers []*ProjectMember
 	err := DB.Where("user_id", userId).Limit(int(pageSize)).Offset(int((page - 1) * pageSize)).Preload("Project").Find(&projectMembers).Error
@@ -63,4 +79,10 @@ func ListProjectMemberByUser(userId int64, page int32, pageSize int32) ([]*Proje
 		return nil, err
 	}
 	return projectMembers, nil
+}
+
+func CountProjectMemberByUser(userId int64) int64 {
+	count := int64(0)
+	DB.Model(&ProjectMember{}).Where("user_id = ?", userId).Count(&count)
+	return count
 }

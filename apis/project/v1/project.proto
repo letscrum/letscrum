@@ -90,7 +90,9 @@ message DeleteProjectMemberResponse {
 }
 
 message ListProjectMemberRequest {
-  int64 project_id = 1;
+  int32 page = 1;
+  int32 page_size = 2;
+  int64 project_id = 3;
 }
 
 message ListProjectMemberResponse {
@@ -99,7 +101,9 @@ message ListProjectMemberResponse {
 }
 
 message ListUserProjectRequest {
-  int64 user_id = 1;
+  int32 page = 1;
+  int32 page_size = 2;
+  int64 user_id = 3;
 }
 
 message ListUserProjectResponse {

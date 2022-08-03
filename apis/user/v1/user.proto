@@ -12,9 +12,10 @@ message User {
   string email = 3;
   string password = 4;
   bool is_super_admin = 5;
-  int64 created_at = 6;
-  int64 updated_at = 7;
-  Token token = 8;
+  bool is_admin = 6;
+  int64 created_at = 7;
+  int64 updated_at = 8;
+  Token token = 9;
 }
 
 message Token {

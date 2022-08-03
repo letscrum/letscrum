@@ -9,16 +9,6 @@ type Project struct {
 	CreatedUser User   `gorm:"foreignKey:CreatedBy"`
 }
 
-type ProjectMember struct {
-	Model
-
-	ProjectId int64 `json:"project_id"`
-	UserId    int64 `json:"user_id"`
-	IsAdmin   bool  `json:"is_admin"`
-	User      User  `gorm:"foreignKey:UserId"`
-	Project   User  `gorm:"foreignKey:ProjectId"`
-}
-
 func CreateProject(name string, displayName string, createdUserId int64) (int64, error) {
 	p := Project{
 		Name:        name,
