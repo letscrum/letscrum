@@ -21,7 +21,8 @@ jobs:
     - name: Prepare
       run: make api_dep_install
 
-    - name: GenAPI
+    - name: Generate API
+      uses: arduino/setup-protoc@v1
       run: make api_gen
     
     - name: Build
