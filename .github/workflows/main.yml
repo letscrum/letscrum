@@ -21,8 +21,10 @@ jobs:
     - name: Prepare
       run: make api_dep_install
 
-    - name: Generate API
+    - name: Install Protoc
       uses: arduino/setup-protoc@v1
+
+    - name: Generate API
       run: make api_gen
     
     - name: Build
