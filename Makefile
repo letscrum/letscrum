@@ -2,7 +2,8 @@
 all: build
 
 build:
-	go build ./cmd
+	# $Env:GOOS = "linux"
+	go build -o letscrum ./cmd
 
 tool:
 	go vet ./...; true
