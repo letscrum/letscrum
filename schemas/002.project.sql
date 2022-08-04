@@ -52,7 +52,8 @@ CREATE TABLE `sprint_member` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_sprint_id_and_user_id` (`sprint_id`, `user_id`),
   CONSTRAINT `fk_sprint_member_sprint_id` FOREIGN KEY (`sprint_id`) REFERENCES `sprint` (`id`),
-  CONSTRAINT `fk_sprint_member_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
+  CONSTRAINT `fk_sprint_member_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`),
+  CONSTRAINT `fk_sprint_member_role_id` FOREIGN KEY (`role_id`) REFERENCES `role` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `role` (

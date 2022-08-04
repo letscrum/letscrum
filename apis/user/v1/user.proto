@@ -13,9 +13,10 @@ message User {
   string password = 4;
   bool is_super_admin = 5;
   bool is_admin = 6;
-  int64 created_at = 7;
-  int64 updated_at = 8;
-  Token token = 9;
+  string role_name = 7;
+  int64 created_at = 8;
+  int64 updated_at = 9;
+  Token token = 10;
 }
 
 message Token {
