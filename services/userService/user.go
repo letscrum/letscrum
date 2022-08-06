@@ -48,8 +48,8 @@ func Delete(name string) error {
 	return nil
 }
 
-func Get(name string) (*userV1.User, error) {
-	u, err := models.GetUser(name)
+func Get(id int64) (*userV1.User, error) {
+	u, err := models.GetUser(id)
 	if err != nil {
 		return nil, err
 	}

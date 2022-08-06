@@ -65,9 +65,9 @@ func DeleteUser(name string) error {
 	return nil
 }
 
-func GetUser(name string) (*User, error) {
+func GetUser(id int64) (*User, error) {
 	var u *User
-	if err := DB.Where("name = ?", name).Find(&u).Error; err != nil {
+	if err := DB.Where("id = ?", id).Find(&u).Error; err != nil {
 		return nil, err
 	}
 	return u, nil

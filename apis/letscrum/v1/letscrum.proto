@@ -137,4 +137,10 @@ service User {
       get: "/apis/v1/users/{user_id}/projects"
     };
   }
+
+  rpc GetUser(letscrum.apis.user.v1.GetUserRequest) returns (letscrum.apis.user.v1.GetUserResponse) {
+    option (google.api.http) = {
+      get: "/apis/v1/users/{user_id}"
+    };
+  }
 }
