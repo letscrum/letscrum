@@ -22,6 +22,7 @@ func InitRouter() *gin.Engine {
 	apisV1.Use(jwtMiddleware.JWT())
 	{
 		apisV1.POST("/users", v1.CreateUser)
+		apisV1.GET("/users", v1.ListUser)
 		apisV1.GET("/users/:user_id/projects", v1.ListUserProject)
 
 		apisV1.POST("/projects", v1.CreateProject)

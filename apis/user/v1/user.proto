@@ -32,7 +32,7 @@ message CreateUserRequest {
 }
 
 message CreateUserResponse {
-  User item = 1;
+  int64 id = 1;
 }
 
 message SignInRequest {
@@ -45,8 +45,9 @@ message SignInResponse {
 }
 
 message ListUserRequest {
-  int32 page = 1;
-  int32 page_size = 2;
+  string keyword = 1;
+  int32 page = 2;
+  int32 page_size = 3;
 }
 
 message ListUserResponse {

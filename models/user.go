@@ -9,7 +9,7 @@ type User struct {
 	IsSuperAdmin bool   `json:"is_super_admin"`
 }
 
-func CreateUser(name string, email string, password string, isSuperAdmin bool) error {
+func CreateUser(name string, email string, password string, isSuperAdmin bool) (int64, error) {
 	u := User{
 		Name:         name,
 		Email:        email,
@@ -27,23 +27,23 @@ func CreateUser(name string, email string, password string, isSuperAdmin bool) e
 	//}
 
 	if err := DB.Create(&u).Error; err != nil {
-		return err
+		return 0, err
 	}
-	return nil
+	return u.Id, nil
 }
 
-func ListUser(page int32, pageSize int32) ([]*User, error) {
+func ListUser(keyword string, page int32, pageSize int32) ([]*User, error) {
 	var users []*User
-	err := DB.Limit(int(pageSize)).Offset(int((page - 1) * pageSize)).Find(&users).Error
+	err := DB.Where("name LIKE ?", "%"+keyword+"%").Limit(int(pageSize)).Offset(int((page - 1) * pageSize)).Find(&users).Error
 	if err != nil {
 		return nil, err
 	}
 	return users, nil
 }
 
-func CountUser() int64 {
+func CountUser(keyword string) int64 {
 	count := int64(0)
-	DB.Model(&User{}).Count(&count)
+	DB.Model(&User{}).Where("name LIKE ?", "%"+keyword+"%").Count(&count)
 	return count
 }
 

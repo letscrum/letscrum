@@ -1,22 +1,22 @@
 package userService
 
 import (
-	generalV1 "github.com/letscrum/letscrum/apis/general/v1"
 	userV1 "github.com/letscrum/letscrum/apis/user/v1"
 	"github.com/letscrum/letscrum/models"
 	"github.com/letscrum/letscrum/pkg/utils"
 	"strconv"
 )
 
-func Create(user *userV1.User) error {
-	if err := models.CreateUser(user.Name, user.Email, user.Password, user.IsSuperAdmin); err != nil {
-		return err
+func Create(name string, email string, password string, isSuperAdmin bool) (int64, error) {
+	id, err := models.CreateUser(name, email, password, isSuperAdmin)
+	if err != nil {
+		return 0, err
 	}
-	return nil
+	return id, nil
 }
 
-func List(pagination *generalV1.Pagination) ([]*userV1.User, int64, error) {
-	users, err := models.ListUser(pagination.Page, pagination.PageSize)
+func List(keyword string, page int32, pageSize int32) ([]*userV1.User, int64, error) {
+	users, err := models.ListUser(keyword, page, pageSize)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -30,7 +30,7 @@ func List(pagination *generalV1.Pagination) ([]*userV1.User, int64, error) {
 			UpdatedAt: u.UpdatedAt.Unix(),
 		})
 	}
-	count := models.CountUser()
+	count := models.CountUser(keyword)
 	return list, count, nil
 }
 
