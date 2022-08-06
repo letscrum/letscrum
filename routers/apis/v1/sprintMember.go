@@ -8,37 +8,37 @@ import (
 	projectV1 "github.com/letscrum/letscrum/apis/project/v1"
 	"github.com/letscrum/letscrum/pkg/errors"
 	"github.com/letscrum/letscrum/pkg/utils"
-	"github.com/letscrum/letscrum/services/projectMemberService"
+	"github.com/letscrum/letscrum/services/sprintMemberService"
 	"net/http"
 )
 
-func CreateProjectMember(ctx *gin.Context) {
-	request := projectV1.CreateProjectMemberRequest{}
+func CreateSprintMember(ctx *gin.Context) {
+	request := projectV1.CreateSprintMemberRequest{}
 
 	errRequest := ctx.ShouldBindJSON(&request)
 	if errRequest != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(errRequest))
 		return
 	}
-	projectId := utils.GetParamInt64(ctx, "project_id")
-	if projectId <= 0 {
+	sprintId := utils.GetParamInt64(ctx, "sprint_id")
+	if sprintId <= 0 {
 		ctx.JSON(http.StatusInternalServerError, fmt.Errorf("wrong id param"))
 		return
 	}
-	request.ProjectId = projectId
-	projectMemberId, err := projectMemberService.Create(request.ProjectId, request.UserId, request.IsAdmin)
+	request.SprintId = sprintId
+	sprintMemberId, err := sprintMemberService.Create(request.SprintId, request.UserId)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, projectV1.CreateProjectMemberResponse{
-		Id: projectMemberId,
+	ctx.JSON(http.StatusOK, projectV1.CreateSprintMemberResponse{
+		Id: sprintMemberId,
 	})
 }
 
-func ListProjectMember(ctx *gin.Context) {
-	request := projectV1.ListProjectMemberRequest{}
+func ListSprintMember(ctx *gin.Context) {
+	request := projectV1.ListSprintMemberRequest{}
 	errRequest := ctx.ShouldBindWith(&request, binding.Form)
 	if errRequest != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(errRequest))
@@ -51,20 +51,20 @@ func ListProjectMember(ctx *gin.Context) {
 	if request.PageSize <= 0 {
 		request.PageSize = 10
 	}
-	projectId := utils.GetParamInt64(ctx, "project_id")
-	if projectId <= 0 {
+	sprintId := utils.GetParamInt64(ctx, "sprint_id")
+	if sprintId <= 0 {
 		ctx.JSON(http.StatusInternalServerError, fmt.Errorf("wrong id param"))
 		return
 	}
-	request.ProjectId = projectId
-	projectMembers, count, err := projectMemberService.ListProjectMemberByProject(request.ProjectId, request.Page, request.PageSize)
+	request.SprintId = sprintId
+	sprintMembers, count, err := sprintMemberService.ListSprintMemberBySprint(request.SprintId, request.Page, request.PageSize)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
 		return
 	}
 
 	ctx.JSON(http.StatusOK, projectV1.ListProjectMemberResponse{
-		Items: projectMembers,
+		Items: sprintMembers,
 		Pagination: &generalV1.Pagination{
 			Page:     request.Page,
 			PageSize: request.PageSize,
@@ -73,8 +73,8 @@ func ListProjectMember(ctx *gin.Context) {
 	})
 }
 
-func ListUserProject(ctx *gin.Context) {
-	request := projectV1.ListUserProjectRequest{}
+func ListUserSprint(ctx *gin.Context) {
+	request := projectV1.ListUserSprintRequest{}
 	errRequest := ctx.ShouldBindWith(&request, binding.Form)
 	if errRequest != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(errRequest))
@@ -93,14 +93,14 @@ func ListUserProject(ctx *gin.Context) {
 		return
 	}
 	request.UserId = userId
-	projects, count, err := projectMemberService.ListProjectByUser(request.UserId, request.Page, request.PageSize)
+	sprints, count, err := sprintMemberService.ListSprintByUser(request.UserId, request.Page, request.PageSize)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, projectV1.ListUserProjectResponse{
-		Items: projects,
+	ctx.JSON(http.StatusOK, projectV1.ListUserSprintResponse{
+		Items: sprints,
 		Pagination: &generalV1.Pagination{
 			Page:     request.Page,
 			PageSize: request.PageSize,

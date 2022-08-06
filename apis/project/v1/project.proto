@@ -107,7 +107,7 @@ message ListUserProjectRequest {
 }
 
 message ListUserProjectResponse {
-  repeated letscrum.apis.project.v1.Project items = 1;
+  repeated Project items = 1;
   letscrum.apis.general.v1.Pagination pagination = 2;
 }
 

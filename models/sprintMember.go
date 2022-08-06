@@ -90,3 +90,18 @@ func CountSprintMemberBySprint(sprintId int64) int64 {
 	DB.Model(&SprintMember{}).Where("sprint_id = ?", sprintId).Count(&count)
 	return count
 }
+
+func ListSprintMemberByUser(userId int64, page int32, pageSize int32) ([]*SprintMember, error) {
+	var sprintMembers []*SprintMember
+	err := DB.Where("user_id", userId).Limit(int(pageSize)).Offset(int((page - 1) * pageSize)).Preload("Sprint").Find(&sprintMembers).Error
+	if err != nil {
+		return nil, err
+	}
+	return sprintMembers, nil
+}
+
+func CountSprintMemberByUser(userId int64) int64 {
+	count := int64(0)
+	DB.Model(&SprintMember{}).Where("user_id = ?", userId).Count(&count)
+	return count
+}

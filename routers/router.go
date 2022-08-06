@@ -35,13 +35,15 @@ func InitRouter() *gin.Engine {
 		apisV1.GET("/projects/:project_id", v1.GetProject)
 
 		apisV1.POST("/projects/:project_id/members", v1.CreateProjectMember)
-		apisV1.GET("/projects/:project_id/members", v1.ListProjectMembers)
+		apisV1.GET("/projects/:project_id/members", v1.ListProjectMember)
 
 		apisV1.POST("/projects/:project_id/sprints", v1.CreateSprint)
 		apisV1.PUT("/projects/:project_id/sprints")
 		apisV1.DELETE("/projects/:project_id/sprints")
 		apisV1.GET("/projects/:project_id/sprints")
 		apisV1.GET("/projects/:project_id/sprints/:sprint_id")
+
+		apisV1.POST("projects/:project_id/sprints/:sprint_id", v1.CreateSprintMember)
 	}
 
 	return r
