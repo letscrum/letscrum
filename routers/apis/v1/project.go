@@ -6,9 +6,9 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	generalV1 "github.com/letscrum/letscrum/apis/general/v1"
 	projectV1 "github.com/letscrum/letscrum/apis/project/v1"
+	"github.com/letscrum/letscrum/internal/service/projectservice"
 	"github.com/letscrum/letscrum/pkg/errors"
 	"github.com/letscrum/letscrum/pkg/utils"
-	"github.com/letscrum/letscrum/services/projectService"
 	"net/http"
 )
 
@@ -20,7 +20,7 @@ func CreateProject(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(errRequest))
 		return
 	}
-	projectId, err := projectService.Create(request.Project.Name, request.Project.DisplayName, ctx.GetInt64("userId"))
+	projectId, err := projectservice.Create(request.Project.Name, request.Project.DisplayName, ctx.GetInt64("userId"))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
 		return
@@ -47,7 +47,7 @@ func ListProject(ctx *gin.Context) {
 		request.PageSize = 10
 	}
 
-	list, count, err := projectService.List(request.Page, request.PageSize)
+	list, count, err := projectservice.List(request.Page, request.PageSize)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
 		return
@@ -79,7 +79,7 @@ func UpdateProject(ctx *gin.Context) {
 	}
 	request.ProjectId = projectId
 
-	err := projectService.Update(request.ProjectId, request.Project.DisplayName)
+	err := projectservice.Update(request.ProjectId, request.Project.DisplayName)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
 		return
@@ -99,7 +99,7 @@ func DeleteProject(ctx *gin.Context) {
 	}
 	request.ProjectId = projectId
 
-	err := projectService.Delete(request.ProjectId)
+	err := projectservice.Delete(request.ProjectId)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
 		return
@@ -119,7 +119,7 @@ func HardDeleteProject(ctx *gin.Context) {
 	}
 	request.ProjectId = projectId
 
-	err := projectService.HardDelete(request.ProjectId)
+	err := projectservice.HardDelete(request.ProjectId)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
 		return
@@ -140,7 +140,7 @@ func GetProject(ctx *gin.Context) {
 	}
 	request.ProjectId = projectId
 
-	project, err := projectService.Get(request.ProjectId)
+	project, err := projectservice.Get(request.ProjectId)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
 		return

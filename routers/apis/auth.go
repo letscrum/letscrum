@@ -1,6 +1,7 @@
 package apis
 
 import (
+	"github.com/letscrum/letscrum/internal/service/auth_service"
 	"net/http"
 
 	"github.com/astaxie/beego/validation"
@@ -8,7 +9,6 @@ import (
 
 	"github.com/letscrum/letscrum/pkg/app"
 	"github.com/letscrum/letscrum/pkg/errors"
-	"github.com/letscrum/letscrum/services/auth_service"
 )
 
 type auth struct {

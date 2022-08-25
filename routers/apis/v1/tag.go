@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"github.com/letscrum/letscrum/internal/service/tag_service"
 	"net/http"
 
 	"github.com/astaxie/beego/validation"
@@ -13,7 +14,6 @@ import (
 	"github.com/letscrum/letscrum/pkg/logging"
 	"github.com/letscrum/letscrum/pkg/settings"
 	"github.com/letscrum/letscrum/pkg/utils"
-	"github.com/letscrum/letscrum/services/tag_service"
 )
 
 // @Summary Get multiple article tags

@@ -6,9 +6,9 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	generalV1 "github.com/letscrum/letscrum/apis/general/v1"
 	projectV1 "github.com/letscrum/letscrum/apis/project/v1"
+	"github.com/letscrum/letscrum/internal/service/sprintmemberservice"
 	"github.com/letscrum/letscrum/pkg/errors"
 	"github.com/letscrum/letscrum/pkg/utils"
-	"github.com/letscrum/letscrum/services/sprintMemberService"
 	"net/http"
 )
 
@@ -26,7 +26,7 @@ func CreateSprintMember(ctx *gin.Context) {
 		return
 	}
 	request.SprintId = sprintId
-	sprintMemberId, err := sprintMemberService.Create(request.SprintId, request.UserId)
+	sprintMemberId, err := sprintmemberservice.Create(request.SprintId, request.UserId)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
 		return
@@ -57,7 +57,7 @@ func ListSprintMember(ctx *gin.Context) {
 		return
 	}
 	request.SprintId = sprintId
-	sprintMembers, count, err := sprintMemberService.ListSprintMemberBySprint(request.SprintId, request.Page, request.PageSize)
+	sprintMembers, count, err := sprintmemberservice.ListSprintMemberBySprint(request.SprintId, request.Page, request.PageSize)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
 		return
@@ -93,7 +93,7 @@ func ListUserSprint(ctx *gin.Context) {
 		return
 	}
 	request.UserId = userId
-	sprints, count, err := sprintMemberService.ListSprintByUser(request.UserId, request.Page, request.PageSize)
+	sprints, count, err := sprintmemberservice.ListSprintByUser(request.UserId, request.Page, request.PageSize)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
 		return

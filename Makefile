@@ -2,7 +2,7 @@
 all: build
 
 build:
-	# $Env:GOOS = "linux"
+	# $Env:GOOS = "linux" "darwin"
 	go build -o letscrum ./cmd
 
 tool:

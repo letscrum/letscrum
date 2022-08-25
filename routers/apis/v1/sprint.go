@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	projectV1 "github.com/letscrum/letscrum/apis/project/v1"
+	"github.com/letscrum/letscrum/internal/service/sprintservice"
 	"github.com/letscrum/letscrum/pkg/errors"
 	"github.com/letscrum/letscrum/pkg/utils"
-	"github.com/letscrum/letscrum/services/sprintService"
 	"net/http"
 	"time"
 )
@@ -25,7 +25,7 @@ func CreateSprint(ctx *gin.Context) {
 		return
 	}
 	request.ProjectId = projectId
-	sprintId, err := sprintService.Create(request.ProjectId, request.Sprint.Name, time.Unix(request.Sprint.StartDate, 0), time.Unix(request.Sprint.EndDate, 0))
+	sprintId, err := sprintservice.Create(request.ProjectId, request.Sprint.Name, time.Unix(request.Sprint.StartDate, 0), time.Unix(request.Sprint.EndDate, 0))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
 		return

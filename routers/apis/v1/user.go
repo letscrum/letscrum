@@ -6,9 +6,9 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	generalV1 "github.com/letscrum/letscrum/apis/general/v1"
 	userV1 "github.com/letscrum/letscrum/apis/user/v1"
+	"github.com/letscrum/letscrum/internal/service/userservice"
 	"github.com/letscrum/letscrum/pkg/errors"
 	"github.com/letscrum/letscrum/pkg/utils"
-	"github.com/letscrum/letscrum/services/userService"
 	"net/http"
 )
 
@@ -20,7 +20,7 @@ func SignIn(ctx *gin.Context) {
 		return
 	}
 
-	user, err := userService.SignIn(request.Name, request.Password)
+	user, err := userservice.SignIn(request.Name, request.Password)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
 		return
@@ -38,7 +38,7 @@ func CreateUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(errRequest))
 		return
 	}
-	id, err := userService.Create(request.Name, request.Email, request.Password, request.IsSuperAdmin)
+	id, err := userservice.Create(request.Name, request.Email, request.Password, request.IsSuperAdmin)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
 		return
@@ -65,7 +65,7 @@ func ListUser(ctx *gin.Context) {
 		request.PageSize = 10
 	}
 
-	list, count, err := userService.List(request.Keyword, request.Page, request.PageSize)
+	list, count, err := userservice.List(request.Keyword, request.Page, request.PageSize)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
 		return
@@ -91,7 +91,7 @@ func GetUser(ctx *gin.Context) {
 	}
 	request.UserId = userId
 
-	user, err := userService.Get(request.UserId)
+	user, err := userservice.Get(request.UserId)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
 		return

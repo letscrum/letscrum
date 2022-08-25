@@ -1,6 +1,8 @@
 package v1
 
 import (
+	article_service2 "github.com/letscrum/letscrum/internal/service/article_service"
+	"github.com/letscrum/letscrum/internal/service/tag_service"
 	"net/http"
 
 	"github.com/astaxie/beego/validation"
@@ -13,8 +15,6 @@ import (
 	"github.com/letscrum/letscrum/pkg/qrcode"
 	"github.com/letscrum/letscrum/pkg/settings"
 	"github.com/letscrum/letscrum/pkg/utils"
-	"github.com/letscrum/letscrum/services/article_service"
-	"github.com/letscrum/letscrum/services/tag_service"
 )
 
 // @Summary Get a single article
@@ -35,7 +35,7 @@ func GetArticle(c *gin.Context) {
 		return
 	}
 
-	articleService := article_service.Article{ID: id}
+	articleService := article_service2.Article{ID: id}
 	exists, err := articleService.ExistByID()
 	if err != nil {
 		appG.Response(http.StatusInternalServerError, errors.ERROR_CHECK_EXIST_ARTICLE_FAIL, nil)
@@ -85,7 +85,7 @@ func GetArticles(c *gin.Context) {
 		return
 	}
 
-	articleService := article_service.Article{
+	articleService := article_service2.Article{
 		TagID:    tagId,
 		State:    state,
 		PageNum:  utils.GetPage(c),
@@ -155,7 +155,7 @@ func AddArticle(c *gin.Context) {
 		return
 	}
 
-	articleService := article_service.Article{
+	articleService := article_service2.Article{
 		TagID:         form.TagID,
 		Title:         form.Title,
 		Desc:          form.Desc,
@@ -207,7 +207,7 @@ func EditArticle(c *gin.Context) {
 		return
 	}
 
-	articleService := article_service.Article{
+	articleService := article_service2.Article{
 		ID:            form.ID,
 		TagID:         form.TagID,
 		Title:         form.Title,
@@ -266,7 +266,7 @@ func DeleteArticle(c *gin.Context) {
 		return
 	}
 
-	articleService := article_service.Article{ID: id}
+	articleService := article_service2.Article{ID: id}
 	exists, err := articleService.ExistByID()
 	if err != nil {
 		appG.Response(http.StatusInternalServerError, errors.ERROR_CHECK_EXIST_ARTICLE_FAIL, nil)
@@ -292,20 +292,20 @@ const (
 
 func GenerateArticlePoster(c *gin.Context) {
 	appG := app.Gin{C: c}
-	article := &article_service.Article{}
+	article := &article_service2.Article{}
 	qr := qrcode.NewQrCode(QRCODE_URL, 300, 300, qr.M, qr.Auto)
-	posterName := article_service.GetPosterFlag() + "-" + qrcode.GetQrCodeFileName(qr.URL) + qr.GetQrCodeExt()
-	articlePoster := article_service.NewArticlePoster(posterName, article, qr)
-	articlePosterBgService := article_service.NewArticlePosterBg(
+	posterName := article_service2.GetPosterFlag() + "-" + qrcode.GetQrCodeFileName(qr.URL) + qr.GetQrCodeExt()
+	articlePoster := article_service2.NewArticlePoster(posterName, article, qr)
+	articlePosterBgService := article_service2.NewArticlePosterBg(
 		"bg.jpg",
 		articlePoster,
-		&article_service.Rect{
+		&article_service2.Rect{
 			X0: 0,
 			Y0: 0,
 			X1: 550,
 			Y1: 700,
 		},
-		&article_service.Pt{
+		&article_service2.Pt{
 			X: 125,
 			Y: 298,
 		},

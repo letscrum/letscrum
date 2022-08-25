@@ -6,9 +6,9 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	generalV1 "github.com/letscrum/letscrum/apis/general/v1"
 	projectV1 "github.com/letscrum/letscrum/apis/project/v1"
+	"github.com/letscrum/letscrum/internal/service/projectmemberservice"
 	"github.com/letscrum/letscrum/pkg/errors"
 	"github.com/letscrum/letscrum/pkg/utils"
-	"github.com/letscrum/letscrum/services/projectMemberService"
 	"net/http"
 )
 
@@ -26,7 +26,7 @@ func CreateProjectMember(ctx *gin.Context) {
 		return
 	}
 	request.ProjectId = projectId
-	projectMemberId, err := projectMemberService.Create(request.ProjectId, request.UserId, request.IsAdmin)
+	projectMemberId, err := projectmemberservice.Create(request.ProjectId, request.UserId, request.IsAdmin)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
 		return
@@ -57,7 +57,7 @@ func ListProjectMember(ctx *gin.Context) {
 		return
 	}
 	request.ProjectId = projectId
-	projectMembers, count, err := projectMemberService.ListProjectMemberByProject(request.ProjectId, request.Page, request.PageSize)
+	projectMembers, count, err := projectmemberservice.ListProjectMemberByProject(request.ProjectId, request.Page, request.PageSize)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
 		return
@@ -93,7 +93,7 @@ func ListUserProject(ctx *gin.Context) {
 		return
 	}
 	request.UserId = userId
-	projects, count, err := projectMemberService.ListProjectByUser(request.UserId, request.Page, request.PageSize)
+	projects, count, err := projectmemberservice.ListProjectByUser(request.UserId, request.Page, request.PageSize)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.HandleErr(err))
 		return
