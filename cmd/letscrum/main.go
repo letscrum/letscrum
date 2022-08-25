@@ -50,6 +50,9 @@ func main() {
 
 	server.ListenAndServe()
 
+	main.Execute()
+
+	
 	// If you want Graceful Restart, you need a Unix system and download github.com/fvbock/endless
 	//endless.DefaultReadTimeOut = readTimeout
 	//endless.DefaultWriteTimeOut = writeTimeout

@@ -323,8 +323,7 @@ go.work
 
 # documentation
 _book/
-apis/*/*/*.go
-apis/*/*/*.json
-apis/*/*.go
-apis/*/*.json
-letscrum
+api/*/*/*.go
+api/*/*/*.json
+api/*/*.go
+api/*/*.json
