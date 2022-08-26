@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/letscrum/letscrum/pkg/file"
-	"github.com/letscrum/letscrum/pkg/logging"
+	"github.com/letscrum/letscrum/pkg/log"
 	"github.com/letscrum/letscrum/pkg/settings"
 	"github.com/letscrum/letscrum/pkg/utils"
 )
@@ -55,7 +55,7 @@ func CheckImageSize(f multipart.File) bool {
 	size, err := file.GetSize(f)
 	if err != nil {
 		log.Println(err)
-		logging.Warn(err)
+		log.Warn(err)
 		return false
 	}
 

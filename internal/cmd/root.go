@@ -4,6 +4,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	cfgFile string
+)
+
 func GetRootCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "letscrum",
@@ -14,5 +18,3 @@ func GetRootCommand() *cobra.Command {
 
 	return cmd
 }
-
-var cfgFile string

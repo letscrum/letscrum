@@ -1,20 +1,20 @@
 syntax = "proto3";
 
-import "apis/general/v1/common.proto";
-import "apis/user/v1/user.proto";
+import "api/general/v1/common.proto";
+import "api/user/v1/user.proto";
 
-package letscrum.apis.project.v1;
+package letscrum.api.project.v1;
 
-option go_package = "github.com/letscrum/letscrum/apis/project/v1";
+option go_package = "github.com/letscrum/letscrum/api/project/v1";
 
 message Project {
   int64 id = 1;
   string name = 2;
   string display_name = 3;
-  letscrum.apis.user.v1.User created_user = 4;
+  letscrum.api.user.v1.User created_user = 4;
   int64 created_at = 5;
   int64 updated_at = 6;
-  repeated letscrum.apis.user.v1.User members = 7;
+  repeated letscrum.api.user.v1.User members = 7;
 }
 
 message CreateProjectRequest {
@@ -49,7 +49,7 @@ message ListProjectRequest {
 
 message ListProjectResponse {
   repeated Project items = 1;
-  letscrum.apis.general.v1.Pagination pagination = 2;
+  letscrum.api.general.v1.Pagination pagination = 2;
 }
 
 message GetProjectRequest {
@@ -96,8 +96,8 @@ message ListProjectMemberRequest {
 }
 
 message ListProjectMemberResponse {
-  repeated letscrum.apis.user.v1.User items = 1;
-  letscrum.apis.general.v1.Pagination pagination = 2;
+  repeated letscrum.api.user.v1.User items = 1;
+  letscrum.api.general.v1.Pagination pagination = 2;
 }
 
 message ListUserProjectRequest {
@@ -108,6 +108,6 @@ message ListUserProjectRequest {
 
 message ListUserProjectResponse {
   repeated Project items = 1;
-  letscrum.apis.general.v1.Pagination pagination = 2;
+  letscrum.api.general.v1.Pagination pagination = 2;
 }
 

@@ -2,7 +2,7 @@ package errors
 
 import (
 	"fmt"
-	v1 "github.com/letscrum/letscrum/apis/general/v1"
+	v1 "github.com/letscrum/letscrum/api/general/v1"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/wrapperspb"

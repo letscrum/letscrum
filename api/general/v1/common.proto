@@ -2,9 +2,9 @@ syntax = "proto3";
 
 import "google/protobuf/any.proto";
 
-package letscrum.apis.general.v1;
+package letscrum.api.general.v1;
 
-option go_package = "github.com/letscrum/letscrum/apis/general/v1";
+option go_package = "github.com/letscrum/letscrum/api/general/v1";
 
 message ErrorResponse {
   int32 code = 1;

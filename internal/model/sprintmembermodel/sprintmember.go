@@ -4,7 +4,6 @@ import (
 	"github.com/letscrum/letscrum/internal/model"
 	"github.com/letscrum/letscrum/internal/model/rolemodel"
 	"github.com/letscrum/letscrum/internal/model/sprintmodel"
-	"github.com/letscrum/letscrum/internal/model/usermodel"
 )
 
 type SprintMember struct {
@@ -14,7 +13,7 @@ type SprintMember struct {
 	UserId   int64              `json:"user_id"`
 	RoleId   int64              `json:"role_id"`
 	Capacity int32              `json:"capacity"`
-	User     usermodel.User     `gorm:"foreignKey:UserId"`
+	User     model.User         `gorm:"foreignKey:UserId"`
 	Sprint   sprintmodel.Sprint `gorm:"foreignKey:SprintId"`
 	Role     rolemodel.Role     `gorm:"foreignKey:RoleId"`
 }

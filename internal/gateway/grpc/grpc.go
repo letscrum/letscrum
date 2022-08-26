@@ -2,17 +2,17 @@ package grpc
 
 import (
 	"context"
+	v1 "github.com/letscrum/letscrum/api/letscrum/v1"
 	golog "log"
 	"net"
 	"os"
 	"time"
 
-	"github.com/daocloud/skoala/api/hive/v1alpha1"
-	"github.com/daocloud/skoala/app/hive/internal/dao"
-	"github.com/daocloud/skoala/app/hive/internal/dao/mysql"
-	svcv1alpha1 "github.com/daocloud/skoala/app/hive/internal/service/v1alpha1"
-	"github.com/daocloud/skoala/app/pkg/db"
-	"github.com/daocloud/skoala/pkg/log"
+	"github.com/letscrum/letscrum/internal/dao"
+	"github.com/letscrum/letscrum/internal/dao/mysql"
+	"github.com/letscrum/letscrum/internal/service"
+	"github.com/letscrum/letscrum/pkg/db"
+	"github.com/letscrum/letscrum/pkg/log"
 
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
@@ -36,17 +36,12 @@ func Run(ctx context.Context, network, address string) error {
 	}()
 	s := grpc.NewServer()
 
-	// init dao,service
-	var hiveDao dao.HiveDao
-	if hiveDao, err = initDao(); err != nil {
+	var daoInterface dao.Interface
+	if daoInterface, err = initDao(); err != nil {
 		return err
 	}
-	hiveService := svcv1alpha1.NewHiveService(hiveDao)
-	registrationService := svcv1alpha1.NewRegistrationService(hiveService)
-	bookService := svcv1alpha1.NewBookService(hiveService)
-	v1alpha1.RegisterHiveServer(s, hiveService)
-	v1alpha1.RegisterRegistrationServer(s, registrationService)
-	v1alpha1.RegisterBookServer(s, bookService)
+	projectService := service.NewProjectService(daoInterface)
+	v1.RegisterProjectServer(s, projectService)
 
 	go func() {
 		defer s.GracefulStop()
@@ -64,7 +59,7 @@ func Run(ctx context.Context, network, address string) error {
 	return nil
 }
 
-func initDao() (dao.HiveDao, error) {
+func initDao() (dao.Interface, error) {
 	newLogger := logger.New(
 		golog.New(os.Stdout, "", golog.LstdFlags),
 		logger.Config{
@@ -85,7 +80,7 @@ func initDao() (dao.HiveDao, error) {
 		MaxConnectionLifeTime: 10 * time.Second,
 		Logger:                newLogger,
 	}
-	hiveDao, err := mysql.GetHiveDaoOr(&options)
+	hiveDao, err := mysql.GetDao(&options)
 	if err != nil {
 		return nil, err
 	}

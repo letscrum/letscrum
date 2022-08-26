@@ -2,13 +2,13 @@ package userservice
 
 import (
 	userV1 "github.com/letscrum/letscrum/api/user/v1"
-	"github.com/letscrum/letscrum/internal/model/usermodel"
+	"github.com/letscrum/letscrum/internal/model"
 	"github.com/letscrum/letscrum/pkg/utils"
 	"strconv"
 )
 
 func Create(name string, email string, password string, isSuperAdmin bool) (int64, error) {
-	id, err := usermodel.CreateUser(name, email, password, isSuperAdmin)
+	id, err := model.CreateUser(name, email, password, isSuperAdmin)
 	if err != nil {
 		return 0, err
 	}
@@ -16,7 +16,7 @@ func Create(name string, email string, password string, isSuperAdmin bool) (int6
 }
 
 func List(keyword string, page int32, pageSize int32) ([]*userV1.User, int64, error) {
-	users, err := usermodel.ListUser(keyword, page, pageSize)
+	users, err := model.ListUser(keyword, page, pageSize)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -30,26 +30,26 @@ func List(keyword string, page int32, pageSize int32) ([]*userV1.User, int64, er
 			UpdatedAt: u.UpdatedAt.Unix(),
 		})
 	}
-	count := usermodel.CountUser(keyword)
+	count := model.CountUser(keyword)
 	return list, count, nil
 }
 
 func Update(user *userV1.User) error {
-	if err := usermodel.UpdateUser(user.Name, user.Email, user.Password); err != nil {
+	if err := model.UpdateUser(user.Name, user.Email, user.Password); err != nil {
 		return err
 	}
 	return nil
 }
 
 func Delete(name string) error {
-	if err := usermodel.DeleteUser(name); err != nil {
+	if err := model.DeleteUser(name); err != nil {
 		return err
 	}
 	return nil
 }
 
 func Get(id int64) (*userV1.User, error) {
-	u, err := usermodel.GetUser(id)
+	u, err := model.GetUser(id)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func Get(id int64) (*userV1.User, error) {
 }
 
 func SignIn(name string, password string) (*userV1.User, error) {
-	u, err := usermodel.GetUserWithPassword(name, password)
+	u, err := model.GetUserWithPassword(name, password)
 	if err != nil {
 		return nil, err
 	}

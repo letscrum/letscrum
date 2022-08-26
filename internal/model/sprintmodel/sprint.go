@@ -2,18 +2,17 @@ package sprintmodel
 
 import (
 	"github.com/letscrum/letscrum/internal/model"
-	"github.com/letscrum/letscrum/internal/model/projectmodel"
 	"time"
 )
 
 type Sprint struct {
 	model.Model
 
-	ProjectId int64                `json:"project_id"`
-	Name      string               `json:"name"`
-	StartDate time.Time            `json:"start_date"`
-	EndDate   time.Time            `json:"end_date"`
-	Project   projectmodel.Project `gorm:"foreignKey:ProjectId"`
+	ProjectId int64         `json:"project_id"`
+	Name      string        `json:"name"`
+	StartDate time.Time     `json:"start_date"`
+	EndDate   time.Time     `json:"end_date"`
+	Project   model.Project `gorm:"foreignKey:ProjectId"`
 }
 
 func CreateSprint(projectId int64, name string, startDate time.Time, endDate time.Time) (int64, error) {

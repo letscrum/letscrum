@@ -1,4 +1,4 @@
-package projectservice
+package service
 
 import (
 	"context"
@@ -6,54 +6,50 @@ import (
 	projectV1 "github.com/letscrum/letscrum/api/project/v1"
 	userV1 "github.com/letscrum/letscrum/api/user/v1"
 	"github.com/letscrum/letscrum/internal/dao"
+	"github.com/letscrum/letscrum/internal/model"
 	models2 "github.com/letscrum/letscrum/internal/model/projectmembermodel"
-	"github.com/letscrum/letscrum/internal/model/projectmodel"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-type ProjectService interface {
+type ProjectServiceInterface interface {
 	Get(context.Context, *projectV1.GetProjectRequest) (*projectV1.GetProjectResponse, error)
 }
 
-type ProjectServer struct {
+type ProjectService struct {
 	v1.UnimplementedProjectServer
-	dao dao.LetscrumDao
+	dao dao.ProjectDao
 }
 
-func NewProjectService(letscrumService *LetscrumService) *ProjectService {
-	return &ProjectServer{dao: hiveService.dao}
+func NewProjectService(dao dao.Interface) *ProjectService {
+	return &ProjectService{dao: dao.ProjectDao()}
 }
 
-func (s *bookService) Get(ctx context.Context, req *v1alpha1.GetBookReq) (*v1alpha1.GetBookReply, error) {
-	book, err := s.dao.BookDao().Get(ctx, req.Uid, metav1alpha1.GetOptions{})
+func (s *ProjectService) Get(ctx context.Context, req *projectV1.GetProjectRequest) (*projectV1.GetProjectResponse, error) {
+	project, err := s.dao.Get(ctx, req.ProjectId)
 	if err != nil {
 		result := status.Convert(err)
 		if result.Code() == codes.NotFound {
-			return nil, status.Errorf(codes.NotFound, "get book err: %s not found", req.Uid)
+			return nil, status.Errorf(codes.NotFound, "get book err: %s not found", req.ProjectId)
 		}
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
 
-	return &v1alpha1.GetBookReply{
-		Uid:         book.UID,
-		Name:        book.Name,
-		Author:      book.Author,
-		Status:      book.Status,
-		IsPublished: book.IsPublished,
-		PublishedAt: timestamppb.New(book.PublishedAt),
+	return &projectV1.GetProjectResponse{
+		Item: &projectV1.Project{
+			Id: project.Id,
+		},
 	}, nil
 }
 
 func Create(name string, displayName string, createdUserId int64) (int64, error) {
-	projectId, err := projectmodel.CreateProject(name, displayName, createdUserId)
+	projectId, err := model.CreateProject(name, displayName, createdUserId)
 	if err != nil {
 		return 0, err
 	}
 	_, errCreateMember := models2.CreateProjectMember(projectId, createdUserId, true)
 	if errCreateMember != nil {
-		errDeleteProject := projectmodel.DeleteProject(projectId)
+		errDeleteProject := model.DeleteProject(projectId)
 		if errDeleteProject != nil {
 			return 0, errDeleteProject
 		}
@@ -63,7 +59,7 @@ func Create(name string, displayName string, createdUserId int64) (int64, error)
 }
 
 func List(page int32, pageSize int32) ([]*projectV1.Project, int64, error) {
-	projects, err := projectmodel.ListProject(page, pageSize)
+	projects, err := model.ListProject(page, pageSize)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -81,19 +77,19 @@ func List(page int32, pageSize int32) ([]*projectV1.Project, int64, error) {
 			UpdatedAt: p.UpdatedAt.Unix(),
 		})
 	}
-	count := projectmodel.CountProject()
+	count := model.CountProject()
 	return list, count, nil
 }
 
 func Update(id int64, displayName string) error {
-	if err := projectmodel.UpdateProject(id, displayName); err != nil {
+	if err := model.UpdateProject(id, displayName); err != nil {
 		return err
 	}
 	return nil
 }
 
 func Delete(id int64) error {
-	if err := projectmodel.DeleteProject(id); err != nil {
+	if err := model.DeleteProject(id); err != nil {
 		return err
 	}
 	return nil
@@ -103,14 +99,14 @@ func HardDelete(id int64) error {
 	if err := models2.HardDeleteProjectMemberByProject(id); err != nil {
 		return err
 	}
-	if err := projectmodel.HardDeleteProject(id); err != nil {
+	if err := model.HardDeleteProject(id); err != nil {
 		return err
 	}
 	return nil
 }
 
 func Get(id int64) (*projectV1.Project, error) {
-	p, err := projectmodel.GetProject(id)
+	p, err := model.GetProject(id)
 	if err != nil {
 		return nil, err
 	}

@@ -2,18 +2,16 @@ package projectmembermodel
 
 import (
 	"github.com/letscrum/letscrum/internal/model"
-	"github.com/letscrum/letscrum/internal/model/projectmodel"
-	"github.com/letscrum/letscrum/internal/model/usermodel"
 )
 
 type ProjectMember struct {
 	model.Model
 
-	ProjectId int64                `json:"project_id"`
-	UserId    int64                `json:"user_id"`
-	IsAdmin   bool                 `json:"is_admin"`
-	User      usermodel.User       `gorm:"foreignKey:UserId"`
-	Project   projectmodel.Project `gorm:"foreignKey:ProjectId"`
+	ProjectId int64         `json:"project_id"`
+	UserId    int64         `json:"user_id"`
+	IsAdmin   bool          `json:"is_admin"`
+	User      model.User    `gorm:"foreignKey:UserId"`
+	Project   model.Project `gorm:"foreignKey:ProjectId"`
 }
 
 func CreateProjectMember(projectId int64, userId int64, isAdmin bool) (int64, error) {

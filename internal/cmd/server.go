@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/letscrum/letscrum/internal/gateway"
 	"github.com/letscrum/letscrum/internal/gateway/grpc"
-	"github.com/letscrum/letscrum/pkg/logging"
+	"github.com/letscrum/letscrum/pkg/log"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 	"os"
@@ -26,7 +26,7 @@ func GetServerCommand() *cobra.Command {
 		Use:   "server",
 		Short: "Run both grpc and http server",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			log, err := logging.New()
+			log, err := log.New()
 			if err != nil {
 				return err
 			}
@@ -56,7 +56,7 @@ func GetServerCommand() *cobra.Command {
 		},
 	}
 	cobra.OnInitialize(InitConfig)
-	cmd.PersistentFlags().StringVar(&cfgFile, "config", "./config/config.yaml", "config file (default is $HOME/.skoala.yaml)")
+	cmd.PersistentFlags().StringVar(&cfgFile, "config", "./config/config.yaml", "config file (default is $HOME/.letscrum.yaml)")
 	cmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 	cmd.PersistentFlags().StringVarP(&cfgPath, "config-path", "c", "",

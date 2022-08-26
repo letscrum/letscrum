@@ -1,9 +1,7 @@
-package usermodel
-
-import "github.com/letscrum/letscrum/internal/model"
+package model
 
 type User struct {
-	model.Model
+	Model
 
 	Name         string `json:"name"`
 	Email        string `json:"email"`
@@ -28,7 +26,7 @@ func CreateUser(name string, email string, password string, isSuperAdmin bool) (
 	//	return fmt.Errorf("duplicate project name")
 	//}
 
-	if err := model.DB.Create(&u).Error; err != nil {
+	if err := DB.Create(&u).Error; err != nil {
 		return 0, err
 	}
 	return u.Id, nil
@@ -36,7 +34,7 @@ func CreateUser(name string, email string, password string, isSuperAdmin bool) (
 
 func ListUser(keyword string, page int32, pageSize int32) ([]*User, error) {
 	var users []*User
-	err := model.DB.Where("name LIKE ?", "%"+keyword+"%").Limit(int(pageSize)).Offset(int((page - 1) * pageSize)).Find(&users).Error
+	err := DB.Where("name LIKE ?", "%"+keyword+"%").Limit(int(pageSize)).Offset(int((page - 1) * pageSize)).Find(&users).Error
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +43,7 @@ func ListUser(keyword string, page int32, pageSize int32) ([]*User, error) {
 
 func CountUser(keyword string) int64 {
 	count := int64(0)
-	model.DB.Model(&User{}).Where("name LIKE ?", "%"+keyword+"%").Count(&count)
+	DB.Model(&User{}).Where("name LIKE ?", "%"+keyword+"%").Count(&count)
 	return count
 }
 
@@ -54,14 +52,14 @@ func UpdateUser(name string, email string, password string) error {
 		Email:    email,
 		Password: password,
 	}
-	if err := model.DB.Model(&User{}).Where("name = ?", name).Update("email", u.Email).Update("password", u.Password).Error; err != nil {
+	if err := DB.Model(&User{}).Where("name = ?", name).Update("email", u.Email).Update("password", u.Password).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
 func DeleteUser(name string) error {
-	if err := model.DB.Where("name = ?", name).Delete(&User{}).Error; err != nil {
+	if err := DB.Where("name = ?", name).Delete(&User{}).Error; err != nil {
 		return err
 	}
 	return nil
@@ -69,7 +67,7 @@ func DeleteUser(name string) error {
 
 func GetUser(id int64) (*User, error) {
 	var u *User
-	if err := model.DB.Where("id = ?", id).Find(&u).Error; err != nil {
+	if err := DB.Where("id = ?", id).Find(&u).Error; err != nil {
 		return nil, err
 	}
 	return u, nil
@@ -77,7 +75,7 @@ func GetUser(id int64) (*User, error) {
 
 func GetUserWithPassword(name string, password string) (*User, error) {
 	var u *User
-	if err := model.DB.Where("name = ?", name).Where("password = ?", password).Find(&u).Error; err != nil {
+	if err := DB.Where("name = ?", name).Where("password = ?", password).Find(&u).Error; err != nil {
 		return nil, err
 	}
 	return u, nil
