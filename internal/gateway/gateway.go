@@ -37,6 +37,7 @@ func NewGateway(ctx context.Context, conn *grpc.ClientConn, opts []runtime.Serve
 		v1.RegisterProjectHandler,
 		v1.RegisterLetscrumHandler,
 		v1.RegisterDemoHandler,
+		v1.RegisterDemoDbHandler,
 	} {
 		if err := f(ctx, mux, conn); err != nil {
 			return nil, err

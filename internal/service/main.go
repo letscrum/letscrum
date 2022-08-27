@@ -17,3 +17,9 @@ func (s *Service) LetscrumService() LetscrumService {
 func (s *Service) DemoService() DemoService {
 	return *NewDemoService()
 }
+
+func (s *Service) DemoDbService() DemoDbService {
+	return *NewDemoDbService(s.dao)
+	// Replace to follow line if you don't need database operate
+	// return *NewDemoService()
+}
