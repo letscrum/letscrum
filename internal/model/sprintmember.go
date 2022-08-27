@@ -1,20 +1,15 @@
-package sprintmembermodel
-
-import (
-	"github.com/letscrum/letscrum/internal/model"
-	"github.com/letscrum/letscrum/internal/model/sprintmodel"
-)
+package model
 
 type SprintMember struct {
-	model.Model
+	Model
 
-	SprintId int64              `json:"sprint_id"`
-	UserId   int64              `json:"user_id"`
-	RoleId   int64              `json:"role_id"`
-	Capacity int32              `json:"capacity"`
-	User     model.User         `gorm:"foreignKey:UserId"`
-	Sprint   sprintmodel.Sprint `gorm:"foreignKey:SprintId"`
-	Role     model.Role         `gorm:"foreignKey:RoleId"`
+	SprintId int64  `json:"sprint_id"`
+	UserId   int64  `json:"user_id"`
+	RoleId   int64  `json:"role_id"`
+	Capacity int32  `json:"capacity"`
+	User     User   `gorm:"foreignKey:UserId"`
+	Sprint   Sprint `gorm:"foreignKey:SprintId"`
+	Role     Role   `gorm:"foreignKey:RoleId"`
 }
 
 //

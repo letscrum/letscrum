@@ -1,18 +1,17 @@
-package sprintmodel
+package model
 
 import (
-	"github.com/letscrum/letscrum/internal/model"
 	"time"
 )
 
 type Sprint struct {
-	model.Model
+	Model
 
-	ProjectId int64         `json:"project_id"`
-	Name      string        `json:"name"`
-	StartDate time.Time     `json:"start_date"`
-	EndDate   time.Time     `json:"end_date"`
-	Project   model.Project `gorm:"foreignKey:ProjectId"`
+	ProjectId int64     `json:"project_id"`
+	Name      string    `json:"name"`
+	StartDate time.Time `json:"start_date"`
+	EndDate   time.Time `json:"end_date"`
+	Project   Project   `gorm:"foreignKey:ProjectId"`
 }
 
 //

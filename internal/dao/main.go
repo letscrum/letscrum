@@ -4,4 +4,5 @@ package dao
 type Interface interface {
 	LetscrumDao() LetscrumDao
 	ProjectDao() ProjectDao
+	UserDao() UserDao
 }

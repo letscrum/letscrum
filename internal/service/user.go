@@ -1,5 +1,19 @@
 package service
 
+import (
+	letscrumv1 "github.com/letscrum/letscrum/api/letscrum/v1"
+	"github.com/letscrum/letscrum/internal/dao"
+)
+
+type UserService struct {
+	letscrumv1.UnimplementedUserServer
+	dao dao.UserDao
+}
+
+func NewUserService(dao dao.Interface) *UserService {
+	return &UserService{dao: dao.UserDao()}
+}
+
 //
 //func Create2(name string, email string, password string, isSuperAdmin bool) (int64, error) {
 //	id, err := model.CreateUser(name, email, password, isSuperAdmin)

@@ -1,17 +1,13 @@
-package projectmembermodel
-
-import (
-	"github.com/letscrum/letscrum/internal/model"
-)
+package model
 
 type ProjectMember struct {
-	model.Model
+	Model
 
-	ProjectId int64         `json:"project_id"`
-	UserId    int64         `json:"user_id"`
-	IsAdmin   bool          `json:"is_admin"`
-	User      model.User    `gorm:"foreignKey:UserId"`
-	Project   model.Project `gorm:"foreignKey:ProjectId"`
+	ProjectId int64   `json:"project_id"`
+	UserId    int64   `json:"user_id"`
+	IsAdmin   bool    `json:"is_admin"`
+	User      User    `gorm:"foreignKey:UserId"`
+	Project   Project `gorm:"foreignKey:ProjectId"`
 }
 
 //
