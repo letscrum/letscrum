@@ -1,0 +1,118 @@
+syntax = "proto3";
+
+import "api/general/v1/common.proto";
+import "api/user/v1/user.proto";
+
+package letscrum.api.project.v1;
+
+option go_package = "github.com/letscrum/letscrum/api/project/v1";
+
+message Sprint {
+  int64 id = 1;
+  int64 project_id = 2;
+  string name = 3;
+  int64 start_date = 4;
+  int64 end_date = 5;
+  int64 created_at = 6;
+  int64 updated_at = 7;
+  repeated letscrum.api.user.v1.User members = 8;
+}
+
+message CreateSprintRequest {
+  int64 project_id = 1;
+  Sprint sprint = 2;
+}
+
+message CreateSprintResponse {
+  int64 id = 1;
+}
+
+message UpdateSprintRequest {
+  int64 project_id = 1;
+  int64 sprint_id = 2;
+  Sprint sprint = 3;
+}
+
+message UpdateSprintResponse {
+  int64 id = 1;
+}
+
+message DeleteSprintRequest {
+  int64 project_id = 1;
+  int64 sprint_id = 2;
+}
+
+message DeleteSprintResponse {
+  int64 id = 1;
+}
+
+message ListSprintRequest {
+  int64 project_id = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+}
+
+message ListSprintResponse {
+  repeated Sprint items = 1;
+  letscrum.api.general.v1.Pagination pagination = 2;
+}
+
+message GetSprintRequest {
+  int64 project_id = 1;
+  int64 sprint_id = 2;
+}
+
+message GetSprintResponse {
+  Sprint item = 1;
+}
+
+message CreateSprintMemberRequest {
+  int64 sprint_id = 2;
+  int64 user_id = 3;
+}
+
+message CreateSprintMemberResponse {
+  int64 id = 1;
+}
+
+message UpdateSprintMemberRequest {
+  int64 sprint_id = 2;
+  int64 user_id = 3;
+  int64 role_id = 4;
+  int32 capacity = 5;
+}
+
+message UpdateSprintMemberResponse {
+  int64 id = 1;
+}
+
+message DeleteSprintMemberRequest {
+  int64 sprint_id = 2;
+  int64 user_id = 3;
+}
+
+message DeleteSprintMemberResponse {
+  int64 id = 1;
+}
+
+message ListSprintMemberRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+  int64 sprint_id = 3;
+}
+
+message ListSprintMemberResponse {
+  repeated letscrum.api.user.v1.User items = 1;
+  letscrum.api.general.v1.Pagination pagination = 2;
+}
+
+message ListUserSprintRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+  int64 user_id = 3;
+}
+
+message ListUserSprintResponse {
+  repeated Sprint items = 1;
+  letscrum.api.general.v1.Pagination pagination = 2;
+}

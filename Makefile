@@ -2,7 +2,7 @@
 all: build
 
 build:
-	# $Env:GOOS = "linux"
+	# $Env:GOOS = "linux" "darwin"
 	go build -o letscrum ./cmd
 
 tool:
@@ -24,7 +24,6 @@ help:
 
 .PHONY: api_gen api_dep_install api_clean
 api_dep_install:
-	go env
 	go env -w GOPROXY=https://goproxy.cn,direct
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
@@ -33,9 +32,8 @@ api_dep_install:
 	go install github.com/golang/mock/mockgen@latest
 	go install github.com/jstemmer/go-junit-report@latest
 	go install github.com/mwitkow/go-proto-validators/protoc-gen-govalidators@latest
-	go install github.com/envoyproxy/protoc-gen-validate@latest
 	go install github.com/grpc-ecosystem/protoc-gen-grpc-gateway-ts@latest
-	go install github.com/envoyproxy/protoc-gen-validate@latest
+	go install github.com/rakyll/statik@latest
 
 api_gen:
 	protoc -I . -I third_party \
@@ -44,8 +42,7 @@ api_gen:
 		--grpc-gateway_out=paths=source_relative:. \
 		--openapiv2_out=logtostderr=true:. \
 		--grpc-gateway-ts_out=paths=source_relative:./dist/sdk/ \
-		--validate_out=lang=go,paths=source_relative:. \
-		apis/general/v1/common.proto apis/general/v1/letscrum.proto apis/letscrum/v1/letscrum.proto apis/project/v1/project.proto apis/user/v1/user.proto apis/project/v1/sprint.proto \
+		api/general/v1/common.proto api/general/v1/letscrum.proto api/letscrum/v1/letscrum.proto api/project/v1/project.proto api/user/v1/user.proto api/project/v1/sprint.proto \
 
 api_clean:
 	rm -f apis/*/*/*.pb.go apis/*/*/*.pb.gw.go apis/*/*/*.swagger.json apis/*/*/*.pb.validate.go

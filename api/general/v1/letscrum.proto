@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package letscrum.api.general.v1;
+
+option go_package = "github.com/letscrum/letscrum/api/general/v1";
+
+message Version {
+  string version = 1;
+  string git_commit = 2;
+  string build_date = 3;
+  string go_version = 4;
+}
+
+message GetVersionResponse {
+  Version version = 1;
+}

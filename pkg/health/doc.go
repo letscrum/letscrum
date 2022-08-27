@@ -1,4 +1,4 @@
-// Copyright 2015 Google LLC
+// Copyright 2017 by the contributors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,20 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-syntax = "proto3";
+/*
+Package health helps you implement Kubernetes liveness and readiness checks
+for your application. It supports synchronous and asynchronous (background)
+checks. It can optionally report each check's status as a set of Prometheus
+gauge metrics for cluster-wide monitoring and alerting.
 
-package google.api;
-
-import "google/api/http.proto";
-import "google/protobuf/descriptor.proto";
-
-option go_package = "google.golang.org/genproto/googleapis/api/annotations;annotations";
-option java_multiple_files = true;
-option java_outer_classname = "AnnotationsProto";
-option java_package = "com.google.api";
-option objc_class_prefix = "GAPI";
-
-extend google.protobuf.MethodOptions {
-  // See `HttpRule`.
-  HttpRule http = 72295728;
-}
+It also includes a small library of generic checks for DNS, TCP, and HTTP
+reachability as well as Goroutine usage.
+*/
+package health
