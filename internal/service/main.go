@@ -13,13 +13,3 @@ func (s *Service) ProjectService() ProjectService {
 func (s *Service) LetscrumService() LetscrumService {
 	return *NewLetscrumService(s.dao)
 }
-
-func (s *Service) DemoService() DemoService {
-	return *NewDemoService()
-}
-
-func (s *Service) DemoDbService() DemoDbService {
-	return *NewDemoDbService(s.dao)
-	// Replace to follow line if you don't need database operate
-	// return *NewDemoService()
-}

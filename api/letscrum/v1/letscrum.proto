@@ -6,25 +6,8 @@ import "api/general/v1/letscrum.proto";
 import "api/project/v1/project.proto";
 import "api/project/v1/sprint.proto";
 import "api/user/v1/user.proto";
-import "api/general/v1/demo.proto";
 
 option go_package = "github.com/letscrum/letscrum/api/letscrum/v1";
-
-service Demo {
-  rpc Demo(letscrum.api.general.v1.DemoRequest) returns (letscrum.api.general.v1.DemoResponse) {
-    option (google.api.http) = {
-      get: "/api/v1/demo"
-    };
-  }
-}
-
-service DemoDb {
-  rpc DemoDb(letscrum.api.general.v1.DemoDbRequest) returns (letscrum.api.general.v1.DemoDbResponse) {
-    option (google.api.http) = {
-      get: "/api/v1/demodb"
-    };
-  }
-}
 
 service Letscrum {
   rpc GetVersion(google.protobuf.Empty) returns (letscrum.api.general.v1.GetVersionResponse) {

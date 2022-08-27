@@ -4,5 +4,4 @@ package dao
 type Interface interface {
 	LetscrumDao() LetscrumDao
 	ProjectDao() ProjectDao
-	DemoDbDao() DemoDbDao
 }

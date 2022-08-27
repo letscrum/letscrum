@@ -20,10 +20,6 @@ func (d *Dao) ProjectDao() dao.ProjectDao {
 	return NewProjectDao(d.Db)
 }
 
-func (d *Dao) DemoDbDao() dao.DemoDbDao {
-	return NewDemoDbDao(d.Db)
-}
-
 func GetDao(opts *db.Options) (dao.Interface, error) {
 	var daoInterface dao.Interface
 	var once sync.Once
