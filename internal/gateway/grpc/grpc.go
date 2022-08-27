@@ -42,6 +42,8 @@ func Run(ctx context.Context, network, address string) error {
 	}
 	projectService := service.NewProjectService(daoInterface)
 	v1.RegisterProjectServer(s, projectService)
+	letscrumService := service.NewLetscrumService(daoInterface)
+	v1.RegisterLetscrumServer(s, letscrumService)
 
 	go func() {
 		defer s.GracefulStop()

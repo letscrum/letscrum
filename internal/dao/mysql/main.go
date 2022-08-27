@@ -12,6 +12,14 @@ type Dao struct {
 	Db *gorm.DB
 }
 
+func (d *Dao) LetscrumDao() dao.LetscrumDao {
+	return NewLetscrumDao(d.Db)
+}
+
+func (d *Dao) ProjectDao() dao.ProjectDao {
+	return NewProjectDao(d.Db)
+}
+
 func GetDao(opts *db.Options) (dao.Interface, error) {
 	var daoInterface dao.Interface
 	var once sync.Once
@@ -43,8 +51,4 @@ func GetDao(opts *db.Options) (dao.Interface, error) {
 	}
 
 	return daoInterface, nil
-}
-
-func (d *Dao) ProjectDao() dao.ProjectDao {
-	return NewProjectDao(d.Db)
 }

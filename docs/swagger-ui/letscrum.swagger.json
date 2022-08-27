@@ -28,9 +28,9 @@
     "application/json"
   ],
   "paths": {
-    "/apis/v1/projects": {
+    "/api/v1/projects": {
       "get": {
-        "operationId": "Project_ListProject",
+        "operationId": "Project_List",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -66,7 +66,7 @@
         ]
       },
       "post": {
-        "operationId": "Project_CreateProject",
+        "operationId": "Project_Create",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -197,9 +197,9 @@
         ]
       }
     },
-    "/apis/v1/projects/{projectId}": {
+    "/api/v1/projects/{projectId}": {
       "get": {
-        "operationId": "Project_GetProject",
+        "operationId": "Project_Get",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -228,7 +228,7 @@
         ]
       },
       "delete": {
-        "operationId": "Project_DeleteProject",
+        "operationId": "Project_Delete",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -257,7 +257,7 @@
         ]
       },
       "put": {
-        "operationId": "Project_UpdateProject",
+        "operationId": "Project_Update",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -395,9 +395,9 @@
         ]
       }
     },
-    "/apis/v1/projects/{projectId}/delete": {
+    "/api/v1/projects/{projectId}/delete": {
       "delete": {
-        "operationId": "Project_HardDeleteProject",
+        "operationId": "Project_HardDelete",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -426,7 +426,7 @@
         ]
       }
     },
-    "/apis/v1/projects/{projectId}/members": {
+    "/api/v1/projects/{projectId}/members": {
       "get": {
         "operationId": "ProjectMember_ListProjectMember",
         "responses": {
@@ -513,7 +513,7 @@
         ]
       }
     },
-    "/apis/v1/projects/{projectId}/members/{userId}": {
+    "/api/v1/projects/{projectId}/members/{userId}": {
       "delete": {
         "operationId": "ProjectMember_DeleteProjectMember",
         "responses": {
@@ -593,7 +593,7 @@
         ]
       }
     },
-    "/apis/v1/projects/{projectId}/sprints": {
+    "/api/v1/projects/{projectId}/sprints": {
       "get": {
         "operationId": "Sprint_ListSprint",
         "responses": {
@@ -715,7 +715,7 @@
         ]
       }
     },
-    "/apis/v1/projects/{projectId}/sprints/{sprintId}": {
+    "/api/v1/projects/{projectId}/sprints/{sprintId}": {
       "get": {
         "operationId": "Sprint_GetSprint",
         "responses": {
@@ -873,7 +873,7 @@
         ]
       }
     },
-    "/apis/v1/projects/{projectId}/sprints/{sprintId}/delete": {
+    "/api/v1/projects/{projectId}/sprints/{sprintId}/delete": {
       "delete": {
         "operationId": "Sprint_HardDeleteSprint",
         "responses": {
@@ -911,8 +911,8 @@
         ]
       }
     },
-    "/apis/v1/signin": {
-      "get": {
+    "/api/v1/signin": {
+      "post": {
         "operationId": "Letscrum_SignIn",
         "responses": {
           "200": {
@@ -930,16 +930,12 @@
         },
         "parameters": [
           {
-            "name": "name",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "password",
-            "in": "query",
-            "required": false,
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1SignInRequest"
+            }
           }
         ],
         "tags": [
@@ -947,7 +943,7 @@
         ]
       }
     },
-    "/apis/v1/sprints/{sprintId}/members": {
+    "/api/v1/sprints/{sprintId}/members": {
       "get": {
         "operationId": "Sprint_ListSprintMember",
         "responses": {
@@ -1028,7 +1024,7 @@
         ]
       }
     },
-    "/apis/v1/sprints/{sprintId}/members/{userId}": {
+    "/api/v1/sprints/{sprintId}/members/{userId}": {
       "delete": {
         "operationId": "Sprint_DeleteSprintMember",
         "responses": {
@@ -1116,7 +1112,7 @@
         ]
       }
     },
-    "/apis/v1/sprints/{sprintId}/members/{userId}/delete": {
+    "/api/v1/sprints/{sprintId}/members/{userId}/delete": {
       "delete": {
         "operationId": "Sprint_HardDeleteSprintMember",
         "responses": {
@@ -1154,7 +1150,7 @@
         ]
       }
     },
-    "/apis/v1/users": {
+    "/api/v1/users": {
       "get": {
         "operationId": "User_ListUser",
         "responses": {
@@ -1198,7 +1194,7 @@
         ]
       }
     },
-    "/apis/v1/users/{userId}": {
+    "/api/v1/users/{userId}": {
       "get": {
         "operationId": "User_GetUser",
         "responses": {
@@ -1229,7 +1225,7 @@
         ]
       }
     },
-    "/apis/v1/users/{userId}/projects": {
+    "/api/v1/users/{userId}/projects": {
       "get": {
         "operationId": "User_ListUserProject",
         "responses": {
@@ -1274,7 +1270,7 @@
         ]
       }
     },
-    "/apis/v1/version": {
+    "/api/v1/version": {
       "get": {
         "operationId": "Letscrum_GetVersion",
         "responses": {
@@ -1561,6 +1557,17 @@
           "items": {
             "$ref": "#/definitions/v1User"
           }
+        }
+      }
+    },
+    "v1SignInRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
         }
       }
     },

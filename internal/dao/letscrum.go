@@ -6,6 +6,5 @@ import (
 )
 
 type LetscrumDao interface {
-	GetVersion(ctx context.Context) (*model.Project, error)
 	SignIn(ctx context.Context, name, password string) (*model.User, error)
 }

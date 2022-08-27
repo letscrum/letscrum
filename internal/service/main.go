@@ -9,3 +9,7 @@ type Service struct {
 func (s *Service) ProjectService() ProjectService {
 	return *NewProjectService(s.dao)
 }
+
+func (s *Service) LetscrumService() LetscrumService {
+	return *NewLetscrumService(s.dao)
+}
