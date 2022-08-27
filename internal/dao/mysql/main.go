@@ -34,7 +34,7 @@ func GetDao(opts *db.Options) (dao.Interface, error) {
 			MaxConnectionLifeTime: opts.MaxConnectionLifeTime,
 			Logger:                opts.Logger,
 		}
-		dbIns, err = db.New(options)
+		dbIns, err = db.NewGORM(options)
 		daoInterface = &Dao{dbIns}
 	})
 

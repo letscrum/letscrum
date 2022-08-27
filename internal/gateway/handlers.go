@@ -2,11 +2,16 @@ package gateway
 
 import (
 	"fmt"
-	"github.com/letscrum/letscrum/internal/config"
+	"github.com/letscrum/letscrum/pkg/db"
 	"github.com/letscrum/letscrum/pkg/health"
+	"github.com/spf13/viper"
+	"gorm.io/gorm/logger"
+	golog "log"
 	"net/http"
+	"os"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/golang/glog"
 	"google.golang.org/grpc"
@@ -62,13 +67,33 @@ func grpcHealthzServer(conn *grpc.ClientConn) http.HandlerFunc {
 
 func runHealthCheck() http.Handler {
 	handler := health.NewHandler()
-	db, err := config.NewDB()
+	newLogger := logger.New(
+		golog.New(os.Stdout, "", golog.LstdFlags),
+		logger.Config{
+			SlowThreshold:             time.Second,
+			LogLevel:                  logger.Info,
+			IgnoreRecordNotFoundError: true,
+			Colorful:                  false,
+		},
+	)
+	options := db.Options{
+		Host:                  viper.GetString("data.database.host"),
+		Port:                  viper.GetString("data.database.port"),
+		Username:              viper.GetString("data.database.user"),
+		Password:              viper.GetString("data.database.password"),
+		Database:              viper.GetString("data.database.database"),
+		MaxIdleConnections:    100,
+		MaxOpenConnections:    100,
+		MaxConnectionLifeTime: 10 * time.Second,
+		Logger:                newLogger,
+	}
+	conn, err := db.NewDB(&options)
 	if err != nil {
 		fmt.Println("db error!")
 	}
 
 	handler.AddLivenessCheck("goroutine-threshold", health.GoroutineCountCheck(500))
-	handler.AddReadinessCheck("mysql", health.DatabasePingCheck(db, 3e9))
+	handler.AddReadinessCheck("mysql", health.DatabasePingCheck(conn, 3e9))
 
 	return handler
 }

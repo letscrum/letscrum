@@ -5,7 +5,7 @@ import (
 	generalv1 "github.com/letscrum/letscrum/api/general/v1"
 	letscrumv1 "github.com/letscrum/letscrum/api/letscrum/v1"
 	"github.com/letscrum/letscrum/internal/dao"
-	"github.com/letscrum/letscrum/pkg/buildinfo"
+	"github.com/letscrum/letscrum/pkg/build"
 )
 
 type LetscrumServiceInterface interface {
@@ -18,7 +18,7 @@ type LetscrumService struct {
 }
 
 func (s *LetscrumService) GetVersion(_ context.Context) (*generalv1.GetVersionResponse, error) {
-	ver := buildinfo.Version()
+	ver := build.Version()
 	response := generalv1.GetVersionResponse{
 		Version: &generalv1.Version{
 			Version:   ver.Version,

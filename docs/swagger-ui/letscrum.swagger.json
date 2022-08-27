@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "apis/letscrum/v1/letscrum.proto",
+    "title": "api/letscrum/v1/letscrum.proto",
     "version": "version not set"
   },
   "tags": [
@@ -10,6 +10,15 @@
     },
     {
       "name": "Project"
+    },
+    {
+      "name": "ProjectMember"
+    },
+    {
+      "name": "Sprint"
+    },
+    {
+      "name": "User"
     }
   ],
   "consumes": [
@@ -74,16 +83,113 @@
         },
         "parameters": [
           {
-            "name": "name",
+            "name": "project.id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "project.name",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
-            "name": "displayName",
+            "name": "project.displayName",
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "project.createdUser.id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "project.createdUser.name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "project.createdUser.email",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "project.createdUser.password",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "project.createdUser.isSuperAdmin",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "project.createdUser.isAdmin",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "project.createdUser.roleName",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "project.createdUser.capacity",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "project.createdUser.createdAt",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "project.createdUser.updatedAt",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "project.createdUser.token.accessToken",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "project.createdUser.token.refreshToken",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "project.createdAt",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "project.updatedAt",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
           }
         ],
         "tags": [
@@ -91,7 +197,7 @@
         ]
       }
     },
-    "/apis/v1/projects/{name}": {
+    "/apis/v1/projects/{projectId}": {
       "get": {
         "operationId": "Project_GetProject",
         "responses": {
@@ -110,10 +216,11 @@
         },
         "parameters": [
           {
-            "name": "name",
+            "name": "projectId",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "format": "int64"
           }
         ],
         "tags": [
@@ -138,10 +245,11 @@
         },
         "parameters": [
           {
-            "name": "name",
+            "name": "projectId",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "format": "int64"
           }
         ],
         "tags": [
@@ -166,16 +274,120 @@
         },
         "parameters": [
           {
-            "name": "name",
+            "name": "projectId",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "format": "int64"
           },
           {
-            "name": "displayName",
+            "name": "project.id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "project.name",
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "project.displayName",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "project.createdUser.id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "project.createdUser.name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "project.createdUser.email",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "project.createdUser.password",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "project.createdUser.isSuperAdmin",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "project.createdUser.isAdmin",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "project.createdUser.roleName",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "project.createdUser.capacity",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "project.createdUser.createdAt",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "project.createdUser.updatedAt",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "project.createdUser.token.accessToken",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "project.createdUser.token.refreshToken",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "project.createdAt",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "project.updatedAt",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
           }
         ],
         "tags": [
@@ -183,9 +395,250 @@
         ]
       }
     },
-    "/apis/v1/projects/{name}/sprints": {
+    "/apis/v1/projects/{projectId}/delete": {
+      "delete": {
+        "operationId": "Project_HardDeleteProject",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1DeleteProjectResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Project"
+        ]
+      }
+    },
+    "/apis/v1/projects/{projectId}/members": {
       "get": {
-        "operationId": "Project_GetSprint",
+        "operationId": "ProjectMember_ListProjectMember",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListProjectMemberResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "ProjectMember"
+        ]
+      },
+      "post": {
+        "operationId": "ProjectMember_CreateProjectMember",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CreateProjectMemberResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "isAdmin",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": [
+          "ProjectMember"
+        ]
+      }
+    },
+    "/apis/v1/projects/{projectId}/members/{userId}": {
+      "delete": {
+        "operationId": "ProjectMember_DeleteProjectMember",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1DeleteProjectMemberResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "ProjectMember"
+        ]
+      },
+      "put": {
+        "operationId": "ProjectMember_UpdateProjectMember",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UpdateProjectMemberResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "isAdmin",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": [
+          "ProjectMember"
+        ]
+      }
+    },
+    "/apis/v1/projects/{projectId}/sprints": {
+      "get": {
+        "operationId": "Sprint_ListSprint",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListSprintResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "Sprint"
+        ]
+      },
+      "post": {
+        "operationId": "Sprint_CreateSprint",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -202,26 +655,55 @@
         },
         "parameters": [
           {
-            "name": "name",
+            "name": "projectId",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "format": "int64"
           },
           {
-            "name": "projectName",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "startDate",
+            "name": "sprint.id",
             "in": "query",
             "required": false,
             "type": "string",
             "format": "int64"
           },
           {
-            "name": "endDate",
+            "name": "sprint.projectId",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "sprint.name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "sprint.startDate",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "sprint.endDate",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "sprint.createdAt",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "sprint.updatedAt",
             "in": "query",
             "required": false,
             "type": "string",
@@ -229,7 +711,203 @@
           }
         ],
         "tags": [
-          "Project"
+          "Sprint"
+        ]
+      }
+    },
+    "/apis/v1/projects/{projectId}/sprints/{sprintId}": {
+      "get": {
+        "operationId": "Sprint_GetSprint",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetSprintResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "sprintId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Sprint"
+        ]
+      },
+      "delete": {
+        "operationId": "Sprint_DeleteSprint",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1DeleteSprintResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "sprintId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Sprint"
+        ]
+      },
+      "put": {
+        "operationId": "Sprint_UpdateSprint",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UpdateSprintResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "sprintId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "sprint.id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "sprint.projectId",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "sprint.name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "sprint.startDate",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "sprint.endDate",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "sprint.createdAt",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "sprint.updatedAt",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Sprint"
+        ]
+      }
+    },
+    "/apis/v1/projects/{projectId}/sprints/{sprintId}/delete": {
+      "delete": {
+        "operationId": "Sprint_HardDeleteSprint",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1DeleteSprintResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "sprintId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Sprint"
         ]
       }
     },
@@ -266,6 +944,333 @@
         ],
         "tags": [
           "Letscrum"
+        ]
+      }
+    },
+    "/apis/v1/sprints/{sprintId}/members": {
+      "get": {
+        "operationId": "Sprint_ListSprintMember",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListSprintMemberResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "sprintId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "Sprint"
+        ]
+      },
+      "post": {
+        "operationId": "Sprint_CreateSprintMember",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CreateSprintMemberResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "sprintId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Sprint"
+        ]
+      }
+    },
+    "/apis/v1/sprints/{sprintId}/members/{userId}": {
+      "delete": {
+        "operationId": "Sprint_DeleteSprintMember",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1DeleteSprintMemberResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "sprintId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Sprint"
+        ]
+      },
+      "put": {
+        "operationId": "Sprint_UpdateSprintMember",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UpdateSprintMemberResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "sprintId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "roleId",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "capacity",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "Sprint"
+        ]
+      }
+    },
+    "/apis/v1/sprints/{sprintId}/members/{userId}/delete": {
+      "delete": {
+        "operationId": "Sprint_HardDeleteSprintMember",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1DeleteSprintMemberResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "sprintId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Sprint"
+        ]
+      }
+    },
+    "/apis/v1/users": {
+      "get": {
+        "operationId": "User_ListUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListUserResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "User"
+        ]
+      }
+    },
+    "/apis/v1/users/{userId}": {
+      "get": {
+        "operationId": "User_GetUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetUserResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "User"
+        ]
+      }
+    },
+    "/apis/v1/users/{userId}/projects": {
+      "get": {
+        "operationId": "User_ListUserProject",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListUserProjectResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "User"
         ]
       }
     },
@@ -322,27 +1327,75 @@
         }
       }
     },
+    "v1CreateProjectMemberResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
     "v1CreateProjectResponse": {
       "type": "object",
       "properties": {
-        "item": {
-          "$ref": "#/definitions/v1Project"
+        "id": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "v1CreateSprintMemberResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },
     "v1CreateSprintResponse": {
       "type": "object",
       "properties": {
-        "item": {
-          "$ref": "#/definitions/v1Sprint"
+        "id": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "v1DeleteProjectMemberResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },
     "v1DeleteProjectResponse": {
       "type": "object",
       "properties": {
-        "item": {
-          "$ref": "#/definitions/v1Project"
+        "id": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "v1DeleteSprintMemberResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "v1DeleteSprintResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },
@@ -354,11 +1407,41 @@
         }
       }
     },
+    "v1GetSprintResponse": {
+      "type": "object",
+      "properties": {
+        "item": {
+          "$ref": "#/definitions/v1Sprint"
+        }
+      }
+    },
+    "v1GetUserResponse": {
+      "type": "object",
+      "properties": {
+        "item": {
+          "$ref": "#/definitions/v1User"
+        }
+      }
+    },
     "v1GetVersionResponse": {
       "type": "object",
       "properties": {
         "version": {
           "$ref": "#/definitions/v1Version"
+        }
+      }
+    },
+    "v1ListProjectMemberResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1User"
+          }
+        },
+        "pagination": {
+          "$ref": "#/definitions/v1Pagination"
         }
       }
     },
@@ -369,6 +1452,62 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/v1Project"
+          }
+        },
+        "pagination": {
+          "$ref": "#/definitions/v1Pagination"
+        }
+      }
+    },
+    "v1ListSprintMemberResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1User"
+          }
+        },
+        "pagination": {
+          "$ref": "#/definitions/v1Pagination"
+        }
+      }
+    },
+    "v1ListSprintResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1Sprint"
+          }
+        },
+        "pagination": {
+          "$ref": "#/definitions/v1Pagination"
+        }
+      }
+    },
+    "v1ListUserProjectResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1Project"
+          }
+        },
+        "pagination": {
+          "$ref": "#/definitions/v1Pagination"
+        }
+      }
+    },
+    "v1ListUserResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1User"
           }
         },
         "pagination": {
@@ -406,9 +1545,8 @@
         "displayName": {
           "type": "string"
         },
-        "createdBy": {
-          "type": "string",
-          "format": "int64"
+        "createdUser": {
+          "$ref": "#/definitions/v1User"
         },
         "createdAt": {
           "type": "string",
@@ -417,6 +1555,12 @@
         "updatedAt": {
           "type": "string",
           "format": "int64"
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1User"
+          }
         }
       }
     },
@@ -449,6 +1593,20 @@
         "endDate": {
           "type": "string",
           "format": "int64"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "int64"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "int64"
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1User"
+          }
         }
       }
     },
@@ -463,11 +1621,39 @@
         }
       }
     },
+    "v1UpdateProjectMemberResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
     "v1UpdateProjectResponse": {
       "type": "object",
       "properties": {
-        "item": {
-          "$ref": "#/definitions/v1Project"
+        "id": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "v1UpdateSprintMemberResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "v1UpdateSprintResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },
@@ -486,6 +1672,19 @@
         },
         "password": {
           "type": "string"
+        },
+        "isSuperAdmin": {
+          "type": "boolean"
+        },
+        "isAdmin": {
+          "type": "boolean"
+        },
+        "roleName": {
+          "type": "string"
+        },
+        "capacity": {
+          "type": "integer",
+          "format": "int32"
         },
         "createdAt": {
           "type": "string",

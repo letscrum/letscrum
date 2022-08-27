@@ -12,7 +12,7 @@ data:
     # dev mysql address
     host: localhost
     port: 3306
-    database: minibook
+    database: letscrum
     user: root
     password: aaaaaa
     max-idle-connections: 150
