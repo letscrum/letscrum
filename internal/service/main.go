@@ -13,3 +13,7 @@ func (s *Service) ProjectService() ProjectService {
 func (s *Service) LetscrumService() LetscrumService {
 	return *NewLetscrumService(s.dao)
 }
+
+func (s *Service) DemoService() DemoService {
+	return *NewDemoService()
+}

@@ -6,19 +6,37 @@ import "api/general/v1/letscrum.proto";
 import "api/project/v1/project.proto";
 import "api/project/v1/sprint.proto";
 import "api/user/v1/user.proto";
+import "api/general/v1/demo.proto";
 
 option go_package = "github.com/letscrum/letscrum/api/letscrum/v1";
+
+service Demo {
+  rpc Demo(letscrum.api.general.v1.DemoRequest) returns (letscrum.api.general.v1.DemoResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/demo"
+    };
+  }
+}
+
+service DemoDb {
+  rpc DemoDb(letscrum.api.general.v1.DemoDbRequest) returns (letscrum.api.general.v1.DemoDbResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/demodb"
+    };
+  }
+}
 
 service Letscrum {
   rpc GetVersion(google.protobuf.Empty) returns (letscrum.api.general.v1.GetVersionResponse) {
     option (google.api.http) = {
-      get: "/apis/v1/version"
+      get: "/api/v1/version"
     };
   }
 
   rpc SignIn(letscrum.api.user.v1.SignInRequest) returns (letscrum.api.user.v1.SignInResponse) {
     option (google.api.http) = {
-      get: "/apis/v1/signin"
+      post: "/api/v1/signin"
+      body: "*"
     };
   }
 }
@@ -26,37 +44,37 @@ service Letscrum {
 service Project {
   rpc Create(letscrum.api.project.v1.CreateProjectRequest) returns (letscrum.api.project.v1.CreateProjectResponse) {
     option (google.api.http) = {
-      post: "/apis/v1/projects"
+      post: "/api/v1/projects"
     };
   }
 
   rpc Update(letscrum.api.project.v1.UpdateProjectRequest) returns (letscrum.api.project.v1.UpdateProjectResponse) {
     option (google.api.http) = {
-      put: "/apis/v1/projects/{project_id}"
+      put: "/api/v1/projects/{project_id}"
     };
   }
 
   rpc Delete(letscrum.api.project.v1.DeleteProjectRequest) returns (letscrum.api.project.v1.DeleteProjectResponse) {
     option (google.api.http) = {
-      delete: "/apis/v1/projects/{project_id}"
+      delete: "/api/v1/projects/{project_id}"
     };
   }
 
   rpc HardDelete(letscrum.api.project.v1.DeleteProjectRequest) returns (letscrum.api.project.v1.DeleteProjectResponse) {
     option (google.api.http) = {
-      delete: "/apis/v1/projects/{project_id}/delete"
+      delete: "/api/v1/projects/{project_id}/delete"
     };
   }
 
   rpc List(letscrum.api.project.v1.ListProjectRequest) returns (letscrum.api.project.v1.ListProjectResponse) {
     option (google.api.http) = {
-      get: "/apis/v1/projects"
+      get: "/api/v1/projects"
     };
   }
 
   rpc Get(letscrum.api.project.v1.GetProjectRequest) returns (letscrum.api.project.v1.GetProjectResponse) {
     option (google.api.http) = {
-      get: "/apis/v1/projects/{project_id}"
+      get: "/api/v1/projects/{project_id}"
     };
   }
 }
@@ -64,25 +82,25 @@ service Project {
 service ProjectMember {
   rpc CreateProjectMember(letscrum.api.project.v1.CreateProjectMemberRequest) returns (letscrum.api.project.v1.CreateProjectMemberResponse) {
     option (google.api.http) = {
-      post: "/apis/v1/projects/{project_id}/members"
+      post: "/api/v1/projects/{project_id}/members"
     };
   }
 
   rpc UpdateProjectMember(letscrum.api.project.v1.UpdateProjectMemberRequest) returns (letscrum.api.project.v1.UpdateProjectMemberResponse) {
     option (google.api.http) = {
-      put: "/apis/v1/projects/{project_id}/members/{user_id}"
+      put: "/api/v1/projects/{project_id}/members/{user_id}"
     };
   }
 
   rpc DeleteProjectMember(letscrum.api.project.v1.DeleteProjectMemberRequest) returns (letscrum.api.project.v1.DeleteProjectMemberResponse) {
     option (google.api.http) = {
-      delete: "/apis/v1/projects/{project_id}/members/{user_id}"
+      delete: "/api/v1/projects/{project_id}/members/{user_id}"
     };
   }
 
   rpc ListProjectMember(letscrum.api.project.v1.ListProjectMemberRequest) returns (letscrum.api.project.v1.ListProjectMemberResponse) {
     option (google.api.http) = {
-      get: "/apis/v1/projects/{project_id}/members"
+      get: "/api/v1/projects/{project_id}/members"
     };
   }
 }
@@ -90,67 +108,67 @@ service ProjectMember {
 service Sprint {
   rpc CreateSprint(letscrum.api.project.v1.CreateSprintRequest) returns (letscrum.api.project.v1.CreateSprintResponse) {
     option (google.api.http) = {
-      post: "/apis/v1/projects/{project_id}/sprints"
+      post: "/api/v1/projects/{project_id}/sprints"
     };
   }
 
   rpc UpdateSprint(letscrum.api.project.v1.UpdateSprintRequest) returns (letscrum.api.project.v1.UpdateSprintResponse) {
     option (google.api.http) = {
-      put: "/apis/v1/projects/{project_id}/sprints/{sprint_id}"
+      put: "/api/v1/projects/{project_id}/sprints/{sprint_id}"
     };
   }
 
   rpc DeleteSprint(letscrum.api.project.v1.DeleteSprintRequest) returns (letscrum.api.project.v1.DeleteSprintResponse) {
     option (google.api.http) = {
-      delete: "/apis/v1/projects/{project_id}/sprints/{sprint_id}"
+      delete: "/api/v1/projects/{project_id}/sprints/{sprint_id}"
     };
   }
 
   rpc HardDeleteSprint(letscrum.api.project.v1.DeleteSprintRequest) returns (letscrum.api.project.v1.DeleteSprintResponse) {
     option (google.api.http) = {
-      delete: "/apis/v1/projects/{project_id}/sprints/{sprint_id}/delete"
+      delete: "/api/v1/projects/{project_id}/sprints/{sprint_id}/delete"
     };
   }
 
   rpc ListSprint(letscrum.api.project.v1.ListSprintRequest) returns (letscrum.api.project.v1.ListSprintResponse) {
     option (google.api.http) = {
-      get: "/apis/v1/projects/{project_id}/sprints"
+      get: "/api/v1/projects/{project_id}/sprints"
     };
   }
 
   rpc GetSprint(letscrum.api.project.v1.GetSprintRequest) returns (letscrum.api.project.v1.GetSprintResponse) {
     option (google.api.http) = {
-      get: "/apis/v1/projects/{project_id}/sprints/{sprint_id}"
+      get: "/api/v1/projects/{project_id}/sprints/{sprint_id}"
     };
   }
 
   rpc CreateSprintMember(letscrum.api.project.v1.CreateSprintMemberRequest) returns (letscrum.api.project.v1.CreateSprintMemberResponse) {
     option (google.api.http) = {
-      post: "/apis/v1/sprints/{sprint_id}/members"
+      post: "/api/v1/sprints/{sprint_id}/members"
     };
   }
 
   rpc UpdateSprintMember(letscrum.api.project.v1.UpdateSprintMemberRequest) returns (letscrum.api.project.v1.UpdateSprintMemberResponse) {
     option (google.api.http) = {
-      put: "/apis/v1/sprints/{sprint_id}/members/{user_id}"
+      put: "/api/v1/sprints/{sprint_id}/members/{user_id}"
     };
   }
 
   rpc DeleteSprintMember(letscrum.api.project.v1.DeleteSprintMemberRequest) returns (letscrum.api.project.v1.DeleteSprintMemberResponse) {
     option (google.api.http) = {
-      delete: "/apis/v1/sprints/{sprint_id}/members/{user_id}"
+      delete: "/api/v1/sprints/{sprint_id}/members/{user_id}"
     };
   }
 
   rpc HardDeleteSprintMember(letscrum.api.project.v1.DeleteSprintMemberRequest) returns (letscrum.api.project.v1.DeleteSprintMemberResponse) {
     option (google.api.http) = {
-      delete: "/apis/v1/sprints/{sprint_id}/members/{user_id}/delete"
+      delete: "/api/v1/sprints/{sprint_id}/members/{user_id}/delete"
     };
   }
 
   rpc ListSprintMember(letscrum.api.project.v1.ListSprintMemberRequest) returns (letscrum.api.project.v1.ListSprintMemberResponse) {
     option (google.api.http) = {
-      get: "/apis/v1/sprints/{sprint_id}/members"
+      get: "/api/v1/sprints/{sprint_id}/members"
     };
   }
 }
@@ -158,19 +176,19 @@ service Sprint {
 service User {
   rpc ListUser(letscrum.api.user.v1.ListUserRequest) returns (letscrum.api.user.v1.ListUserResponse) {
     option (google.api.http) = {
-      get: "/apis/v1/users"
+      get: "/api/v1/users"
     };
   }
 
   rpc ListUserProject(letscrum.api.project.v1.ListUserProjectRequest) returns (letscrum.api.project.v1.ListUserProjectResponse) {
     option (google.api.http) = {
-      get: "/apis/v1/users/{user_id}/projects"
+      get: "/api/v1/users/{user_id}/projects"
     };
   }
 
   rpc GetUser(letscrum.api.user.v1.GetUserRequest) returns (letscrum.api.user.v1.GetUserResponse) {
     option (google.api.http) = {
-      get: "/apis/v1/users/{user_id}"
+      get: "/api/v1/users/{user_id}"
     };
   }
 }

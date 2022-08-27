@@ -6,6 +6,12 @@
   },
   "tags": [
     {
+      "name": "Demo"
+    },
+    {
+      "name": "DemoDb"
+    },
+    {
       "name": "Letscrum"
     },
     {
@@ -28,6 +34,66 @@
     "application/json"
   ],
   "paths": {
+    "/api/v1/demo": {
+      "get": {
+        "operationId": "Demo_Demo",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1DemoResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "demo",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Demo"
+        ]
+      }
+    },
+    "/api/v1/demodb": {
+      "get": {
+        "operationId": "DemoDb_DemoDb",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1DemoDbResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "demoDb",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "DemoDb"
+        ]
+      }
+    },
     "/api/v1/projects": {
       "get": {
         "operationId": "Project_List",
@@ -1392,6 +1458,38 @@
         "id": {
           "type": "string",
           "format": "int64"
+        }
+      }
+    },
+    "v1Demo": {
+      "type": "object",
+      "properties": {
+        "demo": {
+          "type": "string"
+        }
+      }
+    },
+    "v1DemoDb": {
+      "type": "object",
+      "properties": {
+        "demoDb": {
+          "type": "string"
+        }
+      }
+    },
+    "v1DemoDbResponse": {
+      "type": "object",
+      "properties": {
+        "demoDb": {
+          "$ref": "#/definitions/v1DemoDb"
+        }
+      }
+    },
+    "v1DemoResponse": {
+      "type": "object",
+      "properties": {
+        "demo": {
+          "$ref": "#/definitions/v1Demo"
         }
       }
     },
