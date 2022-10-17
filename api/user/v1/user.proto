@@ -48,7 +48,7 @@ message SignInResponse {
 message ListUserRequest {
   string keyword = 1;
   int32 page = 2;
-  int32 page_size = 3;
+  int32 size = 3;
 }
 
 message ListUserResponse {
