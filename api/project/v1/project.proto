@@ -44,7 +44,7 @@ message DeleteProjectResponse {
 
 message ListProjectRequest {
   int32 page = 1;
-  int32 page_size = 2;
+  int32 size = 2;
 }
 
 message ListProjectResponse {
@@ -91,7 +91,7 @@ message DeleteProjectMemberResponse {
 
 message ListProjectMemberRequest {
   int32 page = 1;
-  int32 page_size = 2;
+  int32 size = 2;
   int64 project_id = 3;
 }
 
@@ -102,7 +102,7 @@ message ListProjectMemberResponse {
 
 message ListUserProjectRequest {
   int32 page = 1;
-  int32 page_size = 2;
+  int32 size = 2;
   int64 user_id = 3;
 }
 

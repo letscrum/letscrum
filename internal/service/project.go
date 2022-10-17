@@ -46,7 +46,7 @@ func (s *ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReque
 }
 
 func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectRequest) (*projectv1.ListProjectResponse, error) {
-	projects, err := s.dao.List(ctx, req.Page, req.PageSize)
+	projects, err := s.dao.List(ctx, req.Page, req.Size)
 	if err != nil {
 		result := status.Convert(err)
 		if result.Code() == codes.NotFound {
@@ -72,9 +72,9 @@ func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectReq
 	return &projectv1.ListProjectResponse{
 		Items: list,
 		Pagination: &generalv1.Pagination{
-			Page:     req.Page,
-			PageSize: req.PageSize,
-			Total:    int32(count),
+			Page:  req.Page,
+			Size:  req.Size,
+			Total: int32(count),
 		},
 	}, nil
 }

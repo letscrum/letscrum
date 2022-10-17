@@ -18,4 +18,4 @@ data:
     max-idle-connections: 150
     max-open-connections: 150
     max-connection-lifetime: 20
-    log-level: 2 # GORM log level, 1: silent, 2:error, 3:warn, 4:info
+    log-level: 4 # GORM log level, 1: silent, 2:error, 3:warn, 4:info

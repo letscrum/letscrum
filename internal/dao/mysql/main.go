@@ -2,10 +2,11 @@ package mysql
 
 import (
 	"fmt"
+	"sync"
+
 	"github.com/letscrum/letscrum/internal/dao"
 	"github.com/letscrum/letscrum/pkg/db"
 	"gorm.io/gorm"
-	"sync"
 )
 
 type Dao struct {
@@ -29,7 +30,7 @@ func GetDao(opts *db.Options) (dao.Interface, error) {
 	var once sync.Once
 
 	if opts == nil && daoInterface == nil {
-		return nil, fmt.Errorf("failed to get mysql hive dao")
+		return nil, fmt.Errorf("failed to get mysql letscrum dao")
 	}
 
 	var err error
@@ -51,7 +52,7 @@ func GetDao(opts *db.Options) (dao.Interface, error) {
 	})
 
 	if daoInterface == nil || err != nil {
-		return nil, fmt.Errorf("failed to get mysql hive dao, : %+v, error: %w", daoInterface, err)
+		return nil, fmt.Errorf("failed to get mysql letscrum dao, : %+v, error: %w", daoInterface, err)
 	}
 
 	return daoInterface, nil

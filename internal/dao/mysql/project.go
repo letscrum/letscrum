@@ -31,9 +31,9 @@ func (d *ProjectDao) Count(context.Context) int64 {
 	return count
 }
 
-func (d *ProjectDao) List(ctx context.Context, page, pageSize int32) ([]*model.Project, error) {
+func (d *ProjectDao) List(ctx context.Context, page, size int32) ([]*model.Project, error) {
 	var projects []*model.Project
-	err := d.Db.Limit(int(pageSize)).Offset(int((page - 1) * pageSize)).Preload("CreatedUser").Find(&projects).Error
+	err := d.Db.Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Find(&projects).Error
 	if err != nil {
 		return nil, err
 	}

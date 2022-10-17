@@ -2,11 +2,12 @@ package grpc
 
 import (
 	"context"
-	v1 "github.com/letscrum/letscrum/api/letscrum/v1"
 	golog "log"
 	"net"
 	"os"
 	"time"
+
+	v1 "github.com/letscrum/letscrum/api/letscrum/v1"
 
 	"github.com/letscrum/letscrum/internal/dao"
 	"github.com/letscrum/letscrum/internal/dao/mysql"
@@ -68,7 +69,7 @@ func initDao() (dao.Interface, error) {
 		golog.New(os.Stdout, "", golog.LstdFlags),
 		logger.Config{
 			SlowThreshold:             time.Second,
-			LogLevel:                  logger.Info,
+			LogLevel:                  logger.LogLevel(viper.GetInt("data.database.log-level")),
 			IgnoreRecordNotFoundError: true,
 			Colorful:                  false,
 		},
@@ -79,14 +80,14 @@ func initDao() (dao.Interface, error) {
 		Username:              viper.GetString("data.database.user"),
 		Password:              viper.GetString("data.database.password"),
 		Database:              viper.GetString("data.database.database"),
-		MaxIdleConnections:    100,
-		MaxOpenConnections:    100,
-		MaxConnectionLifeTime: 10 * time.Second,
+		MaxIdleConnections:    viper.GetInt("data.database.max-idle-connections"),
+		MaxOpenConnections:    viper.GetInt("data.database.max-open-connections"),
+		MaxConnectionLifeTime: time.Duration(viper.GetInt("data.database.max-connection-lifetime")) * time.Second,
 		Logger:                newLogger,
 	}
-	hiveDao, err := mysql.GetDao(&options)
+	letscrumDao, err := mysql.GetDao(&options)
 	if err != nil {
 		return nil, err
 	}
-	return hiveDao, nil
+	return letscrumDao, nil
 }
