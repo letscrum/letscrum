@@ -1,7 +1,8 @@
 .PHONY: build clean tool lint help
 all: build
 
-# $Env:GOOS = "linux" $Env:GOOS = "darwin"
+# $Env:GOOS = "e" $Env:GOOS = "darwin"
+# export GOOS=linux
 build:
 	go build -o dist/letscrum ./cmd/letscrum/
 
@@ -15,6 +16,9 @@ lint:
 clean:
 	rm -rf go-gin-example
 	go clean -i .
+
+run:
+	./dist/letscrum server
 
 help:
 	@echo "make: compile packages and dependencies"
