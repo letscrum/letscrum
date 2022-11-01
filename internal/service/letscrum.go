@@ -16,11 +16,11 @@ import (
 
 type LetscrumService struct {
 	letscrumv1.UnimplementedLetscrumServer
-	dao dao.LetscrumDao
+	letscrumDao dao.LetscrumDao
 }
 
 func NewLetscrumService(dao dao.Interface) *LetscrumService {
-	return &LetscrumService{dao: dao.LetscrumDao()}
+	return &LetscrumService{letscrumDao: dao.LetscrumDao()}
 }
 
 func (s *LetscrumService) GetVersion(context.Context, *emptypb.Empty) (*generalv1.GetVersionResponse, error) {
@@ -36,7 +36,7 @@ func (s *LetscrumService) GetVersion(context.Context, *emptypb.Empty) (*generalv
 }
 
 func (s *LetscrumService) SignIn(ctx context.Context, req *userv1.SignInRequest) (*userv1.SignInResponse, error) {
-	user, err := s.dao.SignIn(ctx, req.Name, req.Password)
+	user, err := s.letscrumDao.SignIn(req.Name, req.Password)
 	if err != nil {
 		result := status.Convert(err)
 		if result.Code() == codes.NotFound {

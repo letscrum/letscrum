@@ -16,20 +16,23 @@ import (
 
 type ProjectService struct {
 	v1.UnimplementedProjectServer
-	dao dao.ProjectDao
+	projectDao dao.ProjectDao
+	userDao    dao.UserDao
 }
 
 func NewProjectService(dao dao.Interface) *ProjectService {
-	return &ProjectService{dao: dao.ProjectDao()}
+	return &ProjectService{
+		projectDao: dao.ProjectDao(),
+		userDao:    dao.UserDao(),
+	}
 }
 
 func (s *ProjectService) Get(ctx context.Context, req *projectv1.GetProjectRequest) (*projectv1.GetProjectResponse, error) {
 	_, err := utils.AuthJWT(ctx)
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
-
-	project, err := s.dao.Get(req.ProjectId)
+	project, err := s.projectDao.Get(req.ProjectId)
 	if err != nil {
 		result := status.Convert(err)
 		if result.Code() == codes.NotFound {
@@ -37,7 +40,9 @@ func (s *ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReque
 		}
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
-
+	if project.Id == 0 {
+		return nil, status.Error(codes.NotFound, "project not fount.")
+	}
 	return &projectv1.GetProjectResponse{
 		Item: &projectv1.Project{
 			Id:          project.Id,
@@ -56,9 +61,9 @@ func (s *ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReque
 func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectRequest) (*projectv1.ListProjectResponse, error) {
 	_, err := utils.AuthJWT(ctx)
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
-	projects, err := s.dao.List(req.Page, req.Size)
+	projects, err := s.projectDao.List(req.Page, req.Size)
 	if err != nil {
 		result := status.Convert(err)
 		if result.Code() == codes.NotFound {
@@ -80,7 +85,7 @@ func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectReq
 			UpdatedAt: p.UpdatedAt.Unix(),
 		})
 	}
-	count := s.dao.Count()
+	count := s.projectDao.Count()
 	return &projectv1.ListProjectResponse{
 		Items: list,
 		Pagination: &generalv1.Pagination{
@@ -94,14 +99,14 @@ func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectReq
 func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjectRequest) (*projectv1.CreateProjectResponse, error) {
 	jwt, err := utils.AuthJWT(ctx)
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 	project := model.Project{
 		Name:        req.DisplayName,
 		DisplayName: req.DisplayName,
 		CreatedBy:   cast.ToInt64(jwt.Id),
 	}
-	success, err := s.dao.Create(&project)
+	success, err := s.projectDao.Create(&project)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
@@ -111,11 +116,54 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 }
 
 func (s *ProjectService) Update(ctx context.Context, req *projectv1.UpdateProjectRequest) (*projectv1.UpdateProjectResponse, error) {
-	return nil, nil
+	jwt, err := utils.AuthJWT(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	user, err := s.userDao.Get(cast.ToInt64(jwt.Id))
+	if err != nil {
+		return nil, status.Error(codes.NotFound, err.Error())
+	}
+	if user.IsSuperAdmin == false {
+		return nil, status.Error(codes.PermissionDenied, err.Error())
+	}
+	project, err := s.projectDao.Get(req.ProjectId)
+	if err != nil {
+		result := status.Convert(err)
+		if result.Code() == codes.NotFound {
+			return nil, status.Errorf(codes.NotFound, "get book err: %s not found", req.ProjectId)
+		}
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	project.DisplayName = req.DisplayName
+	success, err := s.projectDao.Update(project)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	return &projectv1.UpdateProjectResponse{
+		Success: success,
+	}, nil
 }
 
 func (s *ProjectService) Delete(ctx context.Context, req *projectv1.DeleteProjectRequest) (*projectv1.DeleteProjectResponse, error) {
-	return nil, nil
+	jwt, err := utils.AuthJWT(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	user, err := s.userDao.Get(cast.ToInt64(jwt.Id))
+	if err != nil {
+		return nil, status.Error(codes.NotFound, err.Error())
+	}
+	if user.IsSuperAdmin == false {
+		return nil, status.Error(codes.PermissionDenied, err.Error())
+	}
+	success, err := s.projectDao.Delete(req.ProjectId)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	return &projectv1.DeleteProjectResponse{
+		Success: success,
+	}, nil
 }
 
 //

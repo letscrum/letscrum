@@ -27,11 +27,11 @@ message CreateProjectResponse {
 
 message UpdateProjectRequest {
   int64 project_id = 1;
-  Project project = 2;
+  string display_name = 2;
 }
 
 message UpdateProjectResponse {
-  int64 id = 1;
+  bool success = 1;
 }
 
 message DeleteProjectRequest {
@@ -39,7 +39,7 @@ message DeleteProjectRequest {
 }
 
 message DeleteProjectResponse {
-  int64 id = 1;
+  bool success = 1;
 }
 
 message ListProjectRequest {
