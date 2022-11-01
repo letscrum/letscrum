@@ -37,14 +37,14 @@ func GetServerCommand() *cobra.Command {
 			stop := make(chan struct{})
 			defer WaitSignal(stop)
 
-			if err := grpc.Run(context.Background(), "tcp", ":9090"); err != nil {
+			if err := grpc.Run(context.Background(), "tcp", viper.GetString("server.grpc.addr")); err != nil {
 				log.Fatalf("grpc start error: %s", err)
 			}
 			opts := gateway.Options{
-				Addr: ":8081",
+				Addr: viper.GetString("server.http.addr"),
 				GRPCServer: gateway.Endpoint{
 					Network: "tcp",
-					Addr:    "localhost:9090",
+					Addr:    viper.GetString("server.grpc.addr"),
 				},
 				OpenAPIDir: "api/v1",
 			}

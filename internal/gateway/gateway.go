@@ -34,9 +34,9 @@ func NewGateway(ctx context.Context, conn *grpc.ClientConn, opts []runtime.Serve
 	mux := runtime.NewServeMux(opts...)
 
 	for _, f := range []func(context.Context, *runtime.ServeMux, *grpc.ClientConn) error{
-		v1.RegisterProjectHandler,
 		v1.RegisterLetscrumHandler,
 		v1.RegisterUserHandler,
+		v1.RegisterProjectHandler,
 	} {
 		if err := f(ctx, mux, conn); err != nil {
 			return nil, err
@@ -86,7 +86,7 @@ func Run(ctx context.Context, opts Options) error {
 		}
 	}()
 
-	log.L(ctx).Infof("Starting listening at %s", opts.Addr)
+	log.L(ctx).Infof("Starting listening at: %s", opts.Addr)
 	if err := s.ListenAndServe(); err != http.ErrServerClosed {
 		log.L(ctx).Errorf("Failed to listen and serve: %v", err)
 		return err

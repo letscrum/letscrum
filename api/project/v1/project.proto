@@ -18,11 +18,11 @@ message Project {
 }
 
 message CreateProjectRequest {
-  Project project = 2;
+  string display_name = 1;
 }
 
 message CreateProjectResponse {
-  int64 id = 1;
+  bool success = 1;
 }
 
 message UpdateProjectRequest {

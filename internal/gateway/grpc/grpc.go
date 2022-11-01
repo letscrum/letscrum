@@ -35,6 +35,11 @@ func Run(ctx context.Context, network, address string) error {
 		}()
 		<-ctx.Done()
 	}()
+
+	//opts := grpc.UnaryInterceptor(
+	//	grpc_auth.UnaryServerInterceptor(mid.Auth),
+	//)
+
 	s := grpc.NewServer()
 
 	var daoInterface dao.Interface
@@ -54,7 +59,7 @@ func Run(ctx context.Context, network, address string) error {
 	}()
 
 	go func() error {
-		log.L(ctx).Infof("grpc listen on:%s\n", address)
+		log.L(ctx).Infof("grpc listen on: %s\n", address)
 		if err := s.Serve(l); err != nil {
 			return err
 		}

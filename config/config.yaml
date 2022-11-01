@@ -5,6 +5,10 @@ server:
   grpc:
     addr: 0.0.0.0:9091
     timeout: 1s
+    interceptors:
+      auth:
+        enabled: true # Enable auth interceptor/middleware
+        ignorePrefix: [ "/api/v1/projects" ] # Ignoring path with prefix
 
 data:
   database:

@@ -1,7 +1,6 @@
 package mysql
 
 import (
-	"context"
 	"github.com/letscrum/letscrum/internal/model"
 	"gorm.io/gorm"
 )
@@ -10,28 +9,34 @@ type ProjectDao struct {
 	Db *gorm.DB
 }
 
-func (d *ProjectDao) Create(ctx context.Context, project *model.Project) (bool, error) {
-	//TODO implement me
-	panic("implement me")
+func (d *ProjectDao) Create(project *model.Project) (bool, error) {
+	if err := d.Db.Create(&project).Error; err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
-func (d *ProjectDao) Update(ctx context.Context, project *model.Project) (bool, error) {
-	//TODO implement me
-	panic("implement me")
+func (d *ProjectDao) Update(project *model.Project) (bool, error) {
+	if err := d.Db.Model(&model.Project{}).Where("id = ?", project.Id).Update("display_name", project.DisplayName).Error; err != nil {
+		return false, nil
+	}
+	return true, nil
 }
 
-func (d *ProjectDao) Delete(ctx context.Context, id int64) (bool, error) {
-	//TODO implement me
-	panic("implement me")
+func (d *ProjectDao) Delete(id int64) (bool, error) {
+	if err := d.Db.Where("id = ?", id).Delete(&model.Project{}).Error; err != nil {
+		return false, nil
+	}
+	return true, nil
 }
 
-func (d *ProjectDao) Count(context.Context) int64 {
+func (d *ProjectDao) Count() int64 {
 	count := int64(0)
 	d.Db.Model(&model.Project{}).Count(&count)
 	return count
 }
 
-func (d *ProjectDao) List(ctx context.Context, page, size int32) ([]*model.Project, error) {
+func (d *ProjectDao) List(page, size int32) ([]*model.Project, error) {
 	var projects []*model.Project
 	err := d.Db.Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Find(&projects).Error
 	if err != nil {
@@ -40,7 +45,7 @@ func (d *ProjectDao) List(ctx context.Context, page, size int32) ([]*model.Proje
 	return projects, nil
 }
 
-func (d *ProjectDao) Get(ctx context.Context, id int64) (*model.Project, error) {
+func (d *ProjectDao) Get(id int64) (*model.Project, error) {
 	var p *model.Project
 	if err := d.Db.Where("id = ?", id).Preload("CreatedUser").Find(&p).Error; err != nil {
 		return nil, err

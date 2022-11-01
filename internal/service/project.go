@@ -7,6 +7,9 @@ import (
 	projectv1 "github.com/letscrum/letscrum/api/project/v1"
 	userV1 "github.com/letscrum/letscrum/api/user/v1"
 	"github.com/letscrum/letscrum/internal/dao"
+	"github.com/letscrum/letscrum/internal/model"
+	"github.com/letscrum/letscrum/pkg/utils"
+	"github.com/spf13/cast"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -21,7 +24,12 @@ func NewProjectService(dao dao.Interface) *ProjectService {
 }
 
 func (s *ProjectService) Get(ctx context.Context, req *projectv1.GetProjectRequest) (*projectv1.GetProjectResponse, error) {
-	project, err := s.dao.Get(ctx, req.ProjectId)
+	_, err := utils.AuthJWT(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	project, err := s.dao.Get(req.ProjectId)
 	if err != nil {
 		result := status.Convert(err)
 		if result.Code() == codes.NotFound {
@@ -46,7 +54,11 @@ func (s *ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReque
 }
 
 func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectRequest) (*projectv1.ListProjectResponse, error) {
-	projects, err := s.dao.List(ctx, req.Page, req.Size)
+	_, err := utils.AuthJWT(ctx)
+	if err != nil {
+		return nil, err
+	}
+	projects, err := s.dao.List(req.Page, req.Size)
 	if err != nil {
 		result := status.Convert(err)
 		if result.Code() == codes.NotFound {
@@ -68,7 +80,7 @@ func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectReq
 			UpdatedAt: p.UpdatedAt.Unix(),
 		})
 	}
-	count := s.dao.Count(ctx)
+	count := s.dao.Count()
 	return &projectv1.ListProjectResponse{
 		Items: list,
 		Pagination: &generalv1.Pagination{
@@ -77,6 +89,33 @@ func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectReq
 			Total: int32(count),
 		},
 	}, nil
+}
+
+func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjectRequest) (*projectv1.CreateProjectResponse, error) {
+	jwt, err := utils.AuthJWT(ctx)
+	if err != nil {
+		return nil, err
+	}
+	project := model.Project{
+		Name:        req.DisplayName,
+		DisplayName: req.DisplayName,
+		CreatedBy:   cast.ToInt64(jwt.Id),
+	}
+	success, err := s.dao.Create(&project)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	return &projectv1.CreateProjectResponse{
+		Success: success,
+	}, nil
+}
+
+func (s *ProjectService) Update(ctx context.Context, req *projectv1.UpdateProjectRequest) (*projectv1.UpdateProjectResponse, error) {
+	return nil, nil
+}
+
+func (s *ProjectService) Delete(ctx context.Context, req *projectv1.DeleteProjectRequest) (*projectv1.DeleteProjectResponse, error) {
+	return nil, nil
 }
 
 //
