@@ -54,7 +54,7 @@
             "format": "int32"
           },
           {
-            "name": "pageSize",
+            "name": "size",
             "in": "query",
             "required": false,
             "type": "integer",
@@ -83,113 +83,10 @@
         },
         "parameters": [
           {
-            "name": "project.id",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "project.name",
+            "name": "displayName",
             "in": "query",
             "required": false,
             "type": "string"
-          },
-          {
-            "name": "project.displayName",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "project.createdUser.id",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "project.createdUser.name",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "project.createdUser.email",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "project.createdUser.password",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "project.createdUser.isSuperAdmin",
-            "in": "query",
-            "required": false,
-            "type": "boolean"
-          },
-          {
-            "name": "project.createdUser.isAdmin",
-            "in": "query",
-            "required": false,
-            "type": "boolean"
-          },
-          {
-            "name": "project.createdUser.roleName",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "project.createdUser.capacity",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "project.createdUser.createdAt",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "project.createdUser.updatedAt",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "project.createdUser.token.accessToken",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "project.createdUser.token.refreshToken",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "project.createdAt",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "project.updatedAt",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
           }
         ],
         "tags": [
@@ -281,113 +178,10 @@
             "format": "int64"
           },
           {
-            "name": "project.id",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "project.name",
+            "name": "displayName",
             "in": "query",
             "required": false,
             "type": "string"
-          },
-          {
-            "name": "project.displayName",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "project.createdUser.id",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "project.createdUser.name",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "project.createdUser.email",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "project.createdUser.password",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "project.createdUser.isSuperAdmin",
-            "in": "query",
-            "required": false,
-            "type": "boolean"
-          },
-          {
-            "name": "project.createdUser.isAdmin",
-            "in": "query",
-            "required": false,
-            "type": "boolean"
-          },
-          {
-            "name": "project.createdUser.roleName",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "project.createdUser.capacity",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "project.createdUser.createdAt",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "project.createdUser.updatedAt",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "project.createdUser.token.accessToken",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "project.createdUser.token.refreshToken",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "project.createdAt",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "project.updatedAt",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
           }
         ],
         "tags": [
@@ -459,7 +253,7 @@
             "format": "int32"
           },
           {
-            "name": "pageSize",
+            "name": "size",
             "in": "query",
             "required": false,
             "type": "integer",
@@ -626,7 +420,7 @@
             "format": "int32"
           },
           {
-            "name": "pageSize",
+            "name": "size",
             "in": "query",
             "required": false,
             "type": "integer",
@@ -976,7 +770,7 @@
             "format": "int32"
           },
           {
-            "name": "pageSize",
+            "name": "size",
             "in": "query",
             "required": false,
             "type": "integer",
@@ -1182,7 +976,7 @@
             "format": "int32"
           },
           {
-            "name": "pageSize",
+            "name": "size",
             "in": "query",
             "required": false,
             "type": "integer",
@@ -1258,7 +1052,7 @@
             "format": "int32"
           },
           {
-            "name": "pageSize",
+            "name": "size",
             "in": "query",
             "required": false,
             "type": "integer",
@@ -1335,9 +1129,8 @@
     "v1CreateProjectResponse": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string",
-          "format": "int64"
+        "success": {
+          "type": "boolean"
         }
       }
     },
@@ -1371,9 +1164,8 @@
     "v1DeleteProjectResponse": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string",
-          "format": "int64"
+        "success": {
+          "type": "boolean"
         }
       }
     },
@@ -1522,7 +1314,7 @@
           "type": "integer",
           "format": "int32"
         },
-        "pageSize": {
+        "size": {
           "type": "integer",
           "format": "int32"
         }
@@ -1640,9 +1432,8 @@
     "v1UpdateProjectResponse": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string",
-          "format": "int64"
+        "success": {
+          "type": "boolean"
         }
       }
     },
