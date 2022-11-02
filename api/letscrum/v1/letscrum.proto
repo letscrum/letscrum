@@ -63,25 +63,25 @@ service Project {
 }
 
 service ProjectMember {
-  rpc CreateProjectMember(letscrum.api.project.v1.CreateProjectMemberRequest) returns (letscrum.api.project.v1.CreateProjectMemberResponse) {
+  rpc Add(letscrum.api.project.v1.CreateProjectMemberRequest) returns (letscrum.api.project.v1.CreateProjectMemberResponse) {
     option (google.api.http) = {
       post: "/api/v1/projects/{project_id}/members"
     };
   }
 
-  rpc UpdateProjectMember(letscrum.api.project.v1.UpdateProjectMemberRequest) returns (letscrum.api.project.v1.UpdateProjectMemberResponse) {
+  rpc Update(letscrum.api.project.v1.UpdateProjectMemberRequest) returns (letscrum.api.project.v1.UpdateProjectMemberResponse) {
     option (google.api.http) = {
       put: "/api/v1/projects/{project_id}/members/{user_id}"
     };
   }
 
-  rpc DeleteProjectMember(letscrum.api.project.v1.DeleteProjectMemberRequest) returns (letscrum.api.project.v1.DeleteProjectMemberResponse) {
+  rpc Remove(letscrum.api.project.v1.DeleteProjectMemberRequest) returns (letscrum.api.project.v1.DeleteProjectMemberResponse) {
     option (google.api.http) = {
       delete: "/api/v1/projects/{project_id}/members/{user_id}"
     };
   }
 
-  rpc ListProjectMember(letscrum.api.project.v1.ListProjectMemberRequest) returns (letscrum.api.project.v1.ListProjectMemberResponse) {
+  rpc List(letscrum.api.project.v1.ListProjectMemberRequest) returns (letscrum.api.project.v1.ListProjectMemberResponse) {
     option (google.api.http) = {
       get: "/api/v1/projects/{project_id}/members"
     };

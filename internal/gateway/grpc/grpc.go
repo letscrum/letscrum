@@ -46,12 +46,15 @@ func Run(ctx context.Context, network, address string) error {
 	if daoInterface, err = initDao(); err != nil {
 		return err
 	}
-	projectService := service.NewProjectService(daoInterface)
-	v1.RegisterProjectServer(s, projectService)
+
 	letscrumService := service.NewLetscrumService(daoInterface)
 	v1.RegisterLetscrumServer(s, letscrumService)
 	userService := service.NewUserService(daoInterface)
 	v1.RegisterUserServer(s, userService)
+	projectService := service.NewProjectService(daoInterface)
+	v1.RegisterProjectServer(s, projectService)
+	projectMemberService := service.NewProjectMemberService(daoInterface)
+	v1.RegisterProjectMemberServer(s, projectMemberService)
 
 	go func() {
 		defer s.GracefulStop()

@@ -13,7 +13,7 @@ import (
 	"net/http"
 )
 
-const staticPrefix = "/api/letscrum/v1/swagger/"
+const staticPrefix = "/api/v1/swagger/"
 
 type Endpoint struct {
 	Network, Addr string

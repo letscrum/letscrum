@@ -17,12 +17,16 @@ func (d *Dao) LetscrumDao() dao.LetscrumDao {
 	return NewLetscrumDao(d.Db)
 }
 
+func (d *Dao) UserDao() dao.UserDao {
+	return NewUserDao(d.Db)
+}
+
 func (d *Dao) ProjectDao() dao.ProjectDao {
 	return NewProjectDao(d.Db)
 }
 
-func (d *Dao) UserDao() dao.UserDao {
-	return NewUserDao(d.Db)
+func (d *Dao) ProjectMemberDao() dao.ProjectMemberDao {
+	return NewProjectMemberDao(d.Db)
 }
 
 func GetDao(opts *db.Options) (dao.Interface, error) {
