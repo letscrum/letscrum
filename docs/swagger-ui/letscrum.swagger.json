@@ -18,6 +18,9 @@
       "name": "Sprint"
     },
     {
+      "name": "SprintMember"
+    },
+    {
       "name": "User"
     }
   ],
@@ -222,7 +225,7 @@
     },
     "/api/v1/projects/{projectId}/members": {
       "get": {
-        "operationId": "ProjectMember_ListProjectMember",
+        "operationId": "ProjectMember_List",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -265,12 +268,12 @@
         ]
       },
       "post": {
-        "operationId": "ProjectMember_CreateProjectMember",
+        "operationId": "ProjectMember_Add",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1CreateProjectMemberResponse"
+              "$ref": "#/definitions/v1AddProjectMemberResponse"
             }
           },
           "default": {
@@ -309,12 +312,12 @@
     },
     "/api/v1/projects/{projectId}/members/{userId}": {
       "delete": {
-        "operationId": "ProjectMember_DeleteProjectMember",
+        "operationId": "ProjectMember_Remove",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1DeleteProjectMemberResponse"
+              "$ref": "#/definitions/v1RemoveProjectMemberResponse"
             }
           },
           "default": {
@@ -345,7 +348,7 @@
         ]
       },
       "put": {
-        "operationId": "ProjectMember_UpdateProjectMember",
+        "operationId": "ProjectMember_Update",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -387,9 +390,47 @@
         ]
       }
     },
+    "/api/v1/projects/{projectId}/members/{userId}/remove": {
+      "delete": {
+        "operationId": "ProjectMember_HardRemove",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1RemoveProjectMemberResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "ProjectMember"
+        ]
+      }
+    },
     "/api/v1/projects/{projectId}/sprints": {
       "get": {
-        "operationId": "Sprint_ListSprint",
+        "operationId": "Sprint_List",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -432,7 +473,7 @@
         ]
       },
       "post": {
-        "operationId": "Sprint_CreateSprint",
+        "operationId": "Sprint_Create",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -511,7 +552,7 @@
     },
     "/api/v1/projects/{projectId}/sprints/{sprintId}": {
       "get": {
-        "operationId": "Sprint_GetSprint",
+        "operationId": "Sprint_Get",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -547,7 +588,7 @@
         ]
       },
       "delete": {
-        "operationId": "Sprint_DeleteSprint",
+        "operationId": "Sprint_Delete",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -583,7 +624,7 @@
         ]
       },
       "put": {
-        "operationId": "Sprint_UpdateSprint",
+        "operationId": "Sprint_Update",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -669,7 +710,7 @@
     },
     "/api/v1/projects/{projectId}/sprints/{sprintId}/delete": {
       "delete": {
-        "operationId": "Sprint_HardDeleteSprint",
+        "operationId": "Sprint_HardDelete",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -705,6 +746,248 @@
         ]
       }
     },
+    "/api/v1/projects/{projectId}/sprints/{sprintId}/members": {
+      "get": {
+        "operationId": "SprintMember_List",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListSprintMemberResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "sprintId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "SprintMember"
+        ]
+      },
+      "post": {
+        "operationId": "SprintMember_Add",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1AddSprintMemberResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "sprintId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "SprintMember"
+        ]
+      }
+    },
+    "/api/v1/projects/{projectId}/sprints/{sprintId}/members/{userId}": {
+      "delete": {
+        "operationId": "SprintMember_Remove",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1RemoveSprintMemberResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "sprintId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "SprintMember"
+        ]
+      },
+      "put": {
+        "operationId": "SprintMember_Update",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UpdateSprintMemberResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "sprintId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "roleId",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "capacity",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "SprintMember"
+        ]
+      }
+    },
+    "/api/v1/projects/{projectId}/sprints/{sprintId}/members/{userId}/remove": {
+      "delete": {
+        "operationId": "SprintMember_HardRemove",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1RemoveSprintMemberResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "sprintId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "SprintMember"
+        ]
+      }
+    },
     "/api/v1/signin": {
       "post": {
         "operationId": "Letscrum_SignIn",
@@ -737,216 +1020,9 @@
         ]
       }
     },
-    "/api/v1/sprints/{sprintId}/members": {
-      "get": {
-        "operationId": "Sprint_ListSprintMember",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1ListSprintMemberResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "sprintId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          }
-        ],
-        "tags": [
-          "Sprint"
-        ]
-      },
-      "post": {
-        "operationId": "Sprint_CreateSprintMember",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1CreateSprintMemberResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "sprintId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "userId",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
-          }
-        ],
-        "tags": [
-          "Sprint"
-        ]
-      }
-    },
-    "/api/v1/sprints/{sprintId}/members/{userId}": {
-      "delete": {
-        "operationId": "Sprint_DeleteSprintMember",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1DeleteSprintMemberResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "sprintId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "format": "int64"
-          }
-        ],
-        "tags": [
-          "Sprint"
-        ]
-      },
-      "put": {
-        "operationId": "Sprint_UpdateSprintMember",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1UpdateSprintMemberResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "sprintId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "roleId",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "capacity",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          }
-        ],
-        "tags": [
-          "Sprint"
-        ]
-      }
-    },
-    "/api/v1/sprints/{sprintId}/members/{userId}/delete": {
-      "delete": {
-        "operationId": "Sprint_HardDeleteSprintMember",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1DeleteSprintMemberResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "sprintId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "format": "int64"
-          }
-        ],
-        "tags": [
-          "Sprint"
-        ]
-      }
-    },
     "/api/v1/users": {
       "get": {
-        "operationId": "User_ListUser",
+        "operationId": "User_List",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -990,7 +1066,7 @@
     },
     "/api/v1/users/{userId}": {
       "get": {
-        "operationId": "User_GetUser",
+        "operationId": "User_Get",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -1117,12 +1193,19 @@
         }
       }
     },
-    "v1CreateProjectMemberResponse": {
+    "v1AddProjectMemberResponse": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string",
-          "format": "int64"
+        "success": {
+          "type": "boolean"
+        }
+      }
+    },
+    "v1AddSprintMemberResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
         }
       }
     },
@@ -1134,30 +1217,11 @@
         }
       }
     },
-    "v1CreateSprintMemberResponse": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "int64"
-        }
-      }
-    },
     "v1CreateSprintResponse": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string",
-          "format": "int64"
-        }
-      }
-    },
-    "v1DeleteProjectMemberResponse": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "int64"
+        "success": {
+          "type": "boolean"
         }
       }
     },
@@ -1169,21 +1233,11 @@
         }
       }
     },
-    "v1DeleteSprintMemberResponse": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "int64"
-        }
-      }
-    },
     "v1DeleteSprintResponse": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string",
-          "format": "int64"
+        "success": {
+          "type": "boolean"
         }
       }
     },
@@ -1352,6 +1406,22 @@
         }
       }
     },
+    "v1RemoveProjectMemberResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        }
+      }
+    },
+    "v1RemoveSprintMemberResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        }
+      }
+    },
     "v1SignInRequest": {
       "type": "object",
       "properties": {
@@ -1423,9 +1493,8 @@
     "v1UpdateProjectMemberResponse": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string",
-          "format": "int64"
+        "success": {
+          "type": "boolean"
         }
       }
     },
@@ -1440,18 +1509,16 @@
     "v1UpdateSprintMemberResponse": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string",
-          "format": "int64"
+        "success": {
+          "type": "boolean"
         }
       }
     },
     "v1UpdateSprintResponse": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string",
-          "format": "int64"
+        "success": {
+          "type": "boolean"
         }
       }
     },

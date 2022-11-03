@@ -60,14 +60,14 @@ message GetProjectResponse {
   Project item = 1;
 }
 
-message CreateProjectMemberRequest {
+message AddProjectMemberRequest {
   int64 project_id = 1;
   int64 user_id = 2;
   bool is_admin = 3;
 }
 
-message CreateProjectMemberResponse {
-  int64 id = 1;
+message AddProjectMemberResponse {
+  bool success = 1;
 }
 
 message UpdateProjectMemberRequest {
@@ -77,16 +77,16 @@ message UpdateProjectMemberRequest {
 }
 
 message UpdateProjectMemberResponse {
-  int64 id = 1;
+  bool success = 1;
 }
 
-message DeleteProjectMemberRequest {
+message RemoveProjectMemberRequest {
   int64 project_id = 1;
   int64 user_id = 2;
 }
 
-message DeleteProjectMemberResponse {
-  int64 id = 1;
+message RemoveProjectMemberResponse {
+  bool success = 1;
 }
 
 message ListProjectMemberRequest {

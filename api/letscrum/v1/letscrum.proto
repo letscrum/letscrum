@@ -63,7 +63,7 @@ service Project {
 }
 
 service ProjectMember {
-  rpc Add(letscrum.api.project.v1.CreateProjectMemberRequest) returns (letscrum.api.project.v1.CreateProjectMemberResponse) {
+  rpc Add(letscrum.api.project.v1.AddProjectMemberRequest) returns (letscrum.api.project.v1.AddProjectMemberResponse) {
     option (google.api.http) = {
       post: "/api/v1/projects/{project_id}/members"
     };
@@ -75,9 +75,15 @@ service ProjectMember {
     };
   }
 
-  rpc Remove(letscrum.api.project.v1.DeleteProjectMemberRequest) returns (letscrum.api.project.v1.DeleteProjectMemberResponse) {
+  rpc Remove(letscrum.api.project.v1.RemoveProjectMemberRequest) returns (letscrum.api.project.v1.RemoveProjectMemberResponse) {
     option (google.api.http) = {
       delete: "/api/v1/projects/{project_id}/members/{user_id}"
+    };
+  }
+
+  rpc HardRemove(letscrum.api.project.v1.RemoveProjectMemberRequest) returns (letscrum.api.project.v1.RemoveProjectMemberResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/projects/{project_id}/members/{user_id}/remove"
     };
   }
 
@@ -89,75 +95,77 @@ service ProjectMember {
 }
 
 service Sprint {
-  rpc CreateSprint(letscrum.api.project.v1.CreateSprintRequest) returns (letscrum.api.project.v1.CreateSprintResponse) {
+  rpc Create(letscrum.api.project.v1.CreateSprintRequest) returns (letscrum.api.project.v1.CreateSprintResponse) {
     option (google.api.http) = {
       post: "/api/v1/projects/{project_id}/sprints"
     };
   }
 
-  rpc UpdateSprint(letscrum.api.project.v1.UpdateSprintRequest) returns (letscrum.api.project.v1.UpdateSprintResponse) {
+  rpc Update(letscrum.api.project.v1.UpdateSprintRequest) returns (letscrum.api.project.v1.UpdateSprintResponse) {
     option (google.api.http) = {
       put: "/api/v1/projects/{project_id}/sprints/{sprint_id}"
     };
   }
 
-  rpc DeleteSprint(letscrum.api.project.v1.DeleteSprintRequest) returns (letscrum.api.project.v1.DeleteSprintResponse) {
+  rpc Delete(letscrum.api.project.v1.DeleteSprintRequest) returns (letscrum.api.project.v1.DeleteSprintResponse) {
     option (google.api.http) = {
       delete: "/api/v1/projects/{project_id}/sprints/{sprint_id}"
     };
   }
 
-  rpc HardDeleteSprint(letscrum.api.project.v1.DeleteSprintRequest) returns (letscrum.api.project.v1.DeleteSprintResponse) {
+  rpc HardDelete(letscrum.api.project.v1.DeleteSprintRequest) returns (letscrum.api.project.v1.DeleteSprintResponse) {
     option (google.api.http) = {
       delete: "/api/v1/projects/{project_id}/sprints/{sprint_id}/delete"
     };
   }
 
-  rpc ListSprint(letscrum.api.project.v1.ListSprintRequest) returns (letscrum.api.project.v1.ListSprintResponse) {
+  rpc List(letscrum.api.project.v1.ListSprintRequest) returns (letscrum.api.project.v1.ListSprintResponse) {
     option (google.api.http) = {
       get: "/api/v1/projects/{project_id}/sprints"
     };
   }
 
-  rpc GetSprint(letscrum.api.project.v1.GetSprintRequest) returns (letscrum.api.project.v1.GetSprintResponse) {
+  rpc Get(letscrum.api.project.v1.GetSprintRequest) returns (letscrum.api.project.v1.GetSprintResponse) {
     option (google.api.http) = {
       get: "/api/v1/projects/{project_id}/sprints/{sprint_id}"
     };
   }
+}
 
-  rpc CreateSprintMember(letscrum.api.project.v1.CreateSprintMemberRequest) returns (letscrum.api.project.v1.CreateSprintMemberResponse) {
+service SprintMember {
+  rpc Add(letscrum.api.project.v1.AddSprintMemberRequest) returns (letscrum.api.project.v1.AddSprintMemberResponse) {
     option (google.api.http) = {
-      post: "/api/v1/sprints/{sprint_id}/members"
+      post: "/api/v1/projects/{project_id}/sprints/{sprint_id}/members"
     };
   }
 
-  rpc UpdateSprintMember(letscrum.api.project.v1.UpdateSprintMemberRequest) returns (letscrum.api.project.v1.UpdateSprintMemberResponse) {
+  rpc Update(letscrum.api.project.v1.UpdateSprintMemberRequest) returns (letscrum.api.project.v1.UpdateSprintMemberResponse) {
     option (google.api.http) = {
-      put: "/api/v1/sprints/{sprint_id}/members/{user_id}"
+      put: "/api/v1/projects/{project_id}/sprints/{sprint_id}/members/{user_id}"
     };
   }
 
-  rpc DeleteSprintMember(letscrum.api.project.v1.DeleteSprintMemberRequest) returns (letscrum.api.project.v1.DeleteSprintMemberResponse) {
+  rpc Remove(letscrum.api.project.v1.RemoveSprintMemberRequest) returns (letscrum.api.project.v1.RemoveSprintMemberResponse) {
     option (google.api.http) = {
-      delete: "/api/v1/sprints/{sprint_id}/members/{user_id}"
+      delete: "/api/v1/projects/{project_id}/sprints/{sprint_id}/members/{user_id}"
     };
   }
 
-  rpc HardDeleteSprintMember(letscrum.api.project.v1.DeleteSprintMemberRequest) returns (letscrum.api.project.v1.DeleteSprintMemberResponse) {
+  rpc HardRemove(letscrum.api.project.v1.RemoveSprintMemberRequest) returns (letscrum.api.project.v1.RemoveSprintMemberResponse) {
     option (google.api.http) = {
-      delete: "/api/v1/sprints/{sprint_id}/members/{user_id}/delete"
+      delete: "/api/v1/projects/{project_id}/sprints/{sprint_id}/members/{user_id}/remove"
     };
   }
 
-  rpc ListSprintMember(letscrum.api.project.v1.ListSprintMemberRequest) returns (letscrum.api.project.v1.ListSprintMemberResponse) {
+  rpc List(letscrum.api.project.v1.ListSprintMemberRequest) returns (letscrum.api.project.v1.ListSprintMemberResponse) {
     option (google.api.http) = {
-      get: "/api/v1/sprints/{sprint_id}/members"
+      get: "/api/v1/projects/{project_id}/sprints/{sprint_id}/members"
     };
   }
 }
 
 service User {
-  rpc ListUser(letscrum.api.user.v1.ListUserRequest) returns (letscrum.api.user.v1.ListUserResponse) {
+  rpc List(letscrum.api.user.v1.ListUserRequest) returns (letscrum.api.user.v1.ListUserResponse) {
     option (google.api.http) = {
       get: "/api/v1/users"
     };
@@ -169,7 +177,7 @@ service User {
     };
   }
 
-  rpc GetUser(letscrum.api.user.v1.GetUserRequest) returns (letscrum.api.user.v1.GetUserResponse) {
+  rpc Get(letscrum.api.user.v1.GetUserRequest) returns (letscrum.api.user.v1.GetUserResponse) {
     option (google.api.http) = {
       get: "/api/v1/users/{user_id}"
     };

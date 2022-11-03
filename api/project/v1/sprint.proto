@@ -24,7 +24,7 @@ message CreateSprintRequest {
 }
 
 message CreateSprintResponse {
-  int64 id = 1;
+  bool success = 1;
 }
 
 message UpdateSprintRequest {
@@ -34,7 +34,7 @@ message UpdateSprintRequest {
 }
 
 message UpdateSprintResponse {
-  int64 id = 1;
+  bool success = 1;
 }
 
 message DeleteSprintRequest {
@@ -43,7 +43,7 @@ message DeleteSprintRequest {
 }
 
 message DeleteSprintResponse {
-  int64 id = 1;
+  bool success = 1;
 }
 
 message ListSprintRequest {
@@ -66,16 +66,18 @@ message GetSprintResponse {
   Sprint item = 1;
 }
 
-message CreateSprintMemberRequest {
+message AddSprintMemberRequest {
+  int64 project_id = 1;
   int64 sprint_id = 2;
   int64 user_id = 3;
 }
 
-message CreateSprintMemberResponse {
-  int64 id = 1;
+message AddSprintMemberResponse {
+  bool success = 1;
 }
 
 message UpdateSprintMemberRequest {
+  int64 project_id = 1;
   int64 sprint_id = 2;
   int64 user_id = 3;
   int64 role_id = 4;
@@ -83,22 +85,24 @@ message UpdateSprintMemberRequest {
 }
 
 message UpdateSprintMemberResponse {
-  int64 id = 1;
+  bool success = 1;
 }
 
-message DeleteSprintMemberRequest {
+message RemoveSprintMemberRequest {
+  int64 project_id = 1;
   int64 sprint_id = 2;
   int64 user_id = 3;
 }
 
-message DeleteSprintMemberResponse {
-  int64 id = 1;
+message RemoveSprintMemberResponse {
+  bool success = 1;
 }
 
 message ListSprintMemberRequest {
   int32 page = 1;
   int32 size = 2;
-  int64 sprint_id = 3;
+  int64 project_id = 3;
+  int64 sprint_id = 4;
 }
 
 message ListSprintMemberResponse {
