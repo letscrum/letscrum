@@ -67,7 +67,7 @@ func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectReq
 	if err != nil {
 		result := status.Convert(err)
 		if result.Code() == codes.NotFound {
-			return nil, status.Errorf(codes.NotFound, "get book err: not found")
+			return nil, status.Errorf(codes.NotFound, "not found.")
 		}
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
