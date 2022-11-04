@@ -1,17 +1,58 @@
 package service
 
 import (
+	"context"
+	generalv1 "github.com/letscrum/letscrum/api/general/v1"
 	letscrumv1 "github.com/letscrum/letscrum/api/letscrum/v1"
+	userV1 "github.com/letscrum/letscrum/api/user/v1"
 	"github.com/letscrum/letscrum/internal/dao"
+	"github.com/letscrum/letscrum/pkg/utils"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type UserService struct {
 	letscrumv1.UnimplementedUserServer
-	dao dao.UserDao
+	userDao dao.UserDao
 }
 
 func NewUserService(dao dao.Interface) *UserService {
-	return &UserService{dao: dao.UserDao()}
+	return &UserService{userDao: dao.UserDao()}
+}
+
+func (s *UserService) List(ctx context.Context, req *userV1.ListUserRequest) (*userV1.ListUserResponse, error) {
+	_, err := utils.AuthJWT(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	users, err := s.userDao.List(req.Page, req.Size, req.Keyword)
+	if err != nil {
+		result := status.Convert(err)
+		if result.Code() == codes.NotFound {
+			return nil, status.Errorf(codes.NotFound, "not found.")
+		}
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	var list []*userV1.User
+	for _, u := range users {
+		list = append(list, &userV1.User{
+			Id:           u.Id,
+			Name:         u.Name,
+			Email:        u.Email,
+			IsSuperAdmin: u.IsSuperAdmin,
+			CreatedAt:    u.CreatedAt.Unix(),
+			UpdatedAt:    u.UpdatedAt.Unix(),
+		})
+	}
+	count := s.userDao.Count(req.Keyword)
+	return &userV1.ListUserResponse{
+		Items: list,
+		Pagination: &generalv1.Pagination{
+			Page:  req.Page,
+			Size:  req.Size,
+			Total: int32(count),
+		},
+	}, nil
 }
 
 //

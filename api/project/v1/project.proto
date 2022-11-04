@@ -17,6 +17,13 @@ message Project {
   repeated letscrum.api.user.v1.User members = 7;
 }
 
+message ProjectMember {
+  int64 user_id = 1;
+  int64 project_id = 2;
+  bool is_super_admin = 3;
+  bool is_project_admin = 4;
+}
+
 message CreateProjectRequest {
   string display_name = 1;
 }
