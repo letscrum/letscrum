@@ -45,15 +45,32 @@ func (s *ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReque
 	if project.Id == 0 {
 		return nil, status.Error(codes.NotFound, "project not fount.")
 	}
+	members, err := s.proejctMemberDao.List(req.ProjectId, 1, 999)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	var memberlist []*projectv1.ProjectMember
+	for _, m := range members {
+		var member = &projectv1.ProjectMember{
+			UserId:         m.UserId,
+			ProjectId:      m.ProjectId,
+			UserName:       m.User.Name,
+			IsSuperAdmin:   m.User.IsSuperAdmin,
+			IsProjectAdmin: m.IsAdmin,
+		}
+		memberlist = append(memberlist, member)
+	}
 	return &projectv1.GetProjectResponse{
 		Item: &projectv1.Project{
 			Id:          project.Id,
 			Name:        project.Name,
 			DisplayName: project.DisplayName,
 			CreatedUser: &userV1.User{
-				Id:   project.CreatedUser.Id,
-				Name: project.CreatedUser.Name,
+				Id:           project.CreatedUser.Id,
+				Name:         project.CreatedUser.Name,
+				IsSuperAdmin: project.CreatedUser.IsSuperAdmin,
 			},
+			Members:   memberlist,
 			CreatedAt: project.CreatedAt.Unix(),
 			UpdatedAt: project.UpdatedAt.Unix(),
 		},
