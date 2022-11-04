@@ -63,7 +63,7 @@ func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectReq
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
-	projects, err := s.projectDao.List(req.Page, req.Size)
+	projects, err := s.projectDao.List(req.Page, req.Size, req.Keyword)
 	if err != nil {
 		result := status.Convert(err)
 		if result.Code() == codes.NotFound {
@@ -85,7 +85,7 @@ func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectReq
 			UpdatedAt: p.UpdatedAt.Unix(),
 		})
 	}
-	count := s.projectDao.Count()
+	count := s.projectDao.Count(req.Keyword)
 	return &projectv1.ListProjectResponse{
 		Items: list,
 		Pagination: &generalv1.Pagination{

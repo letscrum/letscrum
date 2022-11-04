@@ -30,15 +30,15 @@ func (d *ProjectDao) Delete(id int64) (bool, error) {
 	return true, nil
 }
 
-func (d *ProjectDao) Count() int64 {
+func (d *ProjectDao) Count(keyword string) int64 {
 	count := int64(0)
-	d.Db.Model(&model.Project{}).Count(&count)
+	d.Db.Where("name LIKE ?", "%"+keyword+"%").Model(&model.Project{}).Count(&count)
 	return count
 }
 
-func (d *ProjectDao) List(page, size int32) ([]*model.Project, error) {
+func (d *ProjectDao) List(page, size int32, keyword string) ([]*model.Project, error) {
 	var projects []*model.Project
-	err := d.Db.Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Find(&projects).Error
+	err := d.Db.Where("name LIKE ?", "%"+keyword+"%").Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Find(&projects).Error
 	if err != nil {
 		return nil, err
 	}
