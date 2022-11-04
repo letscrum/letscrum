@@ -16,14 +16,16 @@ import (
 
 type ProjectService struct {
 	v1.UnimplementedProjectServer
-	projectDao dao.ProjectDao
-	userDao    dao.UserDao
+	projectDao       dao.ProjectDao
+	userDao          dao.UserDao
+	proejctMemberDao dao.ProjectMemberDao
 }
 
 func NewProjectService(dao dao.Interface) *ProjectService {
 	return &ProjectService{
-		projectDao: dao.ProjectDao(),
-		userDao:    dao.UserDao(),
+		projectDao:       dao.ProjectDao(),
+		userDao:          dao.UserDao(),
+		proejctMemberDao: dao.ProjectMemberDao(),
 	}
 }
 
@@ -73,17 +75,34 @@ func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectReq
 	}
 	var list []*projectv1.Project
 	for _, p := range projects {
-		list = append(list, &projectv1.Project{
+		var project = &projectv1.Project{
 			Id:          p.Id,
 			Name:        p.Name,
 			DisplayName: p.DisplayName,
 			CreatedUser: &userV1.User{
-				Id:   p.CreatedUser.Id,
-				Name: p.CreatedUser.Name,
+				Id:           p.CreatedUser.Id,
+				Name:         p.CreatedUser.Name,
+				IsSuperAdmin: p.CreatedUser.IsSuperAdmin,
 			},
 			CreatedAt: p.CreatedAt.Unix(),
 			UpdatedAt: p.UpdatedAt.Unix(),
-		})
+		}
+		members, err := s.proejctMemberDao.List(p.Id, 1, 999)
+		if err != nil {
+			return nil, status.Error(codes.Unknown, err.Error())
+		}
+		for _, m := range members {
+			var member = &projectv1.ProjectMember{
+				UserId:         m.UserId,
+				ProjectId:      m.ProjectId,
+				UserName:       m.User.Name,
+				IsSuperAdmin:   m.User.IsSuperAdmin,
+				IsProjectAdmin: m.IsAdmin,
+			}
+			project.Members = append(project.Members, member)
+		}
+		list = append(list, project)
+
 	}
 	count := s.projectDao.Count(req.Keyword)
 	return &projectv1.ListProjectResponse{

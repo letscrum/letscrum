@@ -14,9 +14,13 @@ func (p ProjectMemberDao) Update(projectId, userId int64, isAdmin bool) (bool, e
 	panic("implement me")
 }
 
-func (p ProjectMemberDao) List(projectId int64, page, size int32) ([]*model.ProjectMember, error) {
-	//TODO implement me
-	panic("implement me")
+func (d *ProjectMemberDao) List(projectId int64, page, size int32) ([]*model.ProjectMember, error) {
+	var projectMembers []*model.ProjectMember
+	err := d.Db.Where("project_id = ?", projectId).Limit(int(size)).Offset(int((page - 1) * size)).Preload("User").Find(&projectMembers).Error
+	if err != nil {
+		return nil, err
+	}
+	return projectMembers, nil
 }
 
 func (p ProjectMemberDao) Count() int64 {
