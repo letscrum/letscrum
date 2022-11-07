@@ -46,8 +46,13 @@ api_gen:
 		--grpc-gateway_out=paths=source_relative:. \
 		--openapiv2_out=logtostderr=true:. \
 		--grpc-gateway-ts_out=paths=source_relative:./dist/sdk/ \
-		api/general/v1/common.proto api/general/v1/letscrum.proto api/letscrum/v1/letscrum.proto api/project/v1/project.proto api/user/v1/user.proto api/project/v1/sprint.proto
-
+		api/general/v1/common.proto \
+		api/general/v1/letscrum.proto \
+		api/letscrum/v1/letscrum.proto \
+		api/project/v1/project.proto \
+		api/user/v1/user.proto \
+		api/project/v1/sprint.proto
+	cp api/letscrum/v1/letscrum.swagger.json docs/swagger-ui/letscrum.swagger.json
 api_clean:
 	rm -f api/*/*/*.pb.go api/*/*/*.pb.gw.go api/*/*/*.swagger.json api/*/*/*.pb.validate.go
 	rm -rf dist/sdk/*
