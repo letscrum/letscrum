@@ -137,6 +137,9 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
+	if req.DisplayName == "" {
+		return nil, status.Error(codes.InvalidArgument, "project display name can't be empty.")
+	}
 	project := model.Project{
 		Name:        req.DisplayName,
 		DisplayName: req.DisplayName,
