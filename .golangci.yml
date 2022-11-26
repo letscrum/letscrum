@@ -3,7 +3,7 @@ run:
   # vendor$, third_party$, testdata$, examples$, Godeps$, builtin$
   skip-dirs-use-default: true
   skip-dirs:
-    - samples
+    - dist/
   skip-files:
     - ".*\\.pb\\.go$"
 # output configuration options

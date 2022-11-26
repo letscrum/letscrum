@@ -1,4 +1,4 @@
-// package build conatins the stuffs about build information such as: build time, git version and so on
+// package build contains the stuffs about build information such as: build time, git version and so on
 package build
 
 import (
