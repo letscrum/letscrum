@@ -1,4 +1,4 @@
-name: Lint & Test
+name: Pre-check
 
 on:
   push:
@@ -7,10 +7,9 @@ on:
     branches: [ "*" ]
 
 jobs:
-  pre-check:
+  lint-and-build:
     runs-on: ubuntu-latest
     steps:
-
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
