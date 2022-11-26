@@ -10,23 +10,23 @@ import (
 )
 
 type Dao struct {
-	Db *gorm.DB
+	DB *gorm.DB
 }
 
 func (d *Dao) LetscrumDao() dao.LetscrumDao {
-	return NewLetscrumDao(d.Db)
+	return NewLetscrumDao(d.DB)
 }
 
 func (d *Dao) UserDao() dao.UserDao {
-	return NewUserDao(d.Db)
+	return NewUserDao(d.DB)
 }
 
 func (d *Dao) ProjectDao() dao.ProjectDao {
-	return NewProjectDao(d.Db)
+	return NewProjectDao(d.DB)
 }
 
 func (d *Dao) ProjectMemberDao() dao.ProjectMemberDao {
-	return NewProjectMemberDao(d.Db)
+	return NewProjectMemberDao(d.DB)
 }
 
 func GetDao(opts *db.Options) (dao.Interface, error) {

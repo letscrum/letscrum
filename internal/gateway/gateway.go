@@ -2,11 +2,11 @@ package gateway
 
 import (
 	"context"
+	"fmt"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	v1 "github.com/letscrum/letscrum/api/letscrum/v1"
 	swaggerui "github.com/letscrum/letscrum/docs/swagger-ui"
 	"github.com/letscrum/letscrum/pkg/log"
-	_ "google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"mime"
@@ -89,7 +89,7 @@ func Run(ctx context.Context, opts Options) error {
 	log.L(ctx).Infof("Starting listening at: %s", opts.Addr)
 	if err := s.ListenAndServe(); err != http.ErrServerClosed {
 		log.L(ctx).Errorf("Failed to listen and serve: %v", err)
-		return err
+		return fmt.Errorf("error: %w", err)
 	}
 	return nil
 }

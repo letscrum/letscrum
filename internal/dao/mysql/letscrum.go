@@ -5,7 +5,7 @@ import (
 )
 
 type LetscrumDao struct {
-	Db *gorm.DB
+	DB *gorm.DB
 }
 
 func NewLetscrumDao(d *gorm.DB) *LetscrumDao {
