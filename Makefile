@@ -53,6 +53,7 @@ api_gen:
 		api/user/v1/user.proto \
 		api/project/v1/sprint.proto
 	cp api/letscrum/v1/letscrum.swagger.json docs/swagger-ui/letscrum.swagger.json
+
 api_clean:
 	rm -f api/*/*/*.pb.go api/*/*/*.pb.gw.go api/*/*/*.swagger.json api/*/*/*.pb.validate.go
 	rm -rf dist/sdk/*
