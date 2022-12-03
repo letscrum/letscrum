@@ -46,7 +46,7 @@ func (d *ProjectDao) Count(keyword string) int64 {
 
 func (d *ProjectDao) List(page, size int32, keyword string) ([]*model.Project, error) {
 	var projects []*model.Project
-	err := d.DB.Where("name LIKE ?", "%"+keyword+"%").Or("display_name LIKE ?", "%"+keyword+"%").Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Find(&projects).Error
+	err := d.DB.Where("name LIKE ?", "%"+keyword+"%").Or("display_name LIKE ?", "%"+keyword+"%").Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Order("updated_at desc").Find(&projects).Error
 	if err != nil {
 		return nil, err
 	}
