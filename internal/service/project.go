@@ -65,6 +65,7 @@ func (s *ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReque
 			Id:          project.ID,
 			Name:        project.Name,
 			DisplayName: project.DisplayName,
+			Description: project.Description,
 			CreatedUser: &userV1.User{
 				Id:           project.CreatedUser.ID,
 				Name:         project.CreatedUser.Name,
@@ -96,6 +97,7 @@ func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectReq
 			Id:          p.ID,
 			Name:        p.Name,
 			DisplayName: p.DisplayName,
+			Description: p.Description,
 			CreatedUser: &userV1.User{
 				Id:           p.CreatedUser.ID,
 				Name:         p.CreatedUser.Name,
@@ -143,6 +145,7 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 	project := model.Project{
 		Name:        req.DisplayName,
 		DisplayName: req.DisplayName,
+		Description: req.Description,
 		CreatedBy:   cast.ToInt64(jwt.Id),
 	}
 	success, err := s.projectDao.Create(&project)
@@ -175,6 +178,7 @@ func (s *ProjectService) Update(ctx context.Context, req *projectv1.UpdateProjec
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
 	project.DisplayName = req.DisplayName
+	project.Description = req.Description
 	success, err := s.projectDao.Update(project)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())

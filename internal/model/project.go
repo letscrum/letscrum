@@ -5,6 +5,7 @@ type Project struct {
 
 	Name        string `json:"name"`
 	DisplayName string `json:"display_name"`
+	Description string `json:"description"`
 	CreatedBy   int64  `json:"created_by"`
 	CreatedUser User   `gorm:"foreignKey:CreatedBy"`
 }
