@@ -29,6 +29,7 @@ message ProjectMember {
 message CreateProjectRequest {
   string display_name = 1;
   string description = 2;
+  repeated int64 members = 3;
 }
 
 message CreateProjectResponse {

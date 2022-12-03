@@ -9,11 +9,19 @@ type ProjectDao struct {
 	DB *gorm.DB
 }
 
-func (d *ProjectDao) Create(project *model.Project) (bool, error) {
+func (d *ProjectDao) Create(project *model.Project) (int64, error) {
 	if err := d.DB.Create(&project).Error; err != nil {
-		return false, err
+		return 0, err
 	}
-	return true, nil
+	projectAdmin := model.ProjectMember{
+		ProjectID: project.ID,
+		UserID:    project.CreatedBy,
+		IsAdmin:   true,
+	}
+	if err := d.DB.Create(&projectAdmin).Error; err != nil {
+		return 0, err
+	}
+	return project.ID, nil
 }
 
 func (d *ProjectDao) Update(project *model.Project) (bool, error) {

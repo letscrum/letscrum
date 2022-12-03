@@ -28,9 +28,20 @@ func (p ProjectMemberDao) Count() int64 {
 	panic("implement me")
 }
 
-func (p ProjectMemberDao) Add(projectID int64, userID int64) (bool, error) {
-	//TODO implement me
-	panic("implement me")
+func (p ProjectMemberDao) Add(projectID int64, userIDs []int64) (bool, error) {
+	var projectMembers []*model.ProjectMember
+	for _, u := range userIDs {
+		projectMember := model.ProjectMember{
+			ProjectID: projectID,
+			UserID:    u,
+			IsAdmin:   false,
+		}
+		projectMembers = append(projectMembers, &projectMember)
+	}
+	if err := p.DB.Create(&projectMembers).Error; err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 func (p ProjectMemberDao) Remove(projectID int64, userID int64) (bool, error) {

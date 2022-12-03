@@ -121,7 +121,6 @@ func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectReq
 			project.Members = append(project.Members, member)
 		}
 		list = append(list, project)
-
 	}
 	count := s.projectDao.Count(req.Keyword)
 	return &projectv1.ListProjectResponse{
@@ -148,9 +147,26 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 		Description: req.Description,
 		CreatedBy:   cast.ToInt64(jwt.Id),
 	}
-	success, err := s.projectDao.Create(&project)
+	id, err := s.projectDao.Create(&project)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	success := false
+	if id > 0 {
+		success = true
+	}
+	var userIDs []int64
+	for _, u := range req.Members {
+		if u != project.CreatedBy {
+			userIDs = append(userIDs, u)
+		}
+	}
+	if len(userIDs) > 0 {
+		successMembers, err := s.proejctMemberDao.Add(id, userIDs)
+		if err != nil {
+			return nil, status.Error(codes.Unknown, err.Error())
+		}
+		success = successMembers
 	}
 	return &projectv1.CreateProjectResponse{
 		Success: success,

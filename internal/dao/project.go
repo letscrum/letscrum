@@ -8,7 +8,7 @@ type ProjectDao interface {
 	Get(id int64) (*model.Project, error)
 	List(page, size int32, keyword string) ([]*model.Project, error)
 	Count(keyword string) int64
-	Create(project *model.Project) (bool, error)
+	Create(project *model.Project) (int64, error)
 	Update(project *model.Project) (bool, error)
 	Delete(id int64) (bool, error)
 }

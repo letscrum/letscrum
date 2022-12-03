@@ -28,12 +28,14 @@ service Project {
   rpc Create(letscrum.api.project.v1.CreateProjectRequest) returns (letscrum.api.project.v1.CreateProjectResponse) {
     option (google.api.http) = {
       post: "/api/v1/projects"
+      body: "*"
     };
   }
 
   rpc Update(letscrum.api.project.v1.UpdateProjectRequest) returns (letscrum.api.project.v1.UpdateProjectResponse) {
     option (google.api.http) = {
       put: "/api/v1/projects/{project_id}"
+      body: "*"
     };
   }
 
@@ -66,12 +68,14 @@ service ProjectMember {
   rpc Add(letscrum.api.project.v1.AddProjectMemberRequest) returns (letscrum.api.project.v1.AddProjectMemberResponse) {
     option (google.api.http) = {
       post: "/api/v1/projects/{project_id}/members"
+      body: "*"
     };
   }
 
   rpc Update(letscrum.api.project.v1.UpdateProjectMemberRequest) returns (letscrum.api.project.v1.UpdateProjectMemberResponse) {
     option (google.api.http) = {
       put: "/api/v1/projects/{project_id}/members/{user_id}"
+      body: "*"
     };
   }
 
@@ -98,12 +102,14 @@ service Sprint {
   rpc Create(letscrum.api.project.v1.CreateSprintRequest) returns (letscrum.api.project.v1.CreateSprintResponse) {
     option (google.api.http) = {
       post: "/api/v1/projects/{project_id}/sprints"
+      body: "*"
     };
   }
 
   rpc Update(letscrum.api.project.v1.UpdateSprintRequest) returns (letscrum.api.project.v1.UpdateSprintResponse) {
     option (google.api.http) = {
       put: "/api/v1/projects/{project_id}/sprints/{sprint_id}"
+      body: "*"
     };
   }
 
@@ -136,12 +142,14 @@ service SprintMember {
   rpc Add(letscrum.api.project.v1.AddSprintMemberRequest) returns (letscrum.api.project.v1.AddSprintMemberResponse) {
     option (google.api.http) = {
       post: "/api/v1/projects/{project_id}/sprints/{sprint_id}/members"
+      body: "*"
     };
   }
 
   rpc Update(letscrum.api.project.v1.UpdateSprintMemberRequest) returns (letscrum.api.project.v1.UpdateSprintMemberResponse) {
     option (google.api.http) = {
       put: "/api/v1/projects/{project_id}/sprints/{sprint_id}/members/{user_id}"
+      body: "*"
     };
   }
 
