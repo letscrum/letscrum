@@ -96,6 +96,23 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "description",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "members",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "int64"
+            },
+            "collectionFormat": "multi"
           }
         ],
         "tags": [
@@ -188,6 +205,12 @@
           },
           {
             "name": "displayName",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "description",
             "in": "query",
             "required": false,
             "type": "string"
@@ -1391,6 +1414,9 @@
           "type": "string"
         },
         "displayName": {
+          "type": "string"
+        },
+        "description": {
           "type": "string"
         },
         "createdUser": {

@@ -38,11 +38,11 @@ func (s *ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReque
 	if err != nil {
 		result := status.Convert(err)
 		if result.Code() == codes.NotFound {
-			return nil, status.Errorf(codes.NotFound, "get book err: %s not found", req.ProjectId)
+			return nil, status.Errorf(codes.NotFound, "get book err: %d not found", req.ProjectId)
 		}
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
-	if project.Id == 0 {
+	if project.ID == 0 {
 		return nil, status.Error(codes.NotFound, "project not fount.")
 	}
 	members, err := s.proejctMemberDao.List(req.ProjectId, 1, 999)
@@ -52,8 +52,8 @@ func (s *ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReque
 	var memberlist []*projectv1.ProjectMember
 	for _, m := range members {
 		var member = &projectv1.ProjectMember{
-			UserId:         m.UserId,
-			ProjectId:      m.ProjectId,
+			UserId:         m.UserID,
+			ProjectId:      m.ProjectID,
 			UserName:       m.User.Name,
 			IsSuperAdmin:   m.User.IsSuperAdmin,
 			IsProjectAdmin: m.IsAdmin,
@@ -62,11 +62,12 @@ func (s *ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReque
 	}
 	return &projectv1.GetProjectResponse{
 		Item: &projectv1.Project{
-			Id:          project.Id,
+			Id:          project.ID,
 			Name:        project.Name,
 			DisplayName: project.DisplayName,
+			Description: project.Description,
 			CreatedUser: &userV1.User{
-				Id:           project.CreatedUser.Id,
+				Id:           project.CreatedUser.ID,
 				Name:         project.CreatedUser.Name,
 				IsSuperAdmin: project.CreatedUser.IsSuperAdmin,
 			},
@@ -93,25 +94,26 @@ func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectReq
 	var list []*projectv1.Project
 	for _, p := range projects {
 		var project = &projectv1.Project{
-			Id:          p.Id,
+			Id:          p.ID,
 			Name:        p.Name,
 			DisplayName: p.DisplayName,
+			Description: p.Description,
 			CreatedUser: &userV1.User{
-				Id:           p.CreatedUser.Id,
+				Id:           p.CreatedUser.ID,
 				Name:         p.CreatedUser.Name,
 				IsSuperAdmin: p.CreatedUser.IsSuperAdmin,
 			},
 			CreatedAt: p.CreatedAt.Unix(),
 			UpdatedAt: p.UpdatedAt.Unix(),
 		}
-		members, err := s.proejctMemberDao.List(p.Id, 1, 999)
+		members, err := s.proejctMemberDao.List(p.ID, 1, 999)
 		if err != nil {
 			return nil, status.Error(codes.Unknown, err.Error())
 		}
 		for _, m := range members {
 			var member = &projectv1.ProjectMember{
-				UserId:         m.UserId,
-				ProjectId:      m.ProjectId,
+				UserId:         m.UserID,
+				ProjectId:      m.ProjectID,
 				UserName:       m.User.Name,
 				IsSuperAdmin:   m.User.IsSuperAdmin,
 				IsProjectAdmin: m.IsAdmin,
@@ -119,7 +121,6 @@ func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectReq
 			project.Members = append(project.Members, member)
 		}
 		list = append(list, project)
-
 	}
 	count := s.projectDao.Count(req.Keyword)
 	return &projectv1.ListProjectResponse{
@@ -143,11 +144,29 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 	project := model.Project{
 		Name:        req.DisplayName,
 		DisplayName: req.DisplayName,
+		Description: req.Description,
 		CreatedBy:   cast.ToInt64(jwt.Id),
 	}
-	success, err := s.projectDao.Create(&project)
+	id, err := s.projectDao.Create(&project)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	success := false
+	if id > 0 {
+		success = true
+	}
+	var userIDs []int64
+	for _, u := range req.Members {
+		if u != project.CreatedBy {
+			userIDs = append(userIDs, u)
+		}
+	}
+	if len(userIDs) > 0 {
+		successMembers, err := s.proejctMemberDao.Add(id, userIDs)
+		if err != nil {
+			return nil, status.Error(codes.Unknown, err.Error())
+		}
+		success = successMembers
 	}
 	return &projectv1.CreateProjectResponse{
 		Success: success,
@@ -163,18 +182,19 @@ func (s *ProjectService) Update(ctx context.Context, req *projectv1.UpdateProjec
 	if err != nil {
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
-	if user.IsSuperAdmin == false {
+	if !user.IsSuperAdmin {
 		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
 	project, err := s.projectDao.Get(req.ProjectId)
 	if err != nil {
 		result := status.Convert(err)
 		if result.Code() == codes.NotFound {
-			return nil, status.Errorf(codes.NotFound, "get book err: %s not found", req.ProjectId)
+			return nil, status.Errorf(codes.NotFound, "get book err: %d not found", req.ProjectId)
 		}
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
 	project.DisplayName = req.DisplayName
+	project.Description = req.Description
 	success, err := s.projectDao.Update(project)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
@@ -193,7 +213,7 @@ func (s *ProjectService) Delete(ctx context.Context, req *projectv1.DeleteProjec
 	if err != nil {
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
-	if user.IsSuperAdmin == false {
+	if !user.IsSuperAdmin {
 		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
 	success, err := s.projectDao.Delete(req.ProjectId)

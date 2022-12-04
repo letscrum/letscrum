@@ -2,7 +2,6 @@ package note
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -31,7 +30,7 @@ func ParseNotesFile(files []string) ([]Note, error) {
 			return nil, errors.Errorf("could not find file, %s does not exist", file)
 		}
 
-		content, err := ioutil.ReadFile(file)
+		content, err := os.ReadFile(file)
 		if err != nil {
 			return nil, errors.Errorf("unable to open file %s: %s", file, err.Error())
 		}
@@ -70,7 +69,7 @@ func CreateMarkDown(notes []Note, outPath, version string) error {
 	if !strings.HasSuffix(outPath, "/") {
 		outPath += "/"
 	}
-	err = ioutil.WriteFile(outPath+version+".md", []byte(content), 0o666)
+	err = os.WriteFile(outPath+version+".md", []byte(content), 0o666)
 	if err != nil {
 		return errors.Errorf("create markdown file err:%s", err.Error())
 	}

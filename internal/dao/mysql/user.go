@@ -6,12 +6,12 @@ import (
 )
 
 type UserDao struct {
-	Db *gorm.DB
+	DB *gorm.DB
 }
 
 func (d *UserDao) List(page, size int32, keyword string) ([]*model.User, error) {
 	var users []*model.User
-	err := d.Db.Where("name LIKE ?", "%"+keyword+"%").Limit(int(size)).Offset(int((page - 1) * size)).Find(&users).Error
+	err := d.DB.Where("name LIKE ?", "%"+keyword+"%").Limit(int(size)).Offset(int((page - 1) * size)).Find(&users).Error
 	if err != nil {
 		return nil, err
 	}
@@ -20,7 +20,7 @@ func (d *UserDao) List(page, size int32, keyword string) ([]*model.User, error) 
 
 func (d *UserDao) SignIn(name, password string) (*model.User, error) {
 	var u *model.User
-	if err := d.Db.Where("name = ?", name).Where("password = ?", password).Find(&u).Error; err != nil {
+	if err := d.DB.Where("name = ?", name).Where("password = ?", password).Find(&u).Error; err != nil {
 		return nil, err
 	}
 	return u, nil
@@ -28,7 +28,7 @@ func (d *UserDao) SignIn(name, password string) (*model.User, error) {
 
 func (d *UserDao) Get(id int64) (*model.User, error) {
 	var u *model.User
-	if err := d.Db.Where("id = ?", id).Find(&u).Error; err != nil {
+	if err := d.DB.Where("id = ?", id).Find(&u).Error; err != nil {
 		return nil, err
 	}
 	return u, nil
@@ -36,7 +36,7 @@ func (d *UserDao) Get(id int64) (*model.User, error) {
 
 func (d *UserDao) Count(keyword string) int64 {
 	count := int64(0)
-	d.Db.Where("name LIKE ?", "%"+keyword+"%").Model(&model.User{}).Count(&count)
+	d.DB.Where("name LIKE ?", "%"+keyword+"%").Model(&model.User{}).Count(&count)
 	return count
 }
 

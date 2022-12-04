@@ -3,11 +3,11 @@ package model
 type ProjectMember struct {
 	Model
 
-	ProjectId int64   `json:"project_id"`
-	UserId    int64   `json:"user_id"`
+	ProjectID int64   `json:"project_id"`
+	UserID    int64   `json:"user_id"`
 	IsAdmin   bool    `json:"is_admin"`
-	User      User    `gorm:"foreignKey:UserId"`
-	Project   Project `gorm:"foreignKey:ProjectId"`
+	User      User    `gorm:"foreignKey:UserID"`
+	Project   Project `gorm:"foreignKey:ProjectID"`
 }
 
 //

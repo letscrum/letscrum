@@ -4,6 +4,7 @@ CREATE TABLE `project` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
   `display_name` varchar(50) NOT NULL,
+  `description` varchar(500) NOT NULL,
   `created_by` bigint(20) unsigned NOT NULL DEFAULT 0,
   `deleted_at` timestamp NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),

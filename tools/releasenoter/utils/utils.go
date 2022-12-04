@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"io/ioutil"
+	"os"
 	"strings"
 )
 
@@ -24,7 +24,7 @@ func (o *OrderMap) Sort(str string, standard map[string]int) {
 
 func GetDirFiles(folder string) []string {
 	var result []string
-	files, _ := ioutil.ReadDir(folder)
+	files, _ := os.ReadDir(folder)
 	for _, file := range files {
 		if strings.HasPrefix(file.Name(), ".") {
 			continue

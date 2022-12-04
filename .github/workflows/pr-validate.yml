@@ -1,0 +1,38 @@
+name: Pre-check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ "*" ]
+
+jobs:
+  lint-and-build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.19
+
+    - name: Checkout Code 
+      uses: actions/checkout@v3
+
+    - name: Install Dependences
+      run: make api_dep_install
+
+    - name: Install Protoc
+      uses: arduino/setup-protoc@v1
+
+    - name: Generate API
+      run: make api_gen
+    
+    - name: Lint
+      # https://golangci-lint.run/
+      uses: golangci/golangci-lint-action@v3
+      with:
+        version: latest
+
+    - name: Build
+      run: make build
+  

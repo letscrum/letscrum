@@ -1,4 +1,4 @@
-// package build conatins the stuffs about build information such as: build time, git version and so on
+// package build contains the stuffs about build information such as: build time, git version and so on.
 package build
 
 import (
@@ -28,7 +28,7 @@ type version struct {
 	Platform     string `json:"platform"`
 }
 
-// Version returns the version information about the application
+// Version returns the version information about the application.
 func Version() *version {
 	return &version{
 		Version:   binVersion,

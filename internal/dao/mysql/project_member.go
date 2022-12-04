@@ -6,17 +6,17 @@ import (
 )
 
 type ProjectMemberDao struct {
-	Db *gorm.DB
+	DB *gorm.DB
 }
 
-func (p ProjectMemberDao) Update(projectId, userId int64, isAdmin bool) (bool, error) {
+func (p ProjectMemberDao) Update(projectID, userID int64, isAdmin bool) (bool, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (d *ProjectMemberDao) List(projectId int64, page, size int32) ([]*model.ProjectMember, error) {
+func (p *ProjectMemberDao) List(projectID int64, page, size int32) ([]*model.ProjectMember, error) {
 	var projectMembers []*model.ProjectMember
-	err := d.Db.Where("project_id = ?", projectId).Limit(int(size)).Offset(int((page - 1) * size)).Preload("User").Find(&projectMembers).Error
+	err := p.DB.Where("project_id = ?", projectID).Limit(int(size)).Offset(int((page - 1) * size)).Preload("User").Find(&projectMembers).Error
 	if err != nil {
 		return nil, err
 	}
@@ -28,12 +28,23 @@ func (p ProjectMemberDao) Count() int64 {
 	panic("implement me")
 }
 
-func (p ProjectMemberDao) Add(projectId int64, userId int64) (bool, error) {
-	//TODO implement me
-	panic("implement me")
+func (p ProjectMemberDao) Add(projectID int64, userIDs []int64) (bool, error) {
+	var projectMembers []*model.ProjectMember
+	for _, u := range userIDs {
+		projectMember := model.ProjectMember{
+			ProjectID: projectID,
+			UserID:    u,
+			IsAdmin:   false,
+		}
+		projectMembers = append(projectMembers, &projectMember)
+	}
+	if err := p.DB.Create(&projectMembers).Error; err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
-func (p ProjectMemberDao) Remove(projectId int64, userId int64) (bool, error) {
+func (p ProjectMemberDao) Remove(projectID int64, userID int64) (bool, error) {
 	//TODO implement me
 	panic("implement me")
 }
