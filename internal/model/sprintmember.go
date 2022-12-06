@@ -7,8 +7,8 @@ type SprintMember struct {
 	UserID   int64  `json:"user_id"`
 	RoleID   int64  `json:"role_id"`
 	Capacity int32  `json:"capacity"`
-	User     User   `gorm:"foreignKey:UserID"`
 	Sprint   Sprint `gorm:"foreignKey:SprintID"`
+	User     User   `gorm:"foreignKey:UserID"`
 	Role     Role   `gorm:"foreignKey:RoleID"`
 }
 
