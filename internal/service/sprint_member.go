@@ -1,5 +1,21 @@
 package service
 
+import (
+	v1 "github.com/letscrum/letscrum/api/letscrum/v1"
+	"github.com/letscrum/letscrum/internal/dao"
+)
+
+type SprintMemberService struct {
+	v1.UnimplementedSprintMemberServer
+	sprintMemberDao dao.SprintMemberDao
+}
+
+func NewSprintMemberService(dao dao.Interface) *SprintMemberService {
+	return &SprintMemberService{
+		sprintMemberDao: dao.SprintMemberDao(),
+	}
+}
+
 //
 //func Create(sprintId int64, userId int64) (int64, error) {
 //	sprintMemberId, err := sprintmembermodel.CreateSprintMember(sprintId, userId)

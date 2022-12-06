@@ -29,6 +29,14 @@ func (d *Dao) ProjectMemberDao() dao.ProjectMemberDao {
 	return NewProjectMemberDao(d.DB)
 }
 
+func (d *Dao) SprintDao() dao.SprintDao {
+	return NewSprintDao(d.DB)
+}
+
+func (d *Dao) SprintMemberDao() dao.SprintMemberDao {
+	return NewSprintMemberDao(d.DB)
+}
+
 func GetDao(opts *db.Options) (dao.Interface, error) {
 	var daoInterface dao.Interface
 	var once sync.Once

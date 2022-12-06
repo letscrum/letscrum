@@ -18,14 +18,14 @@ type ProjectService struct {
 	v1.UnimplementedProjectServer
 	projectDao       dao.ProjectDao
 	userDao          dao.UserDao
-	proejctMemberDao dao.ProjectMemberDao
+	projectMemberDao dao.ProjectMemberDao
 }
 
 func NewProjectService(dao dao.Interface) *ProjectService {
 	return &ProjectService{
 		projectDao:       dao.ProjectDao(),
 		userDao:          dao.UserDao(),
-		proejctMemberDao: dao.ProjectMemberDao(),
+		projectMemberDao: dao.ProjectMemberDao(),
 	}
 }
 
@@ -45,7 +45,7 @@ func (s *ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReque
 	if project.ID == 0 {
 		return nil, status.Error(codes.NotFound, "project not fount.")
 	}
-	members, err := s.proejctMemberDao.List(req.ProjectId, 1, 999)
+	members, err := s.projectMemberDao.List(req.ProjectId, 1, 999)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
@@ -106,7 +106,7 @@ func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectReq
 			CreatedAt: p.CreatedAt.Unix(),
 			UpdatedAt: p.UpdatedAt.Unix(),
 		}
-		members, err := s.proejctMemberDao.List(p.ID, 1, 999)
+		members, err := s.projectMemberDao.List(p.ID, 1, 999)
 		if err != nil {
 			return nil, status.Error(codes.Unknown, err.Error())
 		}
@@ -162,7 +162,7 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 		}
 	}
 	if len(userIDs) > 0 {
-		successMembers, err := s.proejctMemberDao.Add(id, userIDs)
+		successMembers, err := s.projectMemberDao.Add(id, userIDs)
 		if err != nil {
 			return nil, status.Error(codes.Unknown, err.Error())
 		}

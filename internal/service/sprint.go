@@ -1,5 +1,21 @@
 package service
 
+import (
+	v1 "github.com/letscrum/letscrum/api/letscrum/v1"
+	"github.com/letscrum/letscrum/internal/dao"
+)
+
+type SprintService struct {
+	v1.UnimplementedSprintServer
+	sprintDao dao.SprintDao
+}
+
+func NewSprintService(dao dao.Interface) *SprintService {
+	return &SprintService{
+		sprintDao: dao.SprintDao(),
+	}
+}
+
 //
 //func Create(projectId int64, name string, startDate time.Time, endDate time.Time) (int64, error) {
 //	sprintId, err := sprintmodel.CreateSprint(projectId, name, startDate, endDate)

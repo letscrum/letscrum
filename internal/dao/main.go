@@ -6,4 +6,6 @@ type Interface interface {
 	UserDao() UserDao
 	ProjectDao() ProjectDao
 	ProjectMemberDao() ProjectMemberDao
+	SprintDao() SprintDao
+	SprintMemberDao() SprintMemberDao
 }
