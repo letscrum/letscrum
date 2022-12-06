@@ -92,27 +92,12 @@
         },
         "parameters": [
           {
-            "name": "displayName",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "description",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "members",
-            "in": "query",
-            "required": false,
-            "type": "array",
-            "items": {
-              "type": "string",
-              "format": "int64"
-            },
-            "collectionFormat": "multi"
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreateProjectRequest"
+            }
           }
         ],
         "tags": [
@@ -204,16 +189,20 @@
             "format": "int64"
           },
           {
-            "name": "displayName",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "description",
-            "in": "query",
-            "required": false,
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "displayName": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
           }
         ],
         "tags": [
@@ -321,17 +310,21 @@
             "format": "int64"
           },
           {
-            "name": "userId",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "isAdmin",
-            "in": "query",
-            "required": false,
-            "type": "boolean"
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "userId": {
+                  "type": "string",
+                  "format": "int64"
+                },
+                "isAdmin": {
+                  "type": "boolean"
+                }
+              }
+            }
           }
         ],
         "tags": [
@@ -408,10 +401,17 @@
             "format": "int64"
           },
           {
-            "name": "isAdmin",
-            "in": "query",
-            "required": false,
-            "type": "boolean"
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "isAdmin": {
+                  "type": "boolean"
+                }
+              }
+            }
           }
         ],
         "tags": [
@@ -526,52 +526,25 @@
             "format": "int64"
           },
           {
-            "name": "sprint.id",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "sprint.projectId",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "sprint.name",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "sprint.startDate",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "sprint.endDate",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "sprint.createdAt",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "sprint.updatedAt",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "startDate": {
+                  "type": "string",
+                  "format": "int64"
+                },
+                "endDate": {
+                  "type": "string",
+                  "format": "int64"
+                }
+              }
+            }
           }
         ],
         "tags": [
@@ -684,52 +657,25 @@
             "format": "int64"
           },
           {
-            "name": "sprint.id",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "sprint.projectId",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "sprint.name",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "sprint.startDate",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "sprint.endDate",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "sprint.createdAt",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "sprint.updatedAt",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "startDate": {
+                  "type": "string",
+                  "format": "int64"
+                },
+                "endDate": {
+                  "type": "string",
+                  "format": "int64"
+                }
+              }
+            }
           }
         ],
         "tags": [
@@ -858,11 +804,18 @@
             "format": "int64"
           },
           {
-            "name": "userId",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "userId": {
+                  "type": "string",
+                  "format": "int64"
+                }
+              }
+            }
           }
         ],
         "tags": [
@@ -953,18 +906,22 @@
             "format": "int64"
           },
           {
-            "name": "roleId",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "capacity",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "roleId": {
+                  "type": "string",
+                  "format": "int64"
+                },
+                "capacity": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
           }
         ],
         "tags": [
@@ -1235,6 +1192,24 @@
       "properties": {
         "success": {
           "type": "boolean"
+        }
+      }
+    },
+    "v1CreateProjectRequest": {
+      "type": "object",
+      "properties": {
+        "displayName": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "int64"
+          }
         }
       }
     },
@@ -1524,6 +1499,9 @@
         "updatedAt": {
           "type": "string",
           "format": "int64"
+        },
+        "isCurrent": {
+          "type": "boolean"
         },
         "members": {
           "type": "array",

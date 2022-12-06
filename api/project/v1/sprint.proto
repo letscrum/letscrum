@@ -15,12 +15,15 @@ message Sprint {
   int64 end_date = 5;
   int64 created_at = 6;
   int64 updated_at = 7;
-  repeated letscrum.api.user.v1.User members = 8;
+  bool is_current = 8;
+  repeated letscrum.api.user.v1.User members = 9;
 }
 
 message CreateSprintRequest {
   int64 project_id = 1;
-  Sprint sprint = 2;
+  string name = 2;
+  int64 start_date = 3;
+  int64 end_date = 4;
 }
 
 message CreateSprintResponse {
@@ -30,7 +33,9 @@ message CreateSprintResponse {
 message UpdateSprintRequest {
   int64 project_id = 1;
   int64 sprint_id = 2;
-  Sprint sprint = 3;
+  string name = 3;
+  int64 start_date = 4;
+  int64 end_date = 5;
 }
 
 message UpdateSprintResponse {
