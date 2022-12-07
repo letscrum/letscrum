@@ -1,19 +1,63 @@
 package service
 
 import (
+	"context"
 	v1 "github.com/letscrum/letscrum/api/letscrum/v1"
+	projectv1 "github.com/letscrum/letscrum/api/project/v1"
 	"github.com/letscrum/letscrum/internal/dao"
+	"github.com/letscrum/letscrum/internal/model"
+	"github.com/letscrum/letscrum/pkg/utils"
+	"github.com/spf13/cast"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"time"
 )
 
 type SprintService struct {
 	v1.UnimplementedSprintServer
-	sprintDao dao.SprintDao
+	sprintDao        dao.SprintDao
+	projectMemberDao dao.ProjectMemberDao
 }
 
 func NewSprintService(dao dao.Interface) *SprintService {
 	return &SprintService{
-		sprintDao: dao.SprintDao(),
+		sprintDao:        dao.SprintDao(),
+		projectMemberDao: dao.ProjectMemberDao(),
 	}
+}
+
+func (s *SprintService) Create(ctx context.Context, req *projectv1.CreateSprintRequest) (*projectv1.CreateSprintResponse, error) {
+	jwt, err := utils.AuthJWT(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	if !jwt.IsSuperAdmin {
+		return nil, status.Error(codes.PermissionDenied, err.Error())
+	}
+	member, err := s.projectMemberDao.Get(req.ProjectId, cast.ToInt64(jwt.Id))
+	if err != nil {
+		return nil, status.Error(codes.PermissionDenied, err.Error())
+	}
+	if !member.IsAdmin {
+		return nil, status.Error(codes.PermissionDenied, err.Error())
+	}
+	sprint := model.Sprint{
+		ProjectID: req.ProjectId,
+		Name:      req.Name,
+		StartDate: time.Unix(req.StartDate, 0),
+		EndDate:   time.Unix(req.EndDate, 0),
+	}
+	id, err := s.sprintDao.Create(&sprint)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	success := false
+	if id > 0 {
+		success = true
+	}
+	return &projectv1.CreateSprintResponse{
+		Success: success,
+	}, nil
 }
 
 //

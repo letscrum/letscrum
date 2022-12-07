@@ -138,6 +138,9 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
+	if !jwt.IsSuperAdmin {
+		return nil, status.Error(codes.PermissionDenied, err.Error())
+	}
 	if req.DisplayName == "" {
 		return nil, status.Error(codes.InvalidArgument, "project display name can't be empty.")
 	}
@@ -178,11 +181,14 @@ func (s *ProjectService) Update(ctx context.Context, req *projectv1.UpdateProjec
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
-	user, err := s.userDao.Get(cast.ToInt64(jwt.Id))
-	if err != nil {
-		return nil, status.Error(codes.NotFound, err.Error())
+	if !jwt.IsSuperAdmin {
+		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
-	if !user.IsSuperAdmin {
+	member, err := s.projectMemberDao.Get(req.ProjectId, cast.ToInt64(jwt.Id))
+	if err != nil {
+		return nil, status.Error(codes.PermissionDenied, err.Error())
+	}
+	if !member.IsAdmin {
 		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
 	project, err := s.projectDao.Get(req.ProjectId)

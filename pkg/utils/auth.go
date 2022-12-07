@@ -2,13 +2,12 @@ package utils
 
 import (
 	"context"
-	"github.com/dgrijalva/jwt-go"
 	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-func AuthJWT(ctx context.Context) (*jwt.StandardClaims, error) {
+func AuthJWT(ctx context.Context) (*LetscrumClaims, error) {
 	token, err := grpc_auth.AuthFromMD(ctx, "bearer")
 	if err != nil {
 		return nil, err

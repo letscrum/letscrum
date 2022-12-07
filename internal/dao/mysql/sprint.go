@@ -25,8 +25,26 @@ func (s SprintDao) Count(keyword string) int64 {
 }
 
 func (s SprintDao) Create(sprint *model.Sprint) (int64, error) {
-	//TODO implement me
-	panic("implement me")
+	if err := s.DB.Create(&sprint).Error; err != nil {
+		return 0, err
+	}
+	var projectMembers []*model.ProjectMember
+	err := s.DB.Where("project_id = ?", sprint.ProjectID).Find(&projectMembers).Error
+	if err != nil {
+		return 0, err
+	}
+	var sprintMembers []*model.SprintMember
+	for _, pm := range projectMembers {
+		sprintMember := model.SprintMember{
+			SprintID: sprint.ID,
+			UserID:   pm.UserID,
+		}
+		sprintMembers = append(sprintMembers, &sprintMember)
+	}
+	if err := s.DB.Create(&sprintMembers).Error; err != nil {
+		return 0, err
+	}
+	return sprint.ID, nil
 }
 
 func (s SprintDao) Update(sprint *model.Sprint) (bool, error) {
