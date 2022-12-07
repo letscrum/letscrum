@@ -45,7 +45,7 @@ CREATE TABLE `sprint_member` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `sprint_id` bigint(20) unsigned NOT NULL,
   `user_id` bigint(20) unsigned NOT NULL,
-  `role_id` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `role` varchar(50) DEFAULT NULL,
   `capacity` int(11) NOT NULL DEFAULT 0,
   `deleted_at` timestamp DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -53,8 +53,7 @@ CREATE TABLE `sprint_member` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_sprint_id_and_user_id` (`sprint_id`, `user_id`),
   CONSTRAINT `fk_sprint_member_sprint_id` FOREIGN KEY (`sprint_id`) REFERENCES `sprint` (`id`),
-  CONSTRAINT `fk_sprint_member_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`),
-  CONSTRAINT `fk_sprint_member_role_id` FOREIGN KEY (`role_id`) REFERENCES `role` (`id`)
+  CONSTRAINT `fk_sprint_member_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `role` (
