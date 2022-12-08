@@ -14,14 +14,19 @@ func (s SprintDao) Get(id int64) (*model.Sprint, error) {
 	panic("implement me")
 }
 
-func (s SprintDao) List(page, size int32, keyword string) ([]*model.Sprint, error) {
-	//TODO implement me
-	panic("implement me")
+func (s SprintDao) List(projectID int64, page, size int32, keyword string) ([]*model.Sprint, error) {
+	var sprints []*model.Sprint
+	err := s.DB.Where("project_id = ?", projectID).Where("name LIKE ?", "%"+keyword+"%").Limit(int(size)).Offset(int((page - 1) * size)).Order("start_date, name").Find(&sprints).Error
+	if err != nil {
+		return nil, err
+	}
+	return sprints, nil
 }
 
-func (s SprintDao) Count(keyword string) int64 {
-	//TODO implement me
-	panic("implement me")
+func (s SprintDao) Count(projectID int64, keyword string) int64 {
+	count := int64(0)
+	s.DB.Where("project_id = ?", projectID).Where("name LIKE ?", "%"+keyword+"%").Model(&model.Sprint{}).Count(&count)
+	return count
 }
 
 func (s SprintDao) Create(sprint *model.Sprint) (int64, error) {

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	generalv1 "github.com/letscrum/letscrum/api/general/v1"
 	v1 "github.com/letscrum/letscrum/api/letscrum/v1"
 	projectv1 "github.com/letscrum/letscrum/api/project/v1"
 	"github.com/letscrum/letscrum/internal/dao"
@@ -57,6 +58,61 @@ func (s *SprintService) Create(ctx context.Context, req *projectv1.CreateSprintR
 	}
 	return &projectv1.CreateSprintResponse{
 		Success: success,
+	}, nil
+}
+
+func (s *SprintService) List(ctx context.Context, req *projectv1.ListSprintRequest) (*projectv1.ListSprintResponse, error) {
+	_, err := utils.AuthJWT(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	sprints, err := s.sprintDao.List(req.ProjectId, req.Page, req.Size, req.Keyword)
+	if err != nil {
+		result := status.Convert(err)
+		if result.Code() == codes.NotFound {
+			return nil, status.Errorf(codes.NotFound, "not found.")
+		}
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	var list []*projectv1.Sprint
+	hasCurrent := false
+	for _, s := range sprints {
+		var sprintStatus projectv1.SprintStatus
+		switch {
+		case time.Now().After(s.StartDate) && time.Now().Before(s.EndDate) && !hasCurrent:
+			sprintStatus = projectv1.SprintStatus_CURRENT
+			hasCurrent = true
+			break
+		case time.Now().After(s.StartDate) && time.Now().Before(s.EndDate) && hasCurrent:
+			sprintStatus = projectv1.SprintStatus_FUTURE
+			break
+		case time.Now().After(s.EndDate):
+			sprintStatus = projectv1.SprintStatus_PAST
+			break
+		case time.Now().Before(s.StartDate):
+			sprintStatus = projectv1.SprintStatus_FUTURE
+			break
+		}
+		var sprint = &projectv1.Sprint{
+			Id:        s.ID,
+			ProjectId: s.ProjectID,
+			Name:      s.Name,
+			StartDate: s.StartDate.Unix(),
+			EndDate:   s.EndDate.Unix(),
+			Status:    sprintStatus,
+			CreatedAt: s.CreatedAt.Unix(),
+			UpdatedAt: s.UpdatedAt.Unix(),
+		}
+		list = append(list, sprint)
+	}
+	count := s.sprintDao.Count(req.ProjectId, req.Keyword)
+	return &projectv1.ListSprintResponse{
+		Items: list,
+		Pagination: &generalv1.Pagination{
+			Page:  req.Page,
+			Size:  req.Size,
+			Total: int32(count),
+		},
 	}, nil
 }
 

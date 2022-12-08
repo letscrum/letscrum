@@ -7,6 +7,12 @@ package letscrum.api.project.v1;
 
 option go_package = "github.com/letscrum/letscrum/api/project/v1";
 
+enum SprintStatus {
+  PAST = 0;
+  CURRENT = 1;
+  FUTURE = 2;
+}
+
 message Sprint {
   int64 id = 1;
   int64 project_id = 2;
@@ -15,7 +21,7 @@ message Sprint {
   int64 end_date = 5;
   int64 created_at = 6;
   int64 updated_at = 7;
-  bool is_current = 8;
+  SprintStatus status = 8;
   repeated letscrum.api.user.v1.User members = 9;
 }
 
@@ -55,6 +61,7 @@ message ListSprintRequest {
   int64 project_id = 1;
   int32 page = 2;
   int32 size = 3;
+  string keyword = 4;
 }
 
 message ListSprintResponse {
