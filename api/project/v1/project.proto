@@ -2,6 +2,7 @@ syntax = "proto3";
 
 import "api/general/v1/common.proto";
 import "api/user/v1/user.proto";
+import "api/project/v1/sprint.proto";
 
 package letscrum.api.project.v1;
 
@@ -16,6 +17,7 @@ message Project {
   int64 created_at = 6;
   int64 updated_at = 7;
   repeated ProjectMember members = 8;
+  Sprint sprint = 9;
 }
 
 message ProjectMember {

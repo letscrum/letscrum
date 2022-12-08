@@ -10,8 +10,12 @@ type SprintDao struct {
 }
 
 func (s SprintDao) Get(id int64) (*model.Sprint, error) {
-	//TODO implement me
-	panic("implement me")
+	var sprint *model.Sprint
+	err := s.DB.Where("id = ?", id).Find(&sprint).Error
+	if err != nil {
+		return nil, err
+	}
+	return sprint, nil
 }
 
 func (s SprintDao) List(projectID int64, page, size int32, keyword string) ([]*model.Sprint, error) {
@@ -53,13 +57,17 @@ func (s SprintDao) Create(sprint *model.Sprint) (int64, error) {
 }
 
 func (s SprintDao) Update(sprint *model.Sprint) (bool, error) {
-	//TODO implement me
-	panic("implement me")
+	if err := s.DB.Model(&model.Sprint{}).Where("id = ?", sprint.ID).Update("name", sprint.Name).Update("start_date", sprint.StartDate).Update("end_date", sprint.EndDate).Error; err != nil {
+		return false, nil
+	}
+	return true, nil
 }
 
 func (s SprintDao) Delete(id int64) (bool, error) {
-	//TODO implement me
-	panic("implement me")
+	if err := s.DB.Where("id = ?", id).Delete(&model.Sprint{}).Error; err != nil {
+		return false, nil
+	}
+	return true, nil
 }
 
 func NewSprintDao(d *gorm.DB) *SprintDao {

@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/cast"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"time"
 )
 
 type ProjectService struct {
@@ -19,6 +20,7 @@ type ProjectService struct {
 	projectDao       dao.ProjectDao
 	userDao          dao.UserDao
 	projectMemberDao dao.ProjectMemberDao
+	sprintDao        dao.SprintDao
 }
 
 func NewProjectService(dao dao.Interface) *ProjectService {
@@ -26,6 +28,7 @@ func NewProjectService(dao dao.Interface) *ProjectService {
 		projectDao:       dao.ProjectDao(),
 		userDao:          dao.UserDao(),
 		projectMemberDao: dao.ProjectMemberDao(),
+		sprintDao:        dao.SprintDao(),
 	}
 }
 
@@ -49,7 +52,7 @@ func (s *ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReque
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
-	var memberlist []*projectv1.ProjectMember
+	var memberList []*projectv1.ProjectMember
 	for _, m := range members {
 		var member = &projectv1.ProjectMember{
 			UserId:         m.UserID,
@@ -58,7 +61,43 @@ func (s *ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReque
 			IsSuperAdmin:   m.User.IsSuperAdmin,
 			IsProjectAdmin: m.IsAdmin,
 		}
-		memberlist = append(memberlist, member)
+		memberList = append(memberList, member)
+	}
+	sprints, err := s.sprintDao.List(req.ProjectId, 1, 999, "")
+	if err != nil {
+		result := status.Convert(err)
+		if result.Code() == codes.NotFound {
+			return nil, status.Errorf(codes.NotFound, "not found.")
+		}
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	sprint := projectv1.Sprint{}
+	for i, s := range sprints {
+		if i == 0 {
+			sprint = projectv1.Sprint{
+				Id:        s.ID,
+				ProjectId: s.ProjectID,
+				Name:      s.Name,
+				StartDate: s.StartDate.Unix(),
+				EndDate:   s.EndDate.Unix(),
+				Status:    projectv1.SprintStatus_UNKNOWN,
+				CreatedAt: s.CreatedAt.Unix(),
+				UpdatedAt: s.UpdatedAt.Unix(),
+			}
+		}
+		if time.Now().After(s.StartDate) && time.Now().Before(s.EndDate) {
+			sprint = projectv1.Sprint{
+				Id:        s.ID,
+				ProjectId: s.ProjectID,
+				Name:      s.Name,
+				StartDate: s.StartDate.Unix(),
+				EndDate:   s.EndDate.Unix(),
+				Status:    projectv1.SprintStatus_CURRENT,
+				CreatedAt: s.CreatedAt.Unix(),
+				UpdatedAt: s.UpdatedAt.Unix(),
+			}
+			break
+		}
 	}
 	return &projectv1.GetProjectResponse{
 		Item: &projectv1.Project{
@@ -71,7 +110,8 @@ func (s *ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReque
 				Name:         project.CreatedUser.Name,
 				IsSuperAdmin: project.CreatedUser.IsSuperAdmin,
 			},
-			Members:   memberlist,
+			Members:   memberList,
+			Sprint:    &sprint,
 			CreatedAt: project.CreatedAt.Unix(),
 			UpdatedAt: project.UpdatedAt.Unix(),
 		},
