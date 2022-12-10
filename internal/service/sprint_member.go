@@ -1,8 +1,14 @@
 package service
 
 import (
+	"context"
+	generalv1 "github.com/letscrum/letscrum/api/general/v1"
 	v1 "github.com/letscrum/letscrum/api/letscrum/v1"
+	projectv1 "github.com/letscrum/letscrum/api/project/v1"
 	"github.com/letscrum/letscrum/internal/dao"
+	"github.com/letscrum/letscrum/pkg/utils"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type SprintMemberService struct {
@@ -14,6 +20,38 @@ func NewSprintMemberService(dao dao.Interface) *SprintMemberService {
 	return &SprintMemberService{
 		sprintMemberDao: dao.SprintMemberDao(),
 	}
+}
+
+func (s *SprintMemberService) List(ctx context.Context, req *projectv1.ListSprintMemberRequest) (*projectv1.ListSprintMemberResponse, error) {
+	_, err := utils.AuthJWT(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	members, err := s.sprintMemberDao.List(req.SprintId, 1, 999)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	var memberList []*projectv1.SprintMember
+	for _, m := range members {
+		var member = &projectv1.SprintMember{
+			UserId:    m.UserID,
+			SprintId:  m.SprintID,
+			UserName:  m.User.Name,
+			UserEmail: m.User.Email,
+			Role:      m.Role,
+			Capacity:  m.Capacity,
+		}
+		memberList = append(memberList, member)
+	}
+	count := s.sprintMemberDao.Count(req.SprintId)
+	return &projectv1.ListSprintMemberResponse{
+		Items: memberList,
+		Pagination: &generalv1.Pagination{
+			Page:  req.Page,
+			Size:  req.Size,
+			Total: int32(count),
+		},
+	}, nil
 }
 
 //

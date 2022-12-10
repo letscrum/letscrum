@@ -26,6 +26,15 @@ message Sprint {
   repeated letscrum.api.user.v1.User members = 9;
 }
 
+message SprintMember {
+  int64 user_id = 1;
+  int64 sprint_id = 2;
+  string user_name = 3;
+  string user_email = 4;
+  string role = 5;
+  int32 capacity = 6;
+}
+
 message CreateSprintRequest {
   int64 project_id = 1;
   string name = 2;
@@ -93,7 +102,7 @@ message UpdateSprintMemberRequest {
   int64 project_id = 1;
   int64 sprint_id = 2;
   int64 user_id = 3;
-  int64 role_id = 4;
+  string role = 4;
   int32 capacity = 5;
 }
 
@@ -119,7 +128,7 @@ message ListSprintMemberRequest {
 }
 
 message ListSprintMemberResponse {
-  repeated letscrum.api.user.v1.User items = 1;
+  repeated SprintMember items = 1;
   letscrum.api.general.v1.Pagination pagination = 2;
 }
 
