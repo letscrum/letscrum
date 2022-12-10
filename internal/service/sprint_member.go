@@ -87,6 +87,9 @@ func (s *SprintMemberService) Update(ctx context.Context, req *projectv1.UpdateS
 		memberList = append(memberList, member)
 	}
 	success, err := s.sprintMemberDao.Update(memberList)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 	return &projectv1.UpdateSprintMemberResponse{
 		Success: success,
 	}, nil
