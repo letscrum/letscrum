@@ -6,19 +6,23 @@ import (
 	v1 "github.com/letscrum/letscrum/api/letscrum/v1"
 	projectv1 "github.com/letscrum/letscrum/api/project/v1"
 	"github.com/letscrum/letscrum/internal/dao"
+	"github.com/letscrum/letscrum/internal/model"
 	"github.com/letscrum/letscrum/pkg/utils"
+	"github.com/spf13/cast"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 type SprintMemberService struct {
 	v1.UnimplementedSprintMemberServer
-	sprintMemberDao dao.SprintMemberDao
+	projectMemberDao dao.ProjectMemberDao
+	sprintMemberDao  dao.SprintMemberDao
 }
 
 func NewSprintMemberService(dao dao.Interface) *SprintMemberService {
 	return &SprintMemberService{
-		sprintMemberDao: dao.SprintMemberDao(),
+		projectMemberDao: dao.ProjectMemberDao(),
+		sprintMemberDao:  dao.SprintMemberDao(),
 	}
 }
 
@@ -34,6 +38,7 @@ func (s *SprintMemberService) List(ctx context.Context, req *projectv1.ListSprin
 	var memberList []*projectv1.SprintMember
 	for _, m := range members {
 		var member = &projectv1.SprintMember{
+			Id:        m.ID,
 			UserId:    m.UserID,
 			SprintId:  m.SprintID,
 			UserName:  m.User.Name,
@@ -51,6 +56,39 @@ func (s *SprintMemberService) List(ctx context.Context, req *projectv1.ListSprin
 			Size:  req.Size,
 			Total: int32(count),
 		},
+	}, nil
+}
+
+func (s *SprintMemberService) Update(ctx context.Context, req *projectv1.UpdateSprintMemberRequest) (*projectv1.UpdateSprintMemberResponse, error) {
+	jwt, err := utils.AuthJWT(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	if !jwt.IsSuperAdmin {
+		return nil, status.Error(codes.PermissionDenied, err.Error())
+	}
+	myMember, err := s.projectMemberDao.Get(req.ProjectId, cast.ToInt64(jwt.Id))
+	if err != nil {
+		return nil, status.Error(codes.PermissionDenied, err.Error())
+	}
+	if !myMember.IsAdmin {
+		return nil, status.Error(codes.PermissionDenied, err.Error())
+	}
+
+	var memberList []*model.SprintMember
+	for _, m := range req.Members {
+		var member = &model.SprintMember{
+			Model: model.Model{
+				ID: m.Id,
+			},
+			Role:     m.Role,
+			Capacity: m.Capacity,
+		}
+		memberList = append(memberList, member)
+	}
+	success, err := s.sprintMemberDao.Update(memberList)
+	return &projectv1.UpdateSprintMemberResponse{
+		Success: success,
 	}, nil
 }
 

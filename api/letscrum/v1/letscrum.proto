@@ -148,7 +148,7 @@ service SprintMember {
 
   rpc Update(letscrum.api.project.v1.UpdateSprintMemberRequest) returns (letscrum.api.project.v1.UpdateSprintMemberResponse) {
     option (google.api.http) = {
-      put: "/api/v1/projects/{project_id}/sprints/{sprint_id}/members/{user_id}"
+      put: "/api/v1/projects/{project_id}/sprints/{sprint_id}/members"
       body: "*"
     };
   }

@@ -29,9 +29,16 @@ func (s SprintMemberDao) Add(sprintID int64, userID int64) (bool, error) {
 	panic("implement me")
 }
 
-func (s SprintMemberDao) Update(sprintID, userID int64) (bool, error) {
-	//TODO implement me
-	panic("implement me")
+func (s SprintMemberDao) Update(sprintMembers []*model.SprintMember) (bool, error) {
+	for _, m := range sprintMembers {
+		if err := s.DB.Model(&m).Updates(model.SprintMember{
+			Role:     m.Role,
+			Capacity: m.Capacity,
+		}).Error; err != nil {
+			return false, nil
+		}
+	}
+	return true, nil
 }
 
 func (s SprintMemberDao) Remove(sprintID, userID int64) (bool, error) {
