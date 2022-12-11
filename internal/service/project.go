@@ -223,23 +223,16 @@ func (s *ProjectService) Update(ctx context.Context, req *projectv1.UpdateProjec
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
-	if !jwt.IsSuperAdmin {
-		return nil, status.Error(codes.PermissionDenied, err.Error())
-	}
-	member, err := s.projectMemberDao.Get(req.ProjectId, cast.ToInt64(jwt.Id))
+	myMember, err := s.projectMemberDao.Get(req.ProjectId, cast.ToInt64(jwt.Id))
 	if err != nil {
 		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
-	if !member.IsAdmin {
+	if !myMember.IsAdmin || !jwt.IsSuperAdmin {
 		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
 	project, err := s.projectDao.Get(req.ProjectId)
 	if err != nil {
-		result := status.Convert(err)
-		if result.Code() == codes.NotFound {
-			return nil, status.Errorf(codes.NotFound, "get book err: %d not found", req.ProjectId)
-		}
-		return nil, status.Error(codes.Unknown, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 	project.DisplayName = req.DisplayName
 	project.Description = req.Description

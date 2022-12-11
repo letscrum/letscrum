@@ -64,14 +64,11 @@ func (s *SprintMemberService) Update(ctx context.Context, req *projectv1.UpdateS
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
-	if !jwt.IsSuperAdmin {
-		return nil, status.Error(codes.PermissionDenied, err.Error())
-	}
 	myMember, err := s.projectMemberDao.Get(req.ProjectId, cast.ToInt64(jwt.Id))
 	if err != nil {
 		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
-	if !myMember.IsAdmin {
+	if !myMember.IsAdmin || !jwt.IsSuperAdmin {
 		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
 
