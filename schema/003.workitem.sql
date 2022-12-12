@@ -34,12 +34,15 @@ CREATE TABLE `workitem` (
   `title` varchar(50) NOT NULL,
   `type` varchar(50) NOT NULL,
   `description` varchar(500) NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `assign_id` bigint(20) unsigned DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_workitem_project_id` FOREIGN KEY (`project_id`) REFERENCES `project` (`id`),
   CONSTRAINT `fk_workitem_sprint_id` FOREIGN KEY (`sprint_id`) REFERENCES `sprint` (`id`),
-  CONSTRAINT `fk_workitem_feature_id` FOREIGN KEY (`feature_id`) REFERENCES `feature` (`id`)
+  CONSTRAINT `fk_workitem_feature_id` FOREIGN KEY (`feature_id`) REFERENCES `feature` (`id`),
+  CONSTRAINT `fk_workitem_sprint_member_id` FOREIGN KEY (`assign_id`) REFERENCES `sprint_member` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `task` (
@@ -49,12 +52,16 @@ CREATE TABLE `task` (
   `workitem_id` bigint(20) unsigned DEFAULT 0,
   `title` varchar(50) NOT NULL,
   `description` varchar(500) NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `assign_id` bigint(20) unsigned DEFAULT 0,
+  `remaining` float unsigned DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_task_project_id` FOREIGN KEY (`project_id`) REFERENCES `project` (`id`),
   CONSTRAINT `fk_task_sprint_id` FOREIGN KEY (`sprint_id`) REFERENCES `sprint` (`id`),
-  CONSTRAINT `fk_task_workitem_id` FOREIGN KEY (`workitem_id`) REFERENCES `workitem` (`id`)
+  CONSTRAINT `fk_task_workitem_id` FOREIGN KEY (`workitem_id`) REFERENCES `workitem` (`id`),
+  CONSTRAINT `fk_task_sprint_member_id` FOREIGN KEY (`assign_id`) REFERENCES `sprint_member` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `workitem_log` (

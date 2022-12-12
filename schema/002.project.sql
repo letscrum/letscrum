@@ -46,7 +46,7 @@ CREATE TABLE `sprint_member` (
   `sprint_id` bigint(20) unsigned NOT NULL,
   `user_id` bigint(20) unsigned NOT NULL,
   `role` varchar(50) DEFAULT NULL,
-  `capacity` int(11) NOT NULL DEFAULT 0,
+  `capacity` float NOT NULL DEFAULT 0,
   `deleted_at` timestamp DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),

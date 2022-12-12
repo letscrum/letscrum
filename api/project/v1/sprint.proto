@@ -33,7 +33,7 @@ message SprintMember {
   string user_name = 4;
   string user_email = 5;
   string role = 6;
-  int32 capacity = 7;
+  float capacity = 7;
 }
 
 message CreateSprintRequest {
@@ -93,6 +93,8 @@ message AddSprintMemberRequest {
   int64 project_id = 1;
   int64 sprint_id = 2;
   int64 user_id = 3;
+  string role = 4;
+  float capacity = 5;
 }
 
 message AddSprintMemberResponse {
