@@ -77,20 +77,20 @@ func (s *SprintService) List(ctx context.Context, req *projectv1.ListSprintReque
 	var list []*projectv1.Sprint
 	hasCurrent := false
 	for _, s := range sprints {
-		var sprintStatus projectv1.SprintStatus
+		var sprintStatus projectv1.Sprint_SprintStatus
 		switch {
 		case time.Now().After(s.StartDate) && time.Now().Before(s.EndDate) && !hasCurrent:
-			sprintStatus = projectv1.SprintStatus_CURRENT
+			sprintStatus = projectv1.Sprint_Current
 			hasCurrent = true
 			break
 		case time.Now().After(s.StartDate) && time.Now().Before(s.EndDate) && hasCurrent:
-			sprintStatus = projectv1.SprintStatus_FUTURE
+			sprintStatus = projectv1.Sprint_Future
 			break
 		case time.Now().After(s.EndDate):
-			sprintStatus = projectv1.SprintStatus_PAST
+			sprintStatus = projectv1.Sprint_Past
 			break
 		case time.Now().Before(s.StartDate):
-			sprintStatus = projectv1.SprintStatus_FUTURE
+			sprintStatus = projectv1.Sprint_Future
 			break
 		}
 		var sprint = &projectv1.Sprint{

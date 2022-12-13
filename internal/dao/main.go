@@ -8,4 +8,6 @@ type Interface interface {
 	ProjectMemberDao() ProjectMemberDao
 	SprintDao() SprintDao
 	SprintMemberDao() SprintMemberDao
+	WorkItemDao() WorkItemDao
+	TaskDao() TaskDao
 }

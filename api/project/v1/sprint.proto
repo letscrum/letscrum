@@ -17,9 +17,9 @@ message Sprint {
   int64 updated_at = 7;
   enum SprintStatus {
     UNKNOWN = 0;
-    PAST = 1;
-    CURRENT = 2;
-    FUTURE = 3;
+    Past = 1;
+    Current = 2;
+    Future = 3;
   }
   SprintStatus status = 8;
   repeated letscrum.api.user.v1.User members = 9;

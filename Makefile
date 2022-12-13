@@ -51,6 +51,7 @@ api_gen:
 		api/letscrum/v1/letscrum.proto \
 		api/project/v1/project.proto \
 		api/project/v1/sprint.proto \
+		api/item/v1/item.proto \
 		api/item/v1/epic.proto \
 		api/item/v1/feature.proto \
 		api/item/v1/work_item.proto \

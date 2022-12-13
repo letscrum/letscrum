@@ -81,7 +81,7 @@ func (s *ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReque
 				Name:      s.Name,
 				StartDate: s.StartDate.Unix(),
 				EndDate:   s.EndDate.Unix(),
-				Status:    projectv1.SprintStatus_UNKNOWN,
+				Status:    projectv1.Sprint_UNKNOWN,
 				CreatedAt: s.CreatedAt.Unix(),
 				UpdatedAt: s.UpdatedAt.Unix(),
 			}
@@ -93,7 +93,7 @@ func (s *ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReque
 				Name:      s.Name,
 				StartDate: s.StartDate.Unix(),
 				EndDate:   s.EndDate.Unix(),
-				Status:    projectv1.SprintStatus_CURRENT,
+				Status:    projectv1.Sprint_Current,
 				CreatedAt: s.CreatedAt.Unix(),
 				UpdatedAt: s.UpdatedAt.Unix(),
 			}
@@ -111,10 +111,10 @@ func (s *ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReque
 				Name:         project.CreatedUser.Name,
 				IsSuperAdmin: project.CreatedUser.IsSuperAdmin,
 			},
-			Members:   memberList,
-			Sprint:    &sprint,
-			CreatedAt: project.CreatedAt.Unix(),
-			UpdatedAt: project.UpdatedAt.Unix(),
+			Members:       memberList,
+			CurrentSprint: &sprint,
+			CreatedAt:     project.CreatedAt.Unix(),
+			UpdatedAt:     project.UpdatedAt.Unix(),
 		},
 	}, nil
 }

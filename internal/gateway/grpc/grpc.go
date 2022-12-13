@@ -59,6 +59,10 @@ func Run(ctx context.Context, network, address string) error {
 	v1.RegisterSprintServer(s, sprintService)
 	sprintMemberService := service.NewSprintMemberService(daoInterface)
 	v1.RegisterSprintMemberServer(s, sprintMemberService)
+	workItemService := service.NewWorkItemService(daoInterface)
+	v1.RegisterWorkItemServer(s, workItemService)
+	taskService := service.NewTaskService(daoInterface)
+	v1.RegisterTaskServer(s, taskService)
 
 	go func() {
 		defer s.GracefulStop()

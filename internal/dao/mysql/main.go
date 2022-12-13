@@ -13,6 +13,14 @@ type Dao struct {
 	DB *gorm.DB
 }
 
+func (d *Dao) WorkItemDao() dao.WorkItemDao {
+	return NewWorkItemDao(d.DB)
+}
+
+func (d *Dao) TaskDao() dao.TaskDao {
+	return NewTaskDao(d.DB)
+}
+
 func (d *Dao) LetscrumDao() dao.LetscrumDao {
 	return NewLetscrumDao(d.DB)
 }
