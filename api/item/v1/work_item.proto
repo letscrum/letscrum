@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+import "api/general/v1/common.proto";
+import "api/user/v1/user.proto";
+
+package letscrum.api.item.v1;
+
+option go_package = "github.com/letscrum/letscrum/api/item/v1";
+
+enum WorkItemType {
+  UNKNOWN = 0;
+  Backlog = 1;
+  Bug = 2;
+}
+
+message WorkItem {
+  int64 id = 1;
+  int64 project_id = 2;
+  int64 sprint_id = 3;
+  int64 feature_id = 4;
+  string title = 5;
+  WorkItemType type = 6;
+  string description = 7;
+  enum WorkItemStatus {
+    UNKNOWN = 0;
+    New = 1;
+    Approved = 2;
+    Committed = 3;
+    Done = 4;
+    Removed = 5;
+  }
+  WorkItemStatus status = 8;
+  letscrum.api.user.v1.User assign_to = 9;
+  letscrum.api.user.v1.User created_by = 10;
+  int64 created_at = 11;
+  int64 updated_at = 12;
+}
+
+message CreateWorkItemRequest {
+  int64 project_id = 1;
+  int64 sprint_id = 2;
+  int64 feature_id = 3;
+  string title = 4;
+}
+
+message CreateWorkItemResponse {
+  bool success = 1;
+}
+
+message GetWorkItemRequest {
+  int64 project_id = 1;
+  int64 work_item_id = 2;
+}
+
+message GetWorkItemResponse {
+  WorkItem items = 1;
+}
+
+message ListWorkItemRequest {
+  int64 project_id = 1;
+  int32 page = 2;
+  int32 size = 3;
+  string keyword = 4;
+}
+
+message ListWorkItemResponse {
+  repeated WorkItem items = 1;
+  letscrum.api.general.v1.Pagination pagination = 2;
+}

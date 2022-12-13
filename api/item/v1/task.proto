@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+import "api/general/v1/common.proto";
+import "api/user/v1/user.proto";
+
+package letscrum.api.item.v1;
+
+option go_package = "github.com/letscrum/letscrum/api/item/v1";
+
+message Task {
+  int64 id = 1;
+  int64 project_id = 2;
+  int64 sprint_id = 3;
+  int64 work_item_id = 4;
+  string title = 5;
+  string description = 6;
+  enum TaskStatus {
+    UNKNOWN = 0;
+    ToDo = 1;
+    InProgress = 2;
+    Done = 3;
+    Removed = 4;
+  }
+  TaskStatus status = 7;
+  letscrum.api.user.v1.User assign_to = 8;
+  letscrum.api.user.v1.User created_by = 9;
+  int64 created_at = 10;
+  int64 updated_at = 11;
+}
+
+message CreateTaskRequest {
+  int64 project_id = 1;
+  int64 sprint_id = 2;
+  int64 work_item_id = 3;
+  string title = 4;
+}
+
+message CreateTaskResponse {
+  bool success = 1;
+}
+
+message GetTaskRequest {
+  int64 project_id = 1;
+  int64 work_item_id = 2;
+  int64 task_id = 3;
+}
+
+message GetTaskResponse {
+  Task items = 1;
+}
+
+message ListTaskRequest {
+  int64 project_id = 1;
+  int64 work_item_id = 2;
+  int32 page = 3;
+  int32 size = 4;
+  string keyword = 5;
+}
+
+message ListTaskResponse {
+  repeated Task items = 1;
+  letscrum.api.general.v1.Pagination pagination = 2;
+}

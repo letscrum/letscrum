@@ -7,13 +7,6 @@ package letscrum.api.project.v1;
 
 option go_package = "github.com/letscrum/letscrum/api/project/v1";
 
-enum SprintStatus {
-  UNKNOWN = 0;
-  PAST = 1;
-  CURRENT = 2;
-  FUTURE = 3;
-}
-
 message Sprint {
   int64 id = 1;
   int64 project_id = 2;
@@ -22,6 +15,12 @@ message Sprint {
   int64 end_date = 5;
   int64 created_at = 6;
   int64 updated_at = 7;
+  enum SprintStatus {
+    UNKNOWN = 0;
+    PAST = 1;
+    CURRENT = 2;
+    FUTURE = 3;
+  }
   SprintStatus status = 8;
   repeated letscrum.api.user.v1.User members = 9;
 }
