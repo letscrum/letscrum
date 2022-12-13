@@ -51,7 +51,8 @@ api_gen:
 		api/letscrum/v1/letscrum.proto \
 		api/project/v1/project.proto \
 		api/user/v1/user.proto \
-		api/project/v1/sprint.proto
+		api/project/v1/sprint.proto \
+		api/item/v1/item.proto
 	cp api/letscrum/v1/letscrum.swagger.json docs/swagger-ui/letscrum.swagger.json
 
 api_clean:
