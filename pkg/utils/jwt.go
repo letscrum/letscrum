@@ -7,17 +7,29 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-func GenerateTokens(userId string) (string, string, error) {
+type LetscrumClaims struct {
+	jwt.StandardClaims
+
+	IsSuperAdmin bool `json:"is_super_admin"`
+}
+
+func GenerateTokens(userId string, isSuperAdmin bool) (string, string, error) {
 	nowTime := time.Now()
 	accessTokenExpireTime := nowTime.Add(time.Hour * 720)
-	accessTokenClaims := jwt.StandardClaims{
-		ExpiresAt: accessTokenExpireTime.Unix(),
-		Id:        userId,
+	accessTokenClaims := LetscrumClaims{
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: accessTokenExpireTime.Unix(),
+			Id:        userId,
+		},
+		IsSuperAdmin: isSuperAdmin,
 	}
 	refreshTokenExpireTime := nowTime.Add(time.Hour * 720 * 2)
-	refreshTokenClaims := jwt.StandardClaims{
-		ExpiresAt: refreshTokenExpireTime.Unix(),
-		Id:        userId,
+	refreshTokenClaims := LetscrumClaims{
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: refreshTokenExpireTime.Unix(),
+			Id:        userId,
+		},
+		IsSuperAdmin: isSuperAdmin,
 	}
 	accessToken, errAccessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessTokenClaims).SignedString([]byte(os.Getenv("JWT_SECRET")))
 	if errAccessToken != nil {
@@ -31,12 +43,12 @@ func GenerateTokens(userId string) (string, string, error) {
 }
 
 // ParseToken parsing token
-func ParseToken(token string) (*jwt.StandardClaims, error) {
-	tokenClaims, err := jwt.ParseWithClaims(token, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+func ParseToken(token string) (*LetscrumClaims, error) {
+	tokenClaims, err := jwt.ParseWithClaims(token, &LetscrumClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(os.Getenv("JWT_SECRET")), nil
 	})
 	if tokenClaims != nil {
-		if claims, ok := tokenClaims.Claims.(*jwt.StandardClaims); ok && tokenClaims.Valid {
+		if claims, ok := tokenClaims.Claims.(*LetscrumClaims); ok && tokenClaims.Valid {
 			return claims, nil
 		}
 	}

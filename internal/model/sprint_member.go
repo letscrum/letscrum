@@ -3,13 +3,12 @@ package model
 type SprintMember struct {
 	Model
 
-	SprintID int64  `json:"sprint_id"`
-	UserID   int64  `json:"user_id"`
-	RoleID   int64  `json:"role_id"`
-	Capacity int32  `json:"capacity"`
-	User     User   `gorm:"foreignKey:UserID"`
-	Sprint   Sprint `gorm:"foreignKey:SprintID"`
-	Role     Role   `gorm:"foreignKey:RoleID"`
+	SprintID int64   `json:"sprint_id"`
+	UserID   int64   `json:"user_id"`
+	Role     string  `json:"role"`
+	Capacity float32 `json:"capacity"`
+	Sprint   Sprint  `gorm:"foreignKey:SprintID"`
+	User     User    `gorm:"foreignKey:UserID"`
 }
 
 //

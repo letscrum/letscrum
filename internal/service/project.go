@@ -12,20 +12,23 @@ import (
 	"github.com/spf13/cast"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"time"
 )
 
 type ProjectService struct {
 	v1.UnimplementedProjectServer
 	projectDao       dao.ProjectDao
 	userDao          dao.UserDao
-	proejctMemberDao dao.ProjectMemberDao
+	projectMemberDao dao.ProjectMemberDao
+	sprintDao        dao.SprintDao
 }
 
 func NewProjectService(dao dao.Interface) *ProjectService {
 	return &ProjectService{
 		projectDao:       dao.ProjectDao(),
 		userDao:          dao.UserDao(),
-		proejctMemberDao: dao.ProjectMemberDao(),
+		projectMemberDao: dao.ProjectMemberDao(),
+		sprintDao:        dao.SprintDao(),
 	}
 }
 
@@ -45,20 +48,57 @@ func (s *ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReque
 	if project.ID == 0 {
 		return nil, status.Error(codes.NotFound, "project not fount.")
 	}
-	members, err := s.proejctMemberDao.List(req.ProjectId, 1, 999)
+	members, err := s.projectMemberDao.List(req.ProjectId, 1, 999)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
-	var memberlist []*projectv1.ProjectMember
+	var memberList []*projectv1.ProjectMember
 	for _, m := range members {
 		var member = &projectv1.ProjectMember{
+			Id:             m.ID,
 			UserId:         m.UserID,
 			ProjectId:      m.ProjectID,
 			UserName:       m.User.Name,
 			IsSuperAdmin:   m.User.IsSuperAdmin,
 			IsProjectAdmin: m.IsAdmin,
 		}
-		memberlist = append(memberlist, member)
+		memberList = append(memberList, member)
+	}
+	sprints, err := s.sprintDao.List(req.ProjectId, 1, 999, "")
+	if err != nil {
+		result := status.Convert(err)
+		if result.Code() == codes.NotFound {
+			return nil, status.Errorf(codes.NotFound, "not found.")
+		}
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	sprint := projectv1.Sprint{}
+	for i, s := range sprints {
+		if i == 0 {
+			sprint = projectv1.Sprint{
+				Id:        s.ID,
+				ProjectId: s.ProjectID,
+				Name:      s.Name,
+				StartDate: s.StartDate.Unix(),
+				EndDate:   s.EndDate.Unix(),
+				Status:    projectv1.Sprint_UNKNOWN,
+				CreatedAt: s.CreatedAt.Unix(),
+				UpdatedAt: s.UpdatedAt.Unix(),
+			}
+		}
+		if time.Now().After(s.StartDate) && time.Now().Before(s.EndDate) {
+			sprint = projectv1.Sprint{
+				Id:        s.ID,
+				ProjectId: s.ProjectID,
+				Name:      s.Name,
+				StartDate: s.StartDate.Unix(),
+				EndDate:   s.EndDate.Unix(),
+				Status:    projectv1.Sprint_Current,
+				CreatedAt: s.CreatedAt.Unix(),
+				UpdatedAt: s.UpdatedAt.Unix(),
+			}
+			break
+		}
 	}
 	return &projectv1.GetProjectResponse{
 		Item: &projectv1.Project{
@@ -71,9 +111,10 @@ func (s *ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReque
 				Name:         project.CreatedUser.Name,
 				IsSuperAdmin: project.CreatedUser.IsSuperAdmin,
 			},
-			Members:   memberlist,
-			CreatedAt: project.CreatedAt.Unix(),
-			UpdatedAt: project.UpdatedAt.Unix(),
+			Members:       memberList,
+			CurrentSprint: &sprint,
+			CreatedAt:     project.CreatedAt.Unix(),
+			UpdatedAt:     project.UpdatedAt.Unix(),
 		},
 	}, nil
 }
@@ -106,12 +147,13 @@ func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectReq
 			CreatedAt: p.CreatedAt.Unix(),
 			UpdatedAt: p.UpdatedAt.Unix(),
 		}
-		members, err := s.proejctMemberDao.List(p.ID, 1, 999)
+		members, err := s.projectMemberDao.List(p.ID, 1, 999)
 		if err != nil {
 			return nil, status.Error(codes.Unknown, err.Error())
 		}
 		for _, m := range members {
 			var member = &projectv1.ProjectMember{
+				Id:             m.ID,
 				UserId:         m.UserID,
 				ProjectId:      m.ProjectID,
 				UserName:       m.User.Name,
@@ -138,6 +180,9 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
+	if !jwt.IsSuperAdmin {
+		return nil, status.Error(codes.PermissionDenied, err.Error())
+	}
 	if req.DisplayName == "" {
 		return nil, status.Error(codes.InvalidArgument, "project display name can't be empty.")
 	}
@@ -162,7 +207,7 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 		}
 	}
 	if len(userIDs) > 0 {
-		successMembers, err := s.proejctMemberDao.Add(id, userIDs)
+		successMembers, err := s.projectMemberDao.Add(id, userIDs)
 		if err != nil {
 			return nil, status.Error(codes.Unknown, err.Error())
 		}
@@ -178,20 +223,16 @@ func (s *ProjectService) Update(ctx context.Context, req *projectv1.UpdateProjec
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
-	user, err := s.userDao.Get(cast.ToInt64(jwt.Id))
+	myMember, err := s.projectMemberDao.Get(req.ProjectId, cast.ToInt64(jwt.Id))
 	if err != nil {
-		return nil, status.Error(codes.NotFound, err.Error())
+		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
-	if !user.IsSuperAdmin {
+	if !myMember.IsAdmin || !jwt.IsSuperAdmin {
 		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
 	project, err := s.projectDao.Get(req.ProjectId)
 	if err != nil {
-		result := status.Convert(err)
-		if result.Code() == codes.NotFound {
-			return nil, status.Errorf(codes.NotFound, "get book err: %d not found", req.ProjectId)
-		}
-		return nil, status.Error(codes.Unknown, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 	project.DisplayName = req.DisplayName
 	project.Description = req.Description

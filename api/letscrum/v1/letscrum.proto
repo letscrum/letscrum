@@ -5,6 +5,11 @@ import "google/api/annotations.proto";
 import "api/general/v1/letscrum.proto";
 import "api/project/v1/project.proto";
 import "api/project/v1/sprint.proto";
+import "api/item/v1/item.proto";
+import "api/item/v1/epic.proto";
+import "api/item/v1/feature.proto";
+import "api/item/v1/work_item.proto";
+import "api/item/v1/task.proto";
 import "api/user/v1/user.proto";
 
 option go_package = "github.com/letscrum/letscrum/api/letscrum/v1";
@@ -148,7 +153,7 @@ service SprintMember {
 
   rpc Update(letscrum.api.project.v1.UpdateSprintMemberRequest) returns (letscrum.api.project.v1.UpdateSprintMemberResponse) {
     option (google.api.http) = {
-      put: "/api/v1/projects/{project_id}/sprints/{sprint_id}/members/{user_id}"
+      put: "/api/v1/projects/{project_id}/sprints/{sprint_id}/members"
       body: "*"
     };
   }
@@ -168,6 +173,72 @@ service SprintMember {
   rpc List(letscrum.api.project.v1.ListSprintMemberRequest) returns (letscrum.api.project.v1.ListSprintMemberResponse) {
     option (google.api.http) = {
       get: "/api/v1/projects/{project_id}/sprints/{sprint_id}/members"
+    };
+  }
+}
+
+service Item {
+  rpc List(letscrum.api.item.v1.ListItemRequest) returns (letscrum.api.item.v1.ListItemResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/projects/{project_id}/items"
+    };
+  }
+}
+
+service Epic {
+  rpc List(letscrum.api.item.v1.ListEpicRequest) returns (letscrum.api.item.v1.ListEpicResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/projects/{project_id}/epics"
+    };
+  }
+}
+
+service Feature {
+  rpc List(letscrum.api.item.v1.ListFeatureRequest) returns (letscrum.api.item.v1.ListFeatureResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/projects/{project_id}/features"
+    };
+  }
+}
+
+service WorkItem {
+  rpc Create(letscrum.api.item.v1.CreateWorkItemRequest) returns (letscrum.api.item.v1.CreateWorkItemResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/projects/{project_id}/workitems"
+      body: "*"
+    };
+  }
+
+  rpc List(letscrum.api.item.v1.ListWorkItemRequest) returns (letscrum.api.item.v1.ListWorkItemResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/projects/{project_id}/workitems"
+    };
+  }
+
+  rpc Get(letscrum.api.item.v1.GetWorkItemRequest) returns (letscrum.api.item.v1.GetWorkItemResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/projects/{project_id}/workitems/{work_item_id}"
+    };
+  }
+}
+
+service Task {
+  rpc Create(letscrum.api.item.v1.CreateTaskRequest) returns (letscrum.api.item.v1.CreateTaskResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/projects/{project_id}/workitems/{work_item_id}/tasks"
+      body: "*"
+    };
+  }
+
+  rpc List(letscrum.api.item.v1.ListTaskRequest) returns (letscrum.api.item.v1.ListTaskResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/projects/{project_id}/workitems/{work_item_id}/tasks"
+    };
+  }
+
+  rpc Get(letscrum.api.item.v1.GetTaskRequest) returns (letscrum.api.item.v1.GetTaskResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/projects/{project_id}/workitems/{work_item_id}/tasks/{task_id}"
     };
   }
 }

@@ -15,8 +15,24 @@ message Sprint {
   int64 end_date = 5;
   int64 created_at = 6;
   int64 updated_at = 7;
-  bool is_current = 8;
+  enum SprintStatus {
+    UNKNOWN = 0;
+    Past = 1;
+    Current = 2;
+    Future = 3;
+  }
+  SprintStatus status = 8;
   repeated letscrum.api.user.v1.User members = 9;
+}
+
+message SprintMember {
+  int64 id = 1;
+  int64 user_id = 2;
+  int64 sprint_id = 3;
+  string user_name = 4;
+  string user_email = 5;
+  string role = 6;
+  float capacity = 7;
 }
 
 message CreateSprintRequest {
@@ -55,6 +71,7 @@ message ListSprintRequest {
   int64 project_id = 1;
   int32 page = 2;
   int32 size = 3;
+  string keyword = 4;
 }
 
 message ListSprintResponse {
@@ -75,6 +92,8 @@ message AddSprintMemberRequest {
   int64 project_id = 1;
   int64 sprint_id = 2;
   int64 user_id = 3;
+  string role = 4;
+  float capacity = 5;
 }
 
 message AddSprintMemberResponse {
@@ -84,9 +103,7 @@ message AddSprintMemberResponse {
 message UpdateSprintMemberRequest {
   int64 project_id = 1;
   int64 sprint_id = 2;
-  int64 user_id = 3;
-  int64 role_id = 4;
-  int32 capacity = 5;
+  repeated SprintMember members = 3;
 }
 
 message UpdateSprintMemberResponse {
@@ -111,7 +128,7 @@ message ListSprintMemberRequest {
 }
 
 message ListSprintMemberResponse {
-  repeated letscrum.api.user.v1.User items = 1;
+  repeated SprintMember items = 1;
   letscrum.api.general.v1.Pagination pagination = 2;
 }
 

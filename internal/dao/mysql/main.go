@@ -13,6 +13,14 @@ type Dao struct {
 	DB *gorm.DB
 }
 
+func (d *Dao) WorkItemDao() dao.WorkItemDao {
+	return NewWorkItemDao(d.DB)
+}
+
+func (d *Dao) TaskDao() dao.TaskDao {
+	return NewTaskDao(d.DB)
+}
+
 func (d *Dao) LetscrumDao() dao.LetscrumDao {
 	return NewLetscrumDao(d.DB)
 }
@@ -27,6 +35,14 @@ func (d *Dao) ProjectDao() dao.ProjectDao {
 
 func (d *Dao) ProjectMemberDao() dao.ProjectMemberDao {
 	return NewProjectMemberDao(d.DB)
+}
+
+func (d *Dao) SprintDao() dao.SprintDao {
+	return NewSprintDao(d.DB)
+}
+
+func (d *Dao) SprintMemberDao() dao.SprintMemberDao {
+	return NewSprintMemberDao(d.DB)
 }
 
 func GetDao(opts *db.Options) (dao.Interface, error) {
