@@ -21,6 +21,21 @@
       "name": "SprintMember"
     },
     {
+      "name": "Item"
+    },
+    {
+      "name": "Epic"
+    },
+    {
+      "name": "Feature"
+    },
+    {
+      "name": "WorkItem"
+    },
+    {
+      "name": "Task"
+    },
+    {
       "name": "User"
     }
   ],
@@ -238,6 +253,159 @@
         ],
         "tags": [
           "Project"
+        ]
+      }
+    },
+    "/api/v1/projects/{projectId}/epics": {
+      "get": {
+        "operationId": "Epic_List",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListEpicResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Epic"
+        ]
+      }
+    },
+    "/api/v1/projects/{projectId}/features": {
+      "get": {
+        "operationId": "Feature_List",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListFeatureResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Feature"
+        ]
+      }
+    },
+    "/api/v1/projects/{projectId}/items": {
+      "get": {
+        "operationId": "Item_List",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListItemResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Item"
         ]
       }
     },
@@ -819,6 +987,65 @@
                 "userId": {
                   "type": "string",
                   "format": "int64"
+                },
+                "role": {
+                  "type": "string"
+                },
+                "capacity": {
+                  "type": "number",
+                  "format": "float"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "SprintMember"
+        ]
+      },
+      "put": {
+        "operationId": "SprintMember_Update",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UpdateSprintMemberResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "sprintId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "members": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/v1SprintMember"
+                  }
                 }
               }
             }
@@ -872,67 +1099,6 @@
         "tags": [
           "SprintMember"
         ]
-      },
-      "put": {
-        "operationId": "SprintMember_Update",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1UpdateSprintMemberResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "projectId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "sprintId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "roleId": {
-                  "type": "string",
-                  "format": "int64"
-                },
-                "capacity": {
-                  "type": "integer",
-                  "format": "int32"
-                }
-              }
-            }
-          }
-        ],
-        "tags": [
-          "SprintMember"
-        ]
       }
     },
     "/api/v1/projects/{projectId}/sprints/{sprintId}/members/{userId}/remove": {
@@ -977,6 +1143,301 @@
         ],
         "tags": [
           "SprintMember"
+        ]
+      }
+    },
+    "/api/v1/projects/{projectId}/workitems": {
+      "get": {
+        "operationId": "WorkItem_List",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListWorkItemResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "WorkItem"
+        ]
+      },
+      "post": {
+        "operationId": "WorkItem_Create",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CreateWorkItemResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "sprintId": {
+                  "type": "string",
+                  "format": "int64"
+                },
+                "featureId": {
+                  "type": "string",
+                  "format": "int64"
+                },
+                "title": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "WorkItem"
+        ]
+      }
+    },
+    "/api/v1/projects/{projectId}/workitems/{workItemId}": {
+      "get": {
+        "operationId": "WorkItem_Get",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetWorkItemResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "workItemId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "WorkItem"
+        ]
+      }
+    },
+    "/api/v1/projects/{projectId}/workitems/{workItemId}/tasks": {
+      "get": {
+        "operationId": "Task_List",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListTaskResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "workItemId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Task"
+        ]
+      },
+      "post": {
+        "operationId": "Task_Create",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CreateTaskResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "workItemId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "sprintId": {
+                  "type": "string",
+                  "format": "int64"
+                },
+                "title": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "Task"
+        ]
+      }
+    },
+    "/api/v1/projects/{projectId}/workitems/{workItemId}/tasks/{taskId}": {
+      "get": {
+        "operationId": "Task_Get",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetTaskResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "workItemId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Task"
         ]
       }
     },
@@ -1156,6 +1617,39 @@
     }
   },
   "definitions": {
+    "SprintSprintStatus": {
+      "type": "string",
+      "enum": [
+        "UNKNOWN",
+        "Past",
+        "Current",
+        "Future"
+      ],
+      "default": "UNKNOWN"
+    },
+    "TaskTaskStatus": {
+      "type": "string",
+      "enum": [
+        "UNKNOWN",
+        "ToDo",
+        "InProgress",
+        "Done",
+        "Removed"
+      ],
+      "default": "UNKNOWN"
+    },
+    "WorkItemWorkItemStatus": {
+      "type": "string",
+      "enum": [
+        "UNKNOWN",
+        "New",
+        "Approved",
+        "Committed",
+        "Done",
+        "Removed"
+      ],
+      "default": "UNKNOWN"
+    },
     "protobufAny": {
       "type": "object",
       "properties": {
@@ -1235,6 +1729,22 @@
         }
       }
     },
+    "v1CreateTaskResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        }
+      }
+    },
+    "v1CreateWorkItemResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        }
+      }
+    },
     "v1DeleteProjectResponse": {
       "type": "object",
       "properties": {
@@ -1248,6 +1758,24 @@
       "properties": {
         "success": {
           "type": "boolean"
+        }
+      }
+    },
+    "v1Epic": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "v1Feature": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },
@@ -1267,6 +1795,14 @@
         }
       }
     },
+    "v1GetTaskResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "$ref": "#/definitions/v1Task"
+        }
+      }
+    },
     "v1GetUserResponse": {
       "type": "object",
       "properties": {
@@ -1280,6 +1816,65 @@
       "properties": {
         "version": {
           "$ref": "#/definitions/v1Version"
+        }
+      }
+    },
+    "v1GetWorkItemResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "$ref": "#/definitions/v1WorkItem"
+        }
+      }
+    },
+    "v1Item": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "v1ListEpicResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1Epic"
+          }
+        },
+        "pagination": {
+          "$ref": "#/definitions/v1Pagination"
+        }
+      }
+    },
+    "v1ListFeatureResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1Feature"
+          }
+        },
+        "pagination": {
+          "$ref": "#/definitions/v1Pagination"
+        }
+      }
+    },
+    "v1ListItemResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1Item"
+          }
+        },
+        "pagination": {
+          "$ref": "#/definitions/v1Pagination"
         }
       }
     },
@@ -1317,7 +1912,7 @@
         "items": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/v1User"
+            "$ref": "#/definitions/v1SprintMember"
           }
         },
         "pagination": {
@@ -1332,6 +1927,20 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/v1Sprint"
+          }
+        },
+        "pagination": {
+          "$ref": "#/definitions/v1Pagination"
+        }
+      }
+    },
+    "v1ListTaskResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1Task"
           }
         },
         "pagination": {
@@ -1360,6 +1969,20 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/v1User"
+          }
+        },
+        "pagination": {
+          "$ref": "#/definitions/v1Pagination"
+        }
+      }
+    },
+    "v1ListWorkItemResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1WorkItem"
           }
         },
         "pagination": {
@@ -1416,12 +2039,19 @@
           "items": {
             "$ref": "#/definitions/v1ProjectMember"
           }
+        },
+        "currentSprint": {
+          "$ref": "#/definitions/v1Sprint"
         }
       }
     },
     "v1ProjectMember": {
       "type": "object",
       "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
         "userId": {
           "type": "string",
           "format": "int64"
@@ -1507,7 +2137,7 @@
           "format": "int64"
         },
         "status": {
-          "$ref": "#/definitions/v1SprintStatus"
+          "$ref": "#/definitions/SprintSprintStatus"
         },
         "members": {
           "type": "array",
@@ -1517,14 +2147,79 @@
         }
       }
     },
-    "v1SprintStatus": {
-      "type": "string",
-      "enum": [
-        "PAST",
-        "CURRENT",
-        "FUTURE"
-      ],
-      "default": "PAST"
+    "v1SprintMember": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "sprintId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "userName": {
+          "type": "string"
+        },
+        "userEmail": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "capacity": {
+          "type": "number",
+          "format": "float"
+        }
+      }
+    },
+    "v1Task": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "projectId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "sprintId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "workItemId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/TaskTaskStatus"
+        },
+        "assignUser": {
+          "$ref": "#/definitions/v1User"
+        },
+        "createdUser": {
+          "$ref": "#/definitions/v1User"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "int64"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
     },
     "v1Token": {
       "type": "object",
@@ -1617,6 +2312,68 @@
           "type": "string"
         }
       }
+    },
+    "v1WorkItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "projectId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "sprintId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "featureId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "title": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/definitions/v1WorkItemType"
+        },
+        "description": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/WorkItemWorkItemStatus"
+        },
+        "assignUser": {
+          "$ref": "#/definitions/v1User"
+        },
+        "createdUser": {
+          "$ref": "#/definitions/v1User"
+        },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1Task"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "int64"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "v1WorkItemType": {
+      "type": "string",
+      "enum": [
+        "UNKNOWN",
+        "Backlog",
+        "Bug"
+      ],
+      "default": "UNKNOWN"
     }
   }
 }
