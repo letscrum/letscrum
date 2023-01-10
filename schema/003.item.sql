@@ -99,5 +99,5 @@ CREATE TABLE `task_log` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
-  CONSTRAINT `fk_task_log_task_id` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`id`)
+  CONSTRAINT `fk_task_log_task_id` FOREIGN KEY (`task_id`) REFERENCES `task` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
