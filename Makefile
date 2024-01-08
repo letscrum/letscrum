@@ -44,9 +44,8 @@ api_gen:
 		--go_out=paths=source_relative:. \
 		--go-grpc_out=paths=source_relative:. \
 		--grpc-gateway_out=paths=source_relative:. \
-		--openapiv2_out=logtostderr=true:. \
 		--grpc-gateway-ts_out=paths=source_relative:./dist/sdk/ \
-		--validate_out=lang=go,paths=source_relative:. \
+		--openapiv2_out=logtostderr=true:. \
 		--openapiv2_opt allow_merge=true \
 		--openapiv2_opt output_format=json \
 		--openapiv2_opt merge_file_name="letscrum.swagger." \
