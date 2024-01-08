@@ -48,7 +48,6 @@ api_gen:
 		--openapiv2_out=logtostderr=true:. \
 		--openapiv2_opt allow_merge=true \
 		--openapiv2_opt output_format=json \
-		--openapiv2_opt merge_file_name="letscrum.swagger." \
 		api/general/v1/common.proto \
 		api/general/v1/letscrum.proto \
 		api/letscrum/v1/letscrum.proto \
