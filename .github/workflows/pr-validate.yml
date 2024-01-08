@@ -26,13 +26,11 @@ jobs:
 
     - name: Generate API
       run: make api_gen
-
-    - name: Lint
-      # https://golangci-lint.run/
+  
+    - name: Run golangci-lint
       uses: golangci/golangci-lint-action@v3
       with:
-        version: latest
-        args: --issues-exit-code=0 --timeout 10m
+        args: --verbose --timeout 6m
 
     - name: Build
       run: make build
