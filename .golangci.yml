@@ -5,6 +5,7 @@ run:
   skip-dirs:
     - dist/
     - pkg/
+    - third_party/
   skip-files:
     - ".*\\.pb\\.go$"
 # output configuration options

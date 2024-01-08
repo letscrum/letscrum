@@ -5,10 +5,9 @@ import (
 	"os"
 	"strings"
 
+	"github.com/letscrum/letscrum/tools/releasenoter/utils"
 	"github.com/pkg/errors"
 	"sigs.k8s.io/yaml"
-
-	"github.com/letscrum/letscrum/tools/releasenoter/utils"
 )
 
 var (

@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/letscrum/letscrum/internal/model"
-
 	"github.com/letscrum/letscrum/internal/dao"
+	"github.com/letscrum/letscrum/internal/model"
 	"github.com/letscrum/letscrum/pkg/db"
 	"gorm.io/gorm"
 )
