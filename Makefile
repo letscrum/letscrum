@@ -46,8 +46,6 @@ api_gen:
 		--grpc-gateway_out=paths=source_relative:. \
 		--grpc-gateway-ts_out=paths=source_relative:./dist/sdk/ \
 		--openapiv2_out=logtostderr=true:. \
-		#--openapiv2_opt allow_merge=true \
-		#--openapiv2_opt output_format=json \
 		api/general/v1/common.proto \
 		api/general/v1/letscrum.proto \
 		api/letscrum/v1/letscrum.proto \
