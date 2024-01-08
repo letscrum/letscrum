@@ -7,8 +7,8 @@ import (
 )
 
 type Model struct {
-	ID        int64          `json:"id" gorm:"primary_key"`
-	DeletedAt gorm.DeletedAt `json:"deleted_at" gorm:"default:null"`
-	CreatedAt time.Time      `json:"created_at" gorm:"default:null"`
-	UpdatedAt time.Time      `json:"updated_at" gorm:"default:null"`
+	ID        int64          `gorm:"column:id;primary_key"`
+	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at;default:null"`
+	CreatedAt time.Time      `gorm:"column:created_at;default:null"`
+	UpdatedAt time.Time      `gorm:"column:updated_at;default:null"`
 }

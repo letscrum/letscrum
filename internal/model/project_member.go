@@ -3,9 +3,9 @@ package model
 type ProjectMember struct {
 	Model
 
-	ProjectID int64   `json:"project_id"`
-	UserID    int64   `json:"user_id"`
-	IsAdmin   bool    `json:"is_admin"`
+	ProjectID int64   `gorm:"column:project_id"`
+	UserID    int64   `gorm:"column:user_id"`
+	IsAdmin   bool    `gorm:"column:is_admin"`
 	User      User    `gorm:"foreignKey:UserID"`
 	Project   Project `gorm:"foreignKey:ProjectID"`
 }

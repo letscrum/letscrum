@@ -3,10 +3,10 @@ package model
 type Project struct {
 	Model
 
-	Name        string `json:"name"`
-	DisplayName string `json:"display_name"`
-	Description string `json:"description"`
-	CreatedBy   int64  `json:"created_by"`
+	Name        string `gorm:"column:name;size:255"`
+	DisplayName string `gorm:"column:display_name;size:255"`
+	Description string `gorm:"column:description;size:5000"`
+	CreatedBy   int64  `gorm:"column:create_by"`
 	CreatedUser User   `gorm:"foreignKey:CreatedBy"`
 }
 

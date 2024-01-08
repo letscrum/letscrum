@@ -1044,6 +1044,7 @@
                 "members": {
                   "type": "array",
                   "items": {
+                    "type": "object",
                     "$ref": "#/definitions/v1SprintMember"
                   }
                 }
@@ -1674,6 +1675,7 @@
         "details": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/protobufAny"
           }
         }
@@ -1842,6 +1844,7 @@
         "items": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/v1Epic"
           }
         },
@@ -1856,6 +1859,7 @@
         "items": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/v1Feature"
           }
         },
@@ -1870,6 +1874,7 @@
         "items": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/v1Item"
           }
         },
@@ -1884,6 +1889,7 @@
         "items": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/v1User"
           }
         },
@@ -1898,6 +1904,7 @@
         "items": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/v1Project"
           }
         },
@@ -1912,6 +1919,7 @@
         "items": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/v1SprintMember"
           }
         },
@@ -1926,6 +1934,7 @@
         "items": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/v1Sprint"
           }
         },
@@ -1940,6 +1949,7 @@
         "items": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/v1Task"
           }
         },
@@ -1954,6 +1964,7 @@
         "items": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/v1Project"
           }
         },
@@ -1968,6 +1979,7 @@
         "items": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/v1User"
           }
         },
@@ -1982,6 +1994,7 @@
         "items": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/v1WorkItem"
           }
         },
@@ -2037,6 +2050,7 @@
         "members": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/v1ProjectMember"
           }
         },
@@ -2142,6 +2156,7 @@
         "members": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/v1User"
           }
         }
@@ -2353,6 +2368,7 @@
         "tasks": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/v1Task"
           }
         },
