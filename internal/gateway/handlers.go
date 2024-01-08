@@ -2,16 +2,17 @@ package gateway
 
 import (
 	"fmt"
-	"github.com/letscrum/letscrum/pkg/db"
-	"github.com/letscrum/letscrum/pkg/health"
-	"github.com/spf13/viper"
-	"gorm.io/gorm/logger"
 	golog "log"
 	"net/http"
 	"os"
 	"path"
 	"strings"
 	"time"
+
+	"github.com/letscrum/letscrum/pkg/db"
+	"github.com/letscrum/letscrum/pkg/health"
+	"github.com/spf13/viper"
+	"gorm.io/gorm/logger"
 
 	"github.com/golang/glog"
 	"google.golang.org/grpc"

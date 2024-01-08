@@ -3,6 +3,7 @@ package mid
 import (
 	"context"
 	"fmt"
+
 	"github.com/letscrum/letscrum/pkg/utils"
 
 	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"

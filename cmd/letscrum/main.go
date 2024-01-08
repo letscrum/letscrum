@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/letscrum/letscrum/internal/cmd"
 	"os"
+
+	"github.com/letscrum/letscrum/internal/cmd"
 )
 
 func main() {

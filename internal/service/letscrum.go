@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"strconv"
+
 	generalv1 "github.com/letscrum/letscrum/api/general/v1"
 	letscrumv1 "github.com/letscrum/letscrum/api/letscrum/v1"
 	userv1 "github.com/letscrum/letscrum/api/user/v1"
@@ -11,7 +13,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"strconv"
 )
 
 type LetscrumService struct {
