@@ -5,9 +5,66 @@ run:
   skip-dirs:
     - dist/
     - pkg/
+    - third_party/
   skip-files:
     - ".*\\.pb\\.go$"
 # output configuration options
+# output:
+#   format: colored-line-number
+# # Refer to https://golangci-lint.run/usage/linters
+# linters-settings:
+#   govet:
+#     # Disable analyzers by name.
+#     # Run `go tool vet help` to see all analyzers.
+#     disable:
+#       - stdmethods
+# linters:
+#   disable-all: true
+#   enable:
+#     - revive                   # Fast, configurable, extensible, flexible, and beautiful linter for Go. Drop-in replacement of golint.
+#     - asciicheck               # Simple linter to check that your code does not contain non-ASCII identifiers
+#     - deadcode                 # Finds unused code
+#     - depguard                 # Go linter that checks if package imports are in a list of acceptable packages
+#     - dogsled                  # Checks assignments with too many blank identifiers (e.g. x, _, _, _, := f())
+#     - dupl                     # Tool for code clone detection
+#     - durationcheck            # check for two durations multiplied together
+#     - exportloopref            # checks for pointers to enclosing loop variables
+#     #- gofmt                    # Gofmt checks whether code was gofmt-ed. By default this tool runs with -s option to check for code simplification
+#     #- gofumpt                  # Gofumpt checks whether code was gofumpt-ed.
+#     - goheader                 # Checks is file header matches to pattern
+#     #- goimports                # Goimports does everything that gofmt does. Additionally it checks unused imports
+#     - goprintffuncname         # Checks that printf-like functions are named with `f` at the end
+#     - gosimple                 # Linter for Go source code that specializes in simplifying a code
+#     - govet                    # Vet examines Go source code and reports suspicious constructs, such as Printf calls whose arguments do not align with the format string
+#     #- ifshort                  # Checks that your code uses short syntax for if-statements whenever possible
+#     - importas                 # Enforces consistent import aliases
+#     - ineffassign              # Detects when assignments to existing variables are not used
+#     - makezero                 # Finds slice declarations with non-zero initial length
+#     - misspell                 # Finds commonly misspelled English words in comments
+#     - nakedret                 # Finds naked returns in functions greater than a specified function length
+#     - predeclared              # find code that shadows one of Go's predeclared identifiers
+#     - staticcheck              # Staticcheck is a go vet on steroids, applying a ton of static analysis checks
+#     - stylecheck               # Stylecheck is a replacement for golint
+#     - thelper                  # thelper detects golang test helpers without t.Helper() call and checks the consistency of test helpers
+#     - typecheck                # Like the front-end of a Go compiler, parses and type-checks Go code
+#     - unconvert                # Remove unnecessary type conversions
+#     - unused                   # Checks Go code for unused constants, variables, functions and types
+#     - varcheck                 # Finds unused global variables and constants
+#     - godot                    # Check if comments end in a period
+#     - goconst
+#     #- wrapcheck
+#     #- ireturn                  # too noisy
+#     #- gocritic                 # disabled for bug： https://github.com/go-critic/go-critic/issues/1203
+#     #- nolintlint               # conflict with ireturn
+#     #- goerr113                 # like: wrapcheck
+#     #- prealloc                 # For most programs usage of prealloc will be a premature optimization
+#     #- wsl                      # too noisy
+#     #- whitespace               # Tool for detection of leading and trailing whitespace
+#     #- structcheck              # Finds unused struct fields
+#     #- rowserrcheck             # checks whether Err of rows is checked successfully
+#     #- nilerr                   # Finds the code that returns nil even if it checks that the error is not nil.
+# issues:
+#   exclude-use-default: true
 output:
   format: colored-line-number
 # Refer to https://golangci-lint.run/usage/linters
@@ -20,47 +77,11 @@ linters-settings:
 linters:
   disable-all: true
   enable:
-    - revive                   # Fast, configurable, extensible, flexible, and beautiful linter for Go. Drop-in replacement of golint.
-    - asciicheck               # Simple linter to check that your code does not contain non-ASCII identifiers
-    - deadcode                 # Finds unused code
-    - depguard                 # Go linter that checks if package imports are in a list of acceptable packages
-    - dogsled                  # Checks assignments with too many blank identifiers (e.g. x, _, _, _, := f())
-    - dupl                     # Tool for code clone detection
-    - durationcheck            # check for two durations multiplied together
-    - exportloopref            # checks for pointers to enclosing loop variables
-    #- gofmt                    # Gofmt checks whether code was gofmt-ed. By default this tool runs with -s option to check for code simplification
-    #- gofumpt                  # Gofumpt checks whether code was gofumpt-ed.
-    - goheader                 # Checks is file header matches to pattern
-    #- goimports                # Goimports does everything that gofmt does. Additionally it checks unused imports
-    - goprintffuncname         # Checks that printf-like functions are named with `f` at the end
-    - gosimple                 # Linter for Go source code that specializes in simplifying a code
-    - govet                    # Vet examines Go source code and reports suspicious constructs, such as Printf calls whose arguments do not align with the format string
-    #- ifshort                  # Checks that your code uses short syntax for if-statements whenever possible
-    - importas                 # Enforces consistent import aliases
-    - ineffassign              # Detects when assignments to existing variables are not used
-    - makezero                 # Finds slice declarations with non-zero initial length
-    - misspell                 # Finds commonly misspelled English words in comments
-    - nakedret                 # Finds naked returns in functions greater than a specified function length
-    - predeclared              # find code that shadows one of Go's predeclared identifiers
-    - staticcheck              # Staticcheck is a go vet on steroids, applying a ton of static analysis checks
-    - stylecheck               # Stylecheck is a replacement for golint
-    - thelper                  # thelper detects golang test helpers without t.Helper() call and checks the consistency of test helpers
-    - typecheck                # Like the front-end of a Go compiler, parses and type-checks Go code
-    - unconvert                # Remove unnecessary type conversions
-    - unused                   # Checks Go code for unused constants, variables, functions and types
-    - varcheck                 # Finds unused global variables and constants
-    - godot                    # Check if comments end in a period
-    - goconst
-    #- wrapcheck
-    #- ireturn                  # too noisy
-    #- gocritic                 # disabled for bug： https://github.com/go-critic/go-critic/issues/1203
-    #- nolintlint               # conflict with ireturn
-    #- goerr113                 # like: wrapcheck
-    #- prealloc                 # For most programs usage of prealloc will be a premature optimization
-    #- wsl                      # too noisy
-    #- whitespace               # Tool for detection of leading and trailing whitespace
-    #- structcheck              # Finds unused struct fields
-    #- rowserrcheck             # checks whether Err of rows is checked successfully
-    #- nilerr                   # Finds the code that returns nil even if it checks that the error is not nil.
+    - goimports
+    - gofmt
+    - misspell
+    - govet
+    - ineffassign
+    - staticcheck
 issues:
   exclude-use-default: true

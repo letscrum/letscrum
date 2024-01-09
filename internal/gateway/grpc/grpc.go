@@ -37,7 +37,7 @@ func Run(ctx context.Context, network, address string) error {
 	}()
 
 	//opts := grpc.UnaryInterceptor(
-	//	grpc_auth.UnaryServerInterceptor(mid.Auth),
+	//    grpc_auth.UnaryServerInterceptor(mid.Auth),
 	//)
 
 	s := grpc.NewServer()

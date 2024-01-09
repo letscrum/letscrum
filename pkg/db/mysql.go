@@ -3,12 +3,13 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"time"
+
 	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
-	"time"
 )
 
 type Options struct {

@@ -6,12 +6,8 @@ all: build
 build:
 	go build -o dist/letscrum ./cmd/letscrum/
 
-tool:
-	go vet ./...; true
-	gofmt -w .
-
 lint:
-	golint ./...
+	golangci-lint run --verbose --timeout 50m
 
 clean:
 	rm -rf go-gin-example
@@ -44,8 +40,8 @@ api_gen:
 		--go_out=paths=source_relative:. \
 		--go-grpc_out=paths=source_relative:. \
 		--grpc-gateway_out=paths=source_relative:. \
-		--openapiv2_out=logtostderr=true:. \
 		--grpc-gateway-ts_out=paths=source_relative:./dist/sdk/ \
+		--openapiv2_out=logtostderr=true:. \
 		api/general/v1/common.proto \
 		api/general/v1/letscrum.proto \
 		api/letscrum/v1/letscrum.proto \

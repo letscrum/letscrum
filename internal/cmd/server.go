@@ -3,14 +3,15 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/letscrum/letscrum/internal/gateway"
 	"github.com/letscrum/letscrum/internal/gateway/grpc"
 	"github.com/letscrum/letscrum/pkg/log"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
-	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"

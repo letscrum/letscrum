@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/letscrum/letscrum/internal/dao"
+	"github.com/letscrum/letscrum/internal/model"
 	"github.com/letscrum/letscrum/pkg/db"
 	"gorm.io/gorm"
 )
@@ -45,6 +46,10 @@ func (d *Dao) SprintMemberDao() dao.SprintMemberDao {
 	return NewSprintMemberDao(d.DB)
 }
 
+type ColumnType interface {
+	DatabaseTypeName() string // varchar
+}
+
 func GetDao(opts *db.Options) (dao.Interface, error) {
 	var daoInterface dao.Interface
 	var once sync.Once
@@ -68,11 +73,25 @@ func GetDao(opts *db.Options) (dao.Interface, error) {
 			Logger:                opts.Logger,
 		}
 		dbIns, err = db.NewGORM(options)
-		daoInterface = &Dao{dbIns}
 	})
 
-	if daoInterface == nil || err != nil {
-		return nil, fmt.Errorf("failed to get mysql letscrum dao, : %+v, error: %w", daoInterface, err)
+	initErr := dbIns.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
+		&model.User{},
+		&model.Project{},
+		&model.ProjectMember{},
+		&model.Sprint{},
+		&model.SprintMember{},
+		&model.WorkItem{},
+		&model.Task{},
+	)
+	if initErr != nil {
+		return nil, fmt.Errorf("failed to init mysql letscrum database: %w", err)
+	}
+
+	daoInterface = &Dao{dbIns}
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to get mysql letscrum dao: %+v, error: %w", daoInterface, err)
 	}
 
 	return daoInterface, nil
