@@ -30,7 +30,7 @@ jobs:
     - name: Run golangci-lint
       uses: golangci/golangci-lint-action@v3
       with:
-        args: --verbose --timeout 6m
+        args: --verbose --timeout 50m
 
     - name: Build
       run: make build

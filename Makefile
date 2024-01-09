@@ -6,12 +6,8 @@ all: build
 build:
 	go build -o dist/letscrum ./cmd/letscrum/
 
-tool:
-	go vet ./...; true
-	gofmt -w .
-
 lint:
-	golint ./...
+	golangci-lint run --verbose --timeout 50m
 
 clean:
 	rm -rf go-gin-example

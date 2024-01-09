@@ -75,7 +75,7 @@ func GetDao(opts *db.Options) (dao.Interface, error) {
 		dbIns, err = db.NewGORM(options)
 	})
 
-	err = dbIns.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
+	initErr := dbIns.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
 		&model.User{},
 		&model.Project{},
 		&model.ProjectMember{},
@@ -84,13 +84,13 @@ func GetDao(opts *db.Options) (dao.Interface, error) {
 		&model.WorkItem{},
 		&model.Task{},
 	)
-	if err != nil {
+	if initErr != nil {
 		return nil, fmt.Errorf("failed to init mysql letscrum database: %w", err)
 	}
 
 	daoInterface = &Dao{dbIns}
 
-	if daoInterface == nil || err != nil {
+	if err != nil {
 		return nil, fmt.Errorf("failed to get mysql letscrum dao: %+v, error: %w", daoInterface, err)
 	}
 
