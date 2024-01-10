@@ -42,8 +42,8 @@ func (s *SprintMemberService) List(ctx context.Context, req *projectv1.ListSprin
 			Id:        m.ID,
 			UserId:    m.UserID,
 			SprintId:  m.SprintID,
-			UserName:  m.User.Name,
-			UserEmail: m.User.Email,
+			UserName:  m.MemberUser.Name,
+			UserEmail: m.MemberUser.Email,
 			Role:      m.Role,
 			Capacity:  m.Capacity,
 		}

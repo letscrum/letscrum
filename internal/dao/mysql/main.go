@@ -81,8 +81,12 @@ func GetDao(opts *db.Options) (dao.Interface, error) {
 		&model.ProjectMember{},
 		&model.Sprint{},
 		&model.SprintMember{},
+		&model.Epic{},
+		&model.Feature{},
 		&model.WorkItem{},
+		&model.WorkItemLog{},
 		&model.Task{},
+		&model.TaskLog{},
 	)
 	if initErr != nil {
 		return nil, fmt.Errorf("failed to init mysql letscrum database: %w", err)

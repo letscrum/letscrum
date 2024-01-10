@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "api/letscrum/v1/letscrum.proto",
+    "title": "api/general/v1/common.proto",
     "version": "version not set"
   },
   "tags": [
@@ -208,15 +208,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "displayName": {
-                  "type": "string"
-                },
-                "description": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/ProjectUpdateBody"
             }
           }
         ],
@@ -482,16 +474,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "userId": {
-                  "type": "string",
-                  "format": "int64"
-                },
-                "isAdmin": {
-                  "type": "boolean"
-                }
-              }
+              "$ref": "#/definitions/ProjectMemberAddBody"
             }
           }
         ],
@@ -573,12 +556,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "isAdmin": {
-                  "type": "boolean"
-                }
-              }
+              "$ref": "#/definitions/ProjectMemberUpdateBody"
             }
           }
         ],
@@ -704,20 +682,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "type": "string"
-                },
-                "startDate": {
-                  "type": "string",
-                  "format": "int64"
-                },
-                "endDate": {
-                  "type": "string",
-                  "format": "int64"
-                }
-              }
+              "$ref": "#/definitions/SprintCreateBody"
             }
           }
         ],
@@ -835,20 +800,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "type": "string"
-                },
-                "startDate": {
-                  "type": "string",
-                  "format": "int64"
-                },
-                "endDate": {
-                  "type": "string",
-                  "format": "int64"
-                }
-              }
+              "$ref": "#/definitions/SprintUpdateBody"
             }
           }
         ],
@@ -982,20 +934,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "userId": {
-                  "type": "string",
-                  "format": "int64"
-                },
-                "role": {
-                  "type": "string"
-                },
-                "capacity": {
-                  "type": "number",
-                  "format": "float"
-                }
-              }
+              "$ref": "#/definitions/SprintMemberAddBody"
             }
           }
         ],
@@ -1039,16 +978,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "members": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "$ref": "#/definitions/v1SprintMember"
-                  }
-                }
-              }
+              "$ref": "#/definitions/SprintMemberUpdateBody"
             }
           }
         ],
@@ -1226,20 +1156,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "sprintId": {
-                  "type": "string",
-                  "format": "int64"
-                },
-                "featureId": {
-                  "type": "string",
-                  "format": "int64"
-                },
-                "title": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/WorkItemCreateBody"
             }
           }
         ],
@@ -1379,16 +1296,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "sprintId": {
-                  "type": "string",
-                  "format": "int64"
-                },
-                "title": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/TaskCreateBody"
             }
           }
         ],
@@ -1618,6 +1526,81 @@
     }
   },
   "definitions": {
+    "ProjectMemberAddBody": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "isAdmin": {
+          "type": "boolean"
+        }
+      }
+    },
+    "ProjectMemberUpdateBody": {
+      "type": "object",
+      "properties": {
+        "isAdmin": {
+          "type": "boolean"
+        }
+      }
+    },
+    "ProjectUpdateBody": {
+      "type": "object",
+      "properties": {
+        "displayName": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "SprintCreateBody": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "startDate": {
+          "type": "string",
+          "format": "int64"
+        },
+        "endDate": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "SprintMemberAddBody": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "role": {
+          "type": "string"
+        },
+        "capacity": {
+          "type": "number",
+          "format": "float"
+        }
+      }
+    },
+    "SprintMemberUpdateBody": {
+      "type": "object",
+      "properties": {
+        "members": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1SprintMember"
+          }
+        }
+      }
+    },
     "SprintSprintStatus": {
       "type": "string",
       "enum": [
@@ -1627,6 +1610,34 @@
         "Future"
       ],
       "default": "UNKNOWN"
+    },
+    "SprintUpdateBody": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "startDate": {
+          "type": "string",
+          "format": "int64"
+        },
+        "endDate": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "TaskCreateBody": {
+      "type": "object",
+      "properties": {
+        "sprintId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "title": {
+          "type": "string"
+        }
+      }
     },
     "TaskTaskStatus": {
       "type": "string",
@@ -1638,6 +1649,22 @@
         "Removed"
       ],
       "default": "UNKNOWN"
+    },
+    "WorkItemCreateBody": {
+      "type": "object",
+      "properties": {
+        "sprintId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "featureId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "title": {
+          "type": "string"
+        }
+      }
     },
     "WorkItemWorkItemStatus": {
       "type": "string",
