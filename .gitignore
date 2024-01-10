@@ -328,3 +328,4 @@ api/*/*/*.json
 api/*/*.go
 api/*/*.json
 dist/letscrum
+letscrum.swagger.json

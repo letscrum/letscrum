@@ -42,6 +42,9 @@ api_gen:
 		--grpc-gateway_out=paths=source_relative:. \
 		--grpc-gateway-ts_out=paths=source_relative:./dist/sdk/ \
 		--openapiv2_out=logtostderr=true:. \
+		--openapiv2_opt allow_merge=true \
+		--openapiv2_opt output_format=json \
+		--openapiv2_opt merge_file_name="letscrum." \
 		api/general/v1/common.proto \
 		api/general/v1/letscrum.proto \
 		api/letscrum/v1/letscrum.proto \
@@ -53,7 +56,7 @@ api_gen:
 		api/item/v1/work_item.proto \
 		api/item/v1/task.proto \
 		api/user/v1/user.proto
-	cp api/letscrum/v1/letscrum.swagger.json docs/swagger-ui/letscrum.swagger.json
+	cp -R *.swagger.json docs/swagger-ui/letscrum.swagger.json
 
 api_clean:
 	rm -f api/*/*/*.pb.go api/*/*/*.pb.gw.go api/*/*/*.swagger.json api/*/*/*.pb.validate.go

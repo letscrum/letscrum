@@ -59,8 +59,8 @@ func (s *ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReque
 			Id:             m.ID,
 			UserId:         m.UserID,
 			ProjectId:      m.ProjectID,
-			UserName:       m.User.Name,
-			IsSuperAdmin:   m.User.IsSuperAdmin,
+			UserName:       m.MemberUser.Name,
+			IsSuperAdmin:   m.MemberUser.IsSuperAdmin,
 			IsProjectAdmin: m.IsAdmin,
 		}
 		memberList = append(memberList, member)
@@ -157,8 +157,8 @@ func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectReq
 				Id:             m.ID,
 				UserId:         m.UserID,
 				ProjectId:      m.ProjectID,
-				UserName:       m.User.Name,
-				IsSuperAdmin:   m.User.IsSuperAdmin,
+				UserName:       m.MemberUser.Name,
+				IsSuperAdmin:   m.MemberUser.IsSuperAdmin,
 				IsProjectAdmin: m.IsAdmin,
 			}
 			project.Members = append(project.Members, member)

@@ -3,12 +3,12 @@ package model
 type SprintMember struct {
 	Model
 
-	SprintID int64   `gorm:"column:sprint_id"`
-	UserID   int64   `gorm:"column:user_id"`
-	Role     string  `gorm:"column:role;size:255"`
-	Capacity float32 `gorm:"column:capacity"`
-	Sprint   Sprint  `gorm:"foreignKey:SprintID"`
-	User     User    `gorm:"foreignKey:UserID"`
+	SprintID   int64   `gorm:"column:sprint_id"`
+	UserID     int64   `gorm:"column:user_id"`
+	Role       string  `gorm:"column:role;size:255"`
+	Capacity   float32 `gorm:"column:capacity"`
+	FromSprint Sprint  `gorm:"foreignKey:SprintID"`
+	MemberUser User    `gorm:"foreignKey:UserID"`
 }
 
 //
