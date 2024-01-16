@@ -1,7 +1,6 @@
 syntax = "proto3";
 
 import "api/general/v1/common.proto";
-import "api/user/v1/user.proto";
 
 package letscrum.api.project.v1;
 
@@ -22,7 +21,7 @@ message Sprint {
     Future = 3;
   }
   SprintStatus status = 8;
-  repeated letscrum.api.user.v1.User members = 9;
+  repeated SprintMember members = 9;
 }
 
 message SprintMember {

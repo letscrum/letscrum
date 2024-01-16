@@ -216,6 +216,7 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 	}
 	return &projectv1.CreateProjectResponse{
 		Success: success,
+		Id:      id,
 	}, nil
 }
 
