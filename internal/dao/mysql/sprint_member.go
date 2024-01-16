@@ -11,7 +11,7 @@ type SprintMemberDao struct {
 
 func (s SprintMemberDao) List(sprintID int64, page, size int32) ([]*model.SprintMember, error) {
 	var sprintMembers []*model.SprintMember
-	err := s.DB.Where("sprint_id = ?", sprintID).Limit(int(size)).Offset(int((page - 1) * size)).Preload("User").Find(&sprintMembers).Error
+	err := s.DB.Where("sprint_id = ?", sprintID).Limit(int(size)).Offset(int((page - 1) * size)).Preload("MemberUser").Find(&sprintMembers).Error
 	if err != nil {
 		return nil, err
 	}

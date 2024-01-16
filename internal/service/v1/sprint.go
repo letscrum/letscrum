@@ -1,4 +1,4 @@
-package service
+package v1
 
 import (
 	"context"
@@ -19,12 +19,14 @@ type SprintService struct {
 	v1.UnimplementedSprintServer
 	sprintDao        dao.SprintDao
 	projectMemberDao dao.ProjectMemberDao
+	sprintMemberDao  dao.SprintMemberDao
 }
 
 func NewSprintService(dao dao.Interface) *SprintService {
 	return &SprintService{
 		sprintDao:        dao.SprintDao(),
 		projectMemberDao: dao.ProjectMemberDao(),
+		sprintMemberDao:  dao.SprintMemberDao(),
 	}
 }
 
@@ -77,34 +79,52 @@ func (s *SprintService) List(ctx context.Context, req *projectv1.ListSprintReque
 	}
 	var list []*projectv1.Sprint
 	hasCurrent := false
-	for _, s := range sprints {
+	for _, sprint := range sprints {
 		var sprintStatus projectv1.Sprint_SprintStatus
 		switch {
-		case time.Now().After(s.StartDate) && time.Now().Before(s.EndDate) && !hasCurrent:
+		case time.Now().After(sprint.StartDate) && time.Now().Before(sprint.EndDate) && !hasCurrent:
 			sprintStatus = projectv1.Sprint_Current
 			hasCurrent = true
 			break
-		case time.Now().After(s.StartDate) && time.Now().Before(s.EndDate) && hasCurrent:
+		case time.Now().After(sprint.StartDate) && time.Now().Before(sprint.EndDate) && hasCurrent:
 			sprintStatus = projectv1.Sprint_Future
 			break
-		case time.Now().After(s.EndDate):
+		case time.Now().After(sprint.EndDate):
 			sprintStatus = projectv1.Sprint_Past
 			break
-		case time.Now().Before(s.StartDate):
+		case time.Now().Before(sprint.StartDate):
 			sprintStatus = projectv1.Sprint_Future
 			break
 		}
-		var sprint = &projectv1.Sprint{
-			Id:        s.ID,
-			ProjectId: s.ProjectID,
-			Name:      s.Name,
-			StartDate: s.StartDate.Unix(),
-			EndDate:   s.EndDate.Unix(),
-			Status:    sprintStatus,
-			CreatedAt: s.CreatedAt.Unix(),
-			UpdatedAt: s.UpdatedAt.Unix(),
+		members, err := s.sprintMemberDao.List(sprint.ID, 1, 999)
+		if err != nil {
+			return nil, status.Error(codes.Unknown, err.Error())
 		}
-		list = append(list, sprint)
+		var memberList []*projectv1.SprintMember
+		for _, m := range members {
+			var member = &projectv1.SprintMember{
+				Id:        m.ID,
+				UserId:    m.UserID,
+				SprintId:  m.SprintID,
+				UserName:  m.MemberUser.Name,
+				UserEmail: m.MemberUser.Email,
+				Role:      m.Role,
+				Capacity:  m.Capacity,
+			}
+			memberList = append(memberList, member)
+		}
+		var currentSprint = &projectv1.Sprint{
+			Id:        sprint.ID,
+			ProjectId: sprint.ProjectID,
+			Name:      sprint.Name,
+			StartDate: sprint.StartDate.Unix(),
+			EndDate:   sprint.EndDate.Unix(),
+			Status:    sprintStatus,
+			CreatedAt: sprint.CreatedAt.Unix(),
+			UpdatedAt: sprint.UpdatedAt.Unix(),
+			Members:   memberList,
+		}
+		list = append(list, currentSprint)
 	}
 	count := s.sprintDao.Count(req.ProjectId, req.Keyword)
 	return &projectv1.ListSprintResponse{

@@ -11,7 +11,7 @@ type ProjectMemberDao struct {
 
 func (p ProjectMemberDao) Get(projectID, userID int64) (*model.ProjectMember, error) {
 	var projectMember *model.ProjectMember
-	err := p.DB.Where("project_id = ?", projectID).Preload("User").Find(&projectMember).Error
+	err := p.DB.Where("project_id = ?", projectID).Preload("MemberUser").Find(&projectMember).Error
 	if err != nil {
 		return nil, err
 	}
@@ -25,7 +25,7 @@ func (p ProjectMemberDao) Update(projectID, userID int64, isAdmin bool) (bool, e
 
 func (p *ProjectMemberDao) List(projectID int64, page, size int32) ([]*model.ProjectMember, error) {
 	var projectMembers []*model.ProjectMember
-	err := p.DB.Where("project_id = ?", projectID).Limit(int(size)).Offset(int((page - 1) * size)).Preload("User").Find(&projectMembers).Error
+	err := p.DB.Where("project_id = ?", projectID).Limit(int(size)).Offset(int((page - 1) * size)).Preload("MemberUser").Find(&projectMembers).Error
 	if err != nil {
 		return nil, err
 	}

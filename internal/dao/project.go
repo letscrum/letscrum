@@ -5,10 +5,10 @@ import (
 )
 
 type ProjectDao interface {
-	Get(id int64) (*model.Project, error)
+	Get(project model.Project) (*model.Project, error)
 	List(page, size int32, keyword string) ([]*model.Project, error)
 	Count(keyword string) int64
-	Create(project *model.Project) (int64, error)
-	Update(project *model.Project) (bool, error)
-	Delete(id int64) (bool, error)
+	Create(project model.Project) (*model.Project, error)
+	Update(project model.Project) (*model.Project, error)
+	Delete(project model.Project) (*model.Project, error)
 }
