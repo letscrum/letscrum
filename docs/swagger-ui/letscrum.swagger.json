@@ -1783,6 +1783,10 @@
       "properties": {
         "success": {
           "type": "boolean"
+        },
+        "id": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },
@@ -2291,6 +2295,10 @@
       "properties": {
         "success": {
           "type": "boolean"
+        },
+        "id": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },

@@ -8,10 +8,10 @@ import (
 	"time"
 
 	v1 "github.com/letscrum/letscrum/api/letscrum/v1"
+	servicev1 "github.com/letscrum/letscrum/internal/service/v1"
 
 	"github.com/letscrum/letscrum/internal/dao"
 	"github.com/letscrum/letscrum/internal/dao/mysql"
-	"github.com/letscrum/letscrum/internal/service"
 	"github.com/letscrum/letscrum/pkg/db"
 	"github.com/letscrum/letscrum/pkg/log"
 
@@ -47,21 +47,22 @@ func Run(ctx context.Context, network, address string) error {
 		return err
 	}
 
-	letscrumService := service.NewLetscrumService(daoInterface)
+	letscrumService := servicev1.NewLetscrumService(daoInterface)
+	userService := servicev1.NewUserService(daoInterface)
+	projectService := servicev1.NewProjectService(daoInterface)
+	projectMemberService := servicev1.NewProjectMemberService(daoInterface)
+	sprintService := servicev1.NewSprintService(daoInterface)
+	sprintMemberService := servicev1.NewSprintMemberService(daoInterface)
+	workItemService := servicev1.NewWorkItemService(daoInterface)
+	taskService := servicev1.NewTaskService(daoInterface)
+
 	v1.RegisterLetscrumServer(s, letscrumService)
-	userService := service.NewUserService(daoInterface)
 	v1.RegisterUserServer(s, userService)
-	projectService := service.NewProjectService(daoInterface)
 	v1.RegisterProjectServer(s, projectService)
-	projectMemberService := service.NewProjectMemberService(daoInterface)
 	v1.RegisterProjectMemberServer(s, projectMemberService)
-	sprintService := service.NewSprintService(daoInterface)
 	v1.RegisterSprintServer(s, sprintService)
-	sprintMemberService := service.NewSprintMemberService(daoInterface)
 	v1.RegisterSprintMemberServer(s, sprintMemberService)
-	workItemService := service.NewWorkItemService(daoInterface)
 	v1.RegisterWorkItemServer(s, workItemService)
-	taskService := service.NewTaskService(daoInterface)
 	v1.RegisterTaskServer(s, taskService)
 
 	go func() {

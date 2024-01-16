@@ -1,4 +1,4 @@
-package service
+package v1
 
 import (
 	v1 "github.com/letscrum/letscrum/api/letscrum/v1"

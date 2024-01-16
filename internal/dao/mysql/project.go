@@ -9,9 +9,17 @@ type ProjectDao struct {
 	DB *gorm.DB
 }
 
-func (d *ProjectDao) Create(project *model.Project) (int64, error) {
+func (d ProjectDao) Get(project model.Project) (*model.Project, error) {
+	var p *model.Project
+	if err := d.DB.Where("id = ?", project.ID).Preload("CreatedUser").Find(&p).Error; err != nil {
+		return nil, err
+	}
+	return p, nil
+}
+
+func (d ProjectDao) Create(project model.Project) (*model.Project, error) {
 	if err := d.DB.Create(&project).Error; err != nil {
-		return 0, err
+		return nil, err
 	}
 	projectAdmin := model.ProjectMember{
 		ProjectID: project.ID,
@@ -19,23 +27,23 @@ func (d *ProjectDao) Create(project *model.Project) (int64, error) {
 		IsAdmin:   true,
 	}
 	if err := d.DB.Create(&projectAdmin).Error; err != nil {
-		return 0, err
+		return nil, err
 	}
-	return project.ID, nil
+	return &project, nil
 }
 
-func (d *ProjectDao) Update(project *model.Project) (bool, error) {
+func (d ProjectDao) Update(project model.Project) (*model.Project, error) {
 	if err := d.DB.Model(&model.Project{}).Where("id = ?", project.ID).Update("display_name", project.DisplayName).Error; err != nil {
-		return false, nil
+		return nil, err
 	}
-	return true, nil
+	return &project, nil
 }
 
-func (d *ProjectDao) Delete(id int64) (bool, error) {
-	if err := d.DB.Where("id = ?", id).Delete(&model.Project{}).Error; err != nil {
-		return false, nil
+func (d ProjectDao) Delete(project model.Project) (*model.Project, error) {
+	if err := d.DB.Where("id = ?", project.ID).Delete(&model.Project{}).Error; err != nil {
+		return nil, err
 	}
-	return true, nil
+	return &project, nil
 }
 
 func (d *ProjectDao) Count(keyword string) int64 {
@@ -51,14 +59,6 @@ func (d *ProjectDao) List(page, size int32, keyword string) ([]*model.Project, e
 		return nil, err
 	}
 	return projects, nil
-}
-
-func (d *ProjectDao) Get(id int64) (*model.Project, error) {
-	var p *model.Project
-	if err := d.DB.Where("id = ?", id).Preload("CreatedUser").Find(&p).Error; err != nil {
-		return nil, err
-	}
-	return p, nil
 }
 
 func NewProjectDao(d *gorm.DB) *ProjectDao {

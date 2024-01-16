@@ -48,6 +48,7 @@ message UpdateProjectRequest {
 
 message UpdateProjectResponse {
   bool success = 1;
+  int64 id = 2;
 }
 
 message DeleteProjectRequest {
@@ -56,6 +57,7 @@ message DeleteProjectRequest {
 
 message DeleteProjectResponse {
   bool success = 1;
+  int64 id = 2;
 }
 
 message ListProjectRequest {

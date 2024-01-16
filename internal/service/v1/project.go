@@ -1,4 +1,4 @@
-package service
+package v1
 
 import (
 	"context"
@@ -33,12 +33,14 @@ func NewProjectService(dao dao.Interface) *ProjectService {
 	}
 }
 
-func (s *ProjectService) Get(ctx context.Context, req *projectv1.GetProjectRequest) (*projectv1.GetProjectResponse, error) {
+func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectRequest) (*projectv1.GetProjectResponse, error) {
 	_, err := utils.AuthJWT(ctx)
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
-	project, err := s.projectDao.Get(req.ProjectId)
+	var reqProject model.Project
+	reqProject.ID = req.ProjectId
+	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		result := status.Convert(err)
 		if result.Code() == codes.NotFound {
@@ -187,18 +189,18 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 	if req.DisplayName == "" {
 		return nil, status.Error(codes.InvalidArgument, "project display name can't be empty.")
 	}
-	project := model.Project{
+	newProject := model.Project{
 		Name:        req.DisplayName,
 		DisplayName: req.DisplayName,
 		Description: req.Description,
 		CreatedBy:   cast.ToInt64(jwt.Id),
 	}
-	id, err := s.projectDao.Create(&project)
+	project, err := s.projectDao.Create(newProject)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
 	success := false
-	if id > 0 {
+	if project.ID > 0 {
 		success = true
 	}
 	var userIDs []int64
@@ -208,7 +210,7 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 		}
 	}
 	if len(userIDs) > 0 {
-		successMembers, err := s.projectMemberDao.Add(id, userIDs)
+		successMembers, err := s.projectMemberDao.Add(project.ID, userIDs)
 		if err != nil {
 			return nil, status.Error(codes.Unknown, err.Error())
 		}
@@ -216,7 +218,7 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 	}
 	return &projectv1.CreateProjectResponse{
 		Success: success,
-		Id:      id,
+		Id:      project.ID,
 	}, nil
 }
 
@@ -232,18 +234,21 @@ func (s *ProjectService) Update(ctx context.Context, req *projectv1.UpdateProjec
 	if !myMember.IsAdmin || !jwt.IsSuperAdmin {
 		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
-	project, err := s.projectDao.Get(req.ProjectId)
+	var reqProject model.Project
+	reqProject.ID = req.ProjectId
+	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	project.DisplayName = req.DisplayName
 	project.Description = req.Description
-	success, err := s.projectDao.Update(project)
+	updatedProject, err := s.projectDao.Update(*project)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
 	return &projectv1.UpdateProjectResponse{
-		Success: success,
+		Success: updatedProject != nil,
+		Id:      updatedProject.ID,
 	}, nil
 }
 
@@ -259,12 +264,15 @@ func (s *ProjectService) Delete(ctx context.Context, req *projectv1.DeleteProjec
 	if !user.IsSuperAdmin {
 		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
-	success, err := s.projectDao.Delete(req.ProjectId)
+	var reqProject model.Project
+	reqProject.ID = req.ProjectId
+	deletedProject, err := s.projectDao.Delete(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
 	return &projectv1.DeleteProjectResponse{
-		Success: success,
+		Success: deletedProject != nil,
+		Id:      deletedProject.ID,
 	}, nil
 }
 
