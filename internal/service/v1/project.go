@@ -51,7 +51,7 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 	if project.ID == 0 {
 		return nil, status.Error(codes.NotFound, "project not fount.")
 	}
-	members, err := s.projectMemberDao.List(req.ProjectId, 1, 999)
+	members, err := s.projectMemberDao.List(reqProject, 1, 999)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
@@ -150,7 +150,7 @@ func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectReq
 			CreatedAt: p.CreatedAt.Unix(),
 			UpdatedAt: p.UpdatedAt.Unix(),
 		}
-		members, err := s.projectMemberDao.List(p.ID, 1, 999)
+		members, err := s.projectMemberDao.List(*p, 1, 999)
 		if err != nil {
 			return nil, status.Error(codes.Unknown, err.Error())
 		}
@@ -203,18 +203,28 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 	if project.ID > 0 {
 		success = true
 	}
-	var userIDs []int64
+	var projectMembers []model.ProjectMember
+	projectMembers = append(projectMembers, model.ProjectMember{
+		ProjectID: project.ID,
+		UserID:    project.CreatedBy,
+		IsAdmin:   true,
+	})
 	for _, u := range req.Members {
 		if u != project.CreatedBy {
-			userIDs = append(userIDs, u)
+			projectMember := model.ProjectMember{
+				ProjectID: project.ID,
+				UserID:    u,
+				IsAdmin:   false,
+			}
+			projectMembers = append(projectMembers, projectMember)
 		}
 	}
-	if len(userIDs) > 0 {
-		successMembers, err := s.projectMemberDao.Add(project.ID, userIDs)
+	if len(projectMembers) > 0 {
+		successMembers, err := s.projectMemberDao.BatchAdd(projectMembers)
 		if err != nil {
 			return nil, status.Error(codes.Unknown, err.Error())
 		}
-		success = successMembers
+		success = successMembers != nil
 	}
 	return &projectv1.CreateProjectResponse{
 		Success: success,
@@ -227,15 +237,16 @@ func (s *ProjectService) Update(ctx context.Context, req *projectv1.UpdateProjec
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
-	myMember, err := s.projectMemberDao.Get(req.ProjectId, cast.ToInt64(jwt.Id))
+	var reqProject model.Project
+	reqProject.ID = req.ProjectId
+	reqProject.CreatedUser.ID = cast.ToInt64(jwt.Id)
+	myMember, err := s.projectMemberDao.GetByProject(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
 	if !myMember.IsAdmin || !jwt.IsSuperAdmin {
 		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
-	var reqProject model.Project
-	reqProject.ID = req.ProjectId
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())

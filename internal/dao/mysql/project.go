@@ -21,14 +21,6 @@ func (d ProjectDao) Create(project model.Project) (*model.Project, error) {
 	if err := d.DB.Create(&project).Error; err != nil {
 		return nil, err
 	}
-	projectAdmin := model.ProjectMember{
-		ProjectID: project.ID,
-		UserID:    project.CreatedBy,
-		IsAdmin:   true,
-	}
-	if err := d.DB.Create(&projectAdmin).Error; err != nil {
-		return nil, err
-	}
 	return &project, nil
 }
 
@@ -46,13 +38,13 @@ func (d ProjectDao) Delete(project model.Project) (*model.Project, error) {
 	return &project, nil
 }
 
-func (d *ProjectDao) Count(keyword string) int64 {
+func (d ProjectDao) Count(keyword string) int64 {
 	count := int64(0)
 	d.DB.Where("name LIKE ?", "%"+keyword+"%").Or("display_name LIKE ?", "%"+keyword+"%").Model(&model.Project{}).Count(&count)
 	return count
 }
 
-func (d *ProjectDao) List(page, size int32, keyword string) ([]*model.Project, error) {
+func (d ProjectDao) List(page, size int32, keyword string) ([]*model.Project, error) {
 	var projects []*model.Project
 	err := d.DB.Where("name LIKE ?", "%"+keyword+"%").Or("display_name LIKE ?", "%"+keyword+"%").Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Order("updated_at desc").Find(&projects).Error
 	if err != nil {

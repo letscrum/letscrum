@@ -3,10 +3,11 @@ package dao
 import "github.com/letscrum/letscrum/internal/model"
 
 type ProjectMemberDao interface {
-	Get(projectID, userID int64) (*model.ProjectMember, error)
-	List(projectID int64, page, size int32) ([]*model.ProjectMember, error)
+	Get(projectMember model.ProjectMember) (*model.ProjectMember, error)
+	GetByProject(project model.Project) (*model.ProjectMember, error)
+	List(project model.Project, page, size int32) ([]*model.ProjectMember, error)
 	Count() int64
-	Add(projectID int64, userIDs []int64) (bool, error)
-	Update(projectID, userID int64, isAdmin bool) (bool, error)
-	Remove(projectID, userID int64) (bool, error)
+	BatchAdd(projectMembers []model.ProjectMember) ([]*model.ProjectMember, error)
+	BatchUpdate(projectMembers []model.ProjectMember) (*model.ProjectMember, error)
+	BatchRemove(projectMembers []model.ProjectMember) (*model.ProjectMember, error)
 }

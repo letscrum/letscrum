@@ -65,7 +65,10 @@ func (s *SprintMemberService) Update(ctx context.Context, req *projectv1.UpdateS
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
-	myMember, err := s.projectMemberDao.Get(req.ProjectId, cast.ToInt64(jwt.Id))
+	var reqProject model.Project
+	reqProject.ID = req.ProjectId
+	reqProject.CreatedUser.ID = cast.ToInt64(jwt.Id)
+	myMember, err := s.projectMemberDao.GetByProject(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}

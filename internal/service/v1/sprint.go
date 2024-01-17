@@ -38,7 +38,10 @@ func (s *SprintService) Create(ctx context.Context, req *projectv1.CreateSprintR
 	if !jwt.IsSuperAdmin {
 		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
-	member, err := s.projectMemberDao.Get(req.ProjectId, cast.ToInt64(jwt.Id))
+	var reqProject model.Project
+	reqProject.ID = req.ProjectId
+	reqProject.CreatedUser.ID = cast.ToInt64(jwt.Id)
+	member, err := s.projectMemberDao.GetByProject(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
