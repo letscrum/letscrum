@@ -8,6 +8,6 @@ type ProjectMemberDao interface {
 	ListByProject(project model.Project, page, size int32) ([]*model.ProjectMember, error)
 	Count() int64
 	BatchAdd(projectMembers []model.ProjectMember) ([]*model.ProjectMember, error)
-	BatchUpdate(projectMembers []model.ProjectMember) (*model.ProjectMember, error)
-	BatchRemove(projectMembers []model.ProjectMember) (*model.ProjectMember, error)
+	BatchUpdate(projectMembers []model.ProjectMember) ([]*model.ProjectMember, error)
+	BatchRemove(projectMembers []model.ProjectMember) ([]*model.ProjectMember, error)
 }

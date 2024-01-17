@@ -54,12 +54,12 @@ func (p ProjectMemberDao) BatchAdd(projectMembers []model.ProjectMember) ([]*mod
 	return pMembers, nil
 }
 
-func (p ProjectMemberDao) BatchUpdate(projectMembers []model.ProjectMember) (*model.ProjectMember, error) {
+func (p ProjectMemberDao) BatchUpdate(projectMembers []model.ProjectMember) ([]*model.ProjectMember, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (p ProjectMemberDao) BatchRemove(projectMembers []model.ProjectMember) (*model.ProjectMember, error) {
+func (p ProjectMemberDao) BatchRemove(projectMembers []model.ProjectMember) ([]*model.ProjectMember, error) {
 	//TODO implement me
 	panic("implement me")
 }
