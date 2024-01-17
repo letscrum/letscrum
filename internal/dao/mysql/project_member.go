@@ -27,7 +27,7 @@ func (p ProjectMemberDao) Get(projectMember model.ProjectMember) (*model.Project
 	return pMember, nil
 }
 
-func (p ProjectMemberDao) List(project model.Project, page, size int32) ([]*model.ProjectMember, error) {
+func (p ProjectMemberDao) ListByProject(project model.Project, page, size int32) ([]*model.ProjectMember, error) {
 	var pMembers []*model.ProjectMember
 	err := p.DB.Where("project_id = ?", project.ID).Limit(int(size)).Offset(int((page - 1) * size)).Preload("MemberUser").Find(&pMembers).Error
 	if err != nil {

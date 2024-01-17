@@ -51,7 +51,7 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 	if project.ID == 0 {
 		return nil, status.Error(codes.NotFound, "project not fount.")
 	}
-	members, err := s.projectMemberDao.List(reqProject, 1, 999)
+	members, err := s.projectMemberDao.ListByProject(reqProject, 1, 999)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
@@ -150,7 +150,7 @@ func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectReq
 			CreatedAt: p.CreatedAt.Unix(),
 			UpdatedAt: p.UpdatedAt.Unix(),
 		}
-		members, err := s.projectMemberDao.List(*p, 1, 999)
+		members, err := s.projectMemberDao.ListByProject(*p, 1, 999)
 		if err != nil {
 			return nil, status.Error(codes.Unknown, err.Error())
 		}
