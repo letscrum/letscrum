@@ -32,7 +32,9 @@ func (s *SprintMemberService) List(ctx context.Context, req *projectv1.ListSprin
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
-	members, err := s.sprintMemberDao.List(req.SprintId, 1, 999)
+	var reqSprint model.Sprint
+	reqSprint.ID = req.SprintId
+	members, err := s.sprintMemberDao.ListBySprint(reqSprint, 1, 999)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
@@ -49,7 +51,7 @@ func (s *SprintMemberService) List(ctx context.Context, req *projectv1.ListSprin
 		}
 		memberList = append(memberList, member)
 	}
-	count := s.sprintMemberDao.Count(req.SprintId)
+	count := s.sprintMemberDao.CountBySprint(reqSprint)
 	return &projectv1.ListSprintMemberResponse{
 		Items: memberList,
 		Pagination: &generalv1.Pagination{
@@ -76,9 +78,9 @@ func (s *SprintMemberService) Update(ctx context.Context, req *projectv1.UpdateS
 		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
 
-	var memberList []*model.SprintMember
+	var memberList []model.SprintMember
 	for _, m := range req.Members {
-		var member = &model.SprintMember{
+		var member = model.SprintMember{
 			Model: model.Model{
 				ID: m.Id,
 			},
@@ -87,12 +89,12 @@ func (s *SprintMemberService) Update(ctx context.Context, req *projectv1.UpdateS
 		}
 		memberList = append(memberList, member)
 	}
-	success, err := s.sprintMemberDao.Update(memberList)
+	successMembers, err := s.sprintMemberDao.BatchUpdate(memberList)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	return &projectv1.UpdateSprintMemberResponse{
-		Success: success,
+		Success: successMembers != nil,
 	}, nil
 }
 

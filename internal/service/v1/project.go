@@ -67,7 +67,7 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 		}
 		memberList = append(memberList, member)
 	}
-	sprints, err := s.sprintDao.List(req.ProjectId, 1, 999, "")
+	sprints, err := s.sprintDao.ListByProject(reqProject, 1, 999, "")
 	if err != nil {
 		result := status.Convert(err)
 		if result.Code() == codes.NotFound {
@@ -77,6 +77,7 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 	}
 	sprint := projectv1.Sprint{}
 	for i, s := range sprints {
+		// Set the 1st Sprint as default
 		if i == 0 {
 			sprint = projectv1.Sprint{
 				Id:        s.ID,
@@ -89,6 +90,7 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 				UpdatedAt: s.UpdatedAt.Unix(),
 			}
 		}
+		// Set the real current sprint
 		if time.Now().After(s.StartDate) && time.Now().Before(s.EndDate) {
 			sprint = projectv1.Sprint{
 				Id:        s.ID,

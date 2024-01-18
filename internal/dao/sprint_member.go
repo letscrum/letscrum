@@ -3,9 +3,9 @@ package dao
 import "github.com/letscrum/letscrum/internal/model"
 
 type SprintMemberDao interface {
-	List(sprintID int64, page, size int32) ([]*model.SprintMember, error)
-	Count(sprintID int64) int64
-	Add(sprintID int64, userID int64) (bool, error)
-	Update(sprintMembers []*model.SprintMember) (bool, error)
-	Remove(sprintID, userID int64) (bool, error)
+	ListBySprint(sprint model.Sprint, page, size int32) ([]*model.SprintMember, error)
+	CountBySprint(sprint model.Sprint) int64
+	BatchAdd(sprintMembers []model.SprintMember) ([]*model.SprintMember, error)
+	BatchUpdate(sprintMembers []model.SprintMember) ([]*model.SprintMember, error)
+	BatchRemove(sprintMembers []model.SprintMember) ([]*model.SprintMember, error)
 }

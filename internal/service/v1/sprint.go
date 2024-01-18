@@ -48,22 +48,42 @@ func (s *SprintService) Create(ctx context.Context, req *projectv1.CreateSprintR
 	if !member.IsAdmin {
 		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
-	sprint := model.Sprint{
+	newSprint := model.Sprint{
 		ProjectID: req.ProjectId,
 		Name:      req.Name,
 		StartDate: time.Unix(req.StartDate, 0),
 		EndDate:   time.Unix(req.EndDate, 0),
 	}
-	id, err := s.sprintDao.Create(&sprint)
+	sprint, err := s.sprintDao.Create(newSprint)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
 	success := false
-	if id > 0 {
+	if sprint.ID > 0 {
 		success = true
+	}
+	projectMembers, err := s.projectMemberDao.ListByProject(reqProject, 1, 999)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	var sprintMembers []model.SprintMember
+	for _, pm := range projectMembers {
+		sprintMember := model.SprintMember{
+			SprintID: sprint.ID,
+			UserID:   pm.UserID,
+		}
+		sprintMembers = append(sprintMembers, sprintMember)
+	}
+	if len(sprintMembers) > 0 {
+		successMembers, err := s.sprintMemberDao.BatchAdd(sprintMembers)
+		if err != nil {
+			return nil, status.Error(codes.Unknown, err.Error())
+		}
+		success = successMembers != nil
 	}
 	return &projectv1.CreateSprintResponse{
 		Success: success,
+		Id:      sprint.ID,
 	}, nil
 }
 
@@ -72,7 +92,9 @@ func (s *SprintService) List(ctx context.Context, req *projectv1.ListSprintReque
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
-	sprints, err := s.sprintDao.List(req.ProjectId, req.Page, req.Size, req.Keyword)
+	var reqProject model.Project
+	reqProject.ID = req.ProjectId
+	sprints, err := s.sprintDao.ListByProject(reqProject, req.Page, req.Size, req.Keyword)
 	if err != nil {
 		result := status.Convert(err)
 		if result.Code() == codes.NotFound {
@@ -99,7 +121,7 @@ func (s *SprintService) List(ctx context.Context, req *projectv1.ListSprintReque
 			sprintStatus = projectv1.Sprint_Future
 			break
 		}
-		members, err := s.sprintMemberDao.List(sprint.ID, 1, 999)
+		members, err := s.sprintMemberDao.ListBySprint(*sprint, 1, 999)
 		if err != nil {
 			return nil, status.Error(codes.Unknown, err.Error())
 		}
@@ -129,7 +151,7 @@ func (s *SprintService) List(ctx context.Context, req *projectv1.ListSprintReque
 		}
 		list = append(list, currentSprint)
 	}
-	count := s.sprintDao.Count(req.ProjectId, req.Keyword)
+	count := s.sprintDao.CountByProject(reqProject, req.Keyword)
 	return &projectv1.ListSprintResponse{
 		Items: list,
 		Pagination: &generalv1.Pagination{
