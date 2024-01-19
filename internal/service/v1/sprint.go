@@ -35,9 +35,6 @@ func (s *SprintService) Create(ctx context.Context, req *projectv1.CreateSprintR
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
-	if !jwt.IsSuperAdmin {
-		return nil, status.Error(codes.PermissionDenied, err.Error())
-	}
 	var reqProject model.Project
 	reqProject.ID = req.ProjectId
 	reqProject.CreatedUser.ID = cast.ToInt64(jwt.Id)
@@ -88,12 +85,17 @@ func (s *SprintService) Create(ctx context.Context, req *projectv1.CreateSprintR
 }
 
 func (s *SprintService) List(ctx context.Context, req *projectv1.ListSprintRequest) (*projectv1.ListSprintResponse, error) {
-	_, err := utils.AuthJWT(ctx)
+	jwt, err := utils.AuthJWT(ctx)
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 	var reqProject model.Project
 	reqProject.ID = req.ProjectId
+	reqProject.CreatedUser.ID = cast.ToInt64(jwt.Id)
+	member, err := s.projectMemberDao.GetByProject(reqProject)
+	if err != nil || member == nil {
+		return nil, status.Error(codes.PermissionDenied, err.Error())
+	}
 	sprints, err := s.sprintDao.ListByProject(reqProject, req.Page, req.Size, req.Keyword)
 	if err != nil {
 		result := status.Convert(err)
