@@ -41,7 +41,7 @@ func Run(ctx context.Context, opts utils.Options) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	conn, err := dialTCP(ctx, opts.GRPCAddr)
+	conn, err := grpc.NewClient(opts.GRPCAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return err
 	}
@@ -84,8 +84,4 @@ func Run(ctx context.Context, opts utils.Options) error {
 		return fmt.Errorf("error: %w", err)
 	}
 	return nil
-}
-
-func dialTCP(ctx context.Context, addr string) (*grpc.ClientConn, error) {
-	return grpc.DialContext(ctx, addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 }
