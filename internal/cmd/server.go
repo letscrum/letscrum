@@ -8,8 +8,9 @@ import (
 	"syscall"
 
 	"github.com/letscrum/letscrum/internal/gateway"
-	"github.com/letscrum/letscrum/internal/gateway/grpc"
+	"github.com/letscrum/letscrum/internal/grpc"
 	"github.com/letscrum/letscrum/pkg/log"
+	"github.com/letscrum/letscrum/pkg/utils"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 
@@ -38,16 +39,15 @@ func GetServerCommand() *cobra.Command {
 			stop := make(chan struct{})
 			defer WaitSignal(stop)
 
-			if err := grpc.Run(context.Background(), "tcp", viper.GetString("server.grpc.addr")); err != nil {
-				log.Fatalf("grpc start error: %s", err)
-			}
-			opts := gateway.Options{
-				Addr: viper.GetString("server.http.addr"),
-				GRPCServer: gateway.Endpoint{
-					Network: "tcp",
-					Addr:    viper.GetString("server.grpc.addr"),
-				},
+			opts := utils.Options{
+				HTTPAddr:   viper.GetString("server.http.addr"),
+				GRPCAddr:   viper.GetString("server.grpc.addr"),
+				Network:    "tcp",
 				OpenAPIDir: "api/v1",
+			}
+
+			if err := grpc.Run(context.Background(), opts); err != nil {
+				log.Fatalf("grpc start error: %s", err)
 			}
 			if err := gateway.Run(context.Background(), opts); err != nil {
 				log.Fatalf("grpc gateway start error: %s", err)

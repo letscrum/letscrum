@@ -9,6 +9,7 @@ import (
 
 	v1 "github.com/letscrum/letscrum/api/letscrum/v1"
 	servicev1 "github.com/letscrum/letscrum/internal/service/v1"
+	"github.com/letscrum/letscrum/pkg/utils"
 
 	"github.com/letscrum/letscrum/internal/dao"
 	"github.com/letscrum/letscrum/internal/dao/mysql"
@@ -20,9 +21,9 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-func Run(ctx context.Context, network, address string) error {
+func Run(ctx context.Context, opts utils.Options) error {
 	//init grpc server and run
-	l, err := net.Listen(network, address)
+	l, err := net.Listen(opts.Network, opts.GRPCAddr)
 	if err != nil {
 		return err
 	}
@@ -71,7 +72,7 @@ func Run(ctx context.Context, network, address string) error {
 	}()
 
 	go func() error {
-		log.L(ctx).Infof("grpc listen on: %s\n", address)
+		log.L(ctx).Infof("grpc listen on: %s\n", opts.GRPCAddr)
 		if err := s.Serve(l); err != nil {
 			return err
 		}

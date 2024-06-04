@@ -1,26 +1,24 @@
-.PHONY: build clean tool lint help
+.PHONY: build lint upgrade help
 all: build
 
 # $Env:GOOS = "e" $Env:GOOS = "darwin"
 # export GOOS=linux
 build:
-	go build -o dist/letscrum ./cmd/letscrum/
+	CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -o ./bin/letscrum ./cmd/letscrum/
 
 lint:
 	golangci-lint run --verbose --timeout 50m
 
-clean:
-	rm -rf go-gin-example
-	go clean -i .
+upgrade:
+	go get -t -u ./...
 
 run:
-	./dist/letscrum server
+	./bin/letscrum server
 
 help:
-	@echo "make: compile packages and dependencies"
-	@echo "make tool: run specified go tool"
-	@echo "make lint: golint ./..."
-	@echo "make clean: remove object files and cached files"
+	@echo "make build: compile packages and dependencies"
+	@echo "make lint: golangci-lint"
+	@echo "make upgrade: upgrade deps"
 
 .PHONY: api_gen api_dep_install api_clean
 api_dep_install:
@@ -32,7 +30,6 @@ api_dep_install:
 	go install github.com/golang/mock/mockgen@latest
 	go install github.com/jstemmer/go-junit-report@latest
 	go install github.com/mwitkow/go-proto-validators/protoc-gen-govalidators@latest
-	go install github.com/grpc-ecosystem/protoc-gen-grpc-gateway-ts@latest
 	go install github.com/rakyll/statik@latest
 
 api_gen:
@@ -40,7 +37,6 @@ api_gen:
 		--go_out=paths=source_relative:. \
 		--go-grpc_out=paths=source_relative:. \
 		--grpc-gateway_out=paths=source_relative:. \
-		--grpc-gateway-ts_out=paths=source_relative:./dist/sdk/ \
 		--openapiv2_out=logtostderr=true:. \
 		--openapiv2_opt allow_merge=true \
 		--openapiv2_opt output_format=json \
@@ -57,6 +53,7 @@ api_gen:
 		api/item/v1/task.proto \
 		api/user/v1/user.proto
 	cp -R *.swagger.json docs/swagger-ui/letscrum.swagger.json
+	rm *.swagger.json
 
 api_clean:
 	rm -f api/*/*/*.pb.go api/*/*/*.pb.gw.go api/*/*/*.swagger.json api/*/*/*.pb.validate.go

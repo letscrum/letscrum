@@ -10,25 +10,12 @@ import (
 	v1 "github.com/letscrum/letscrum/api/letscrum/v1"
 	swaggerui "github.com/letscrum/letscrum/docs/swagger-ui"
 	"github.com/letscrum/letscrum/pkg/log"
+	"github.com/letscrum/letscrum/pkg/utils"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 const staticPrefix = "/api/v1/swagger/"
-
-type Endpoint struct {
-	Network, Addr string
-}
-
-type Options struct {
-	Addr string
-
-	GRPCServer Endpoint
-
-	OpenAPIDir string
-
-	Mux []runtime.ServeMuxOption
-}
 
 func NewGateway(ctx context.Context, conn *grpc.ClientConn, opts []runtime.ServeMuxOption) (http.Handler, error) {
 
@@ -50,11 +37,11 @@ func NewGateway(ctx context.Context, conn *grpc.ClientConn, opts []runtime.Serve
 	return mux, nil
 }
 
-func Run(ctx context.Context, opts Options) error {
+func Run(ctx context.Context, opts utils.Options) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	conn, err := dialTCP(ctx, opts.GRPCServer.Addr)
+	conn, err := dialTCP(ctx, opts.GRPCAddr)
 	if err != nil {
 		return err
 	}
@@ -80,7 +67,7 @@ func Run(ctx context.Context, opts Options) error {
 	mux.Handle("/", gw)
 
 	s := &http.Server{
-		Addr:    opts.Addr,
+		Addr:    opts.HTTPAddr,
 		Handler: allowCORS(mux),
 	}
 	go func() {
@@ -91,7 +78,7 @@ func Run(ctx context.Context, opts Options) error {
 		}
 	}()
 
-	log.L(ctx).Infof("Starting listening at: %s", opts.Addr)
+	log.L(ctx).Infof("Starting listening at: %s", opts.HTTPAddr)
 	if err := s.ListenAndServe(); err != http.ErrServerClosed {
 		log.L(ctx).Errorf("Failed to listen and serve: %v", err)
 		return fmt.Errorf("error: %w", err)
