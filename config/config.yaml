@@ -7,8 +7,10 @@ server:
     timeout: 1s
     interceptors:
       auth:
-        enabled: true # Enable auth interceptor/middleware
-        ignorePrefix: [ "/api/v1/projects" ] # Ignoring path with prefix
+        enabled: true
+        ignoreMethods:
+          - GetVersion
+          - SignIn
 
 data:
   database:
@@ -22,4 +24,4 @@ data:
     max-idle-connections: 150
     max-open-connections: 150
     max-connection-lifetime: 20
-    log-level: 4 # GORM log level, 1: silent, 2:error, 3:warn, 4:info
+    log-level: 1 # GORM log level, 1: silent, 2:error, 3:warn, 4:info

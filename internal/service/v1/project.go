@@ -125,10 +125,10 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 }
 
 func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectRequest) (*projectv1.ListProjectResponse, error) {
-	_, err := utils.AuthJWT(ctx)
-	if err != nil {
-		return nil, status.Error(codes.Unauthenticated, err.Error())
-	}
+
+	a := ctx.Value("tokenInfo").(utils.LetscrumClaims).Id
+	println(a)
+
 	projects, err := s.projectDao.List(req.Page, req.Size, req.Keyword)
 	if err != nil {
 		result := status.Convert(err)
