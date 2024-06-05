@@ -9,7 +9,6 @@ import (
 	"github.com/letscrum/letscrum/internal/dao"
 	"github.com/letscrum/letscrum/internal/model"
 	"github.com/letscrum/letscrum/pkg/utils"
-	"github.com/spf13/cast"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -28,10 +27,6 @@ func NewSprintMemberService(dao dao.Interface) *SprintMemberService {
 }
 
 func (s *SprintMemberService) List(ctx context.Context, req *projectv1.ListSprintMemberRequest) (*projectv1.ListSprintMemberResponse, error) {
-	_, err := utils.AuthJWT(ctx)
-	if err != nil {
-		return nil, status.Error(codes.Unauthenticated, err.Error())
-	}
 	var reqSprint model.Sprint
 	reqSprint.ID = req.SprintId
 	members, err := s.sprintMemberDao.ListBySprint(reqSprint, 1, 999)
@@ -63,18 +58,18 @@ func (s *SprintMemberService) List(ctx context.Context, req *projectv1.ListSprin
 }
 
 func (s *SprintMemberService) Update(ctx context.Context, req *projectv1.UpdateSprintMemberRequest) (*projectv1.UpdateSprintMemberResponse, error) {
-	jwt, err := utils.AuthJWT(ctx)
+	claims, err := utils.GetTokenDetails(ctx)
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 	var reqProject model.Project
 	reqProject.ID = req.ProjectId
-	reqProject.CreatedUser.ID = cast.ToInt64(jwt.Id)
+	reqProject.CreatedUser.ID = int64(claims.ID)
 	myMember, err := s.projectMemberDao.GetByProject(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
-	if !myMember.IsAdmin || !jwt.IsSuperAdmin {
+	if !myMember.IsAdmin || !claims.IsSuperAdmin {
 		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
 

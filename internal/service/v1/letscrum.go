@@ -2,7 +2,6 @@ package v1
 
 import (
 	"context"
-	"strconv"
 
 	generalv1 "github.com/letscrum/letscrum/api/general/v1"
 	letscrumv1 "github.com/letscrum/letscrum/api/letscrum/v1"
@@ -48,7 +47,7 @@ func (s *LetscrumService) SignIn(ctx context.Context, req *userv1.SignInRequest)
 	if user.ID == 0 {
 		return nil, status.Error(codes.NotFound, "user not fount.")
 	}
-	accessToken, refreshToken, errGenTokens := utils.GenerateTokens(strconv.FormatInt(user.ID, 10), user.IsSuperAdmin)
+	accessToken, refreshToken, errGenTokens := utils.GenerateTokens(float64(user.ID), user.IsSuperAdmin)
 	if errGenTokens != nil {
 		return nil, errGenTokens
 	}

@@ -7,7 +7,6 @@ import (
 	letscrumv1 "github.com/letscrum/letscrum/api/letscrum/v1"
 	userV1 "github.com/letscrum/letscrum/api/user/v1"
 	"github.com/letscrum/letscrum/internal/dao"
-	"github.com/letscrum/letscrum/pkg/utils"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -22,10 +21,6 @@ func NewUserService(dao dao.Interface) *UserService {
 }
 
 func (s *UserService) List(ctx context.Context, req *userV1.ListUserRequest) (*userV1.ListUserResponse, error) {
-	_, err := utils.AuthJWT(ctx)
-	if err != nil {
-		return nil, status.Error(codes.Unauthenticated, err.Error())
-	}
 	users, err := s.userDao.List(req.Page, req.Size, req.Keyword)
 	if err != nil {
 		result := status.Convert(err)

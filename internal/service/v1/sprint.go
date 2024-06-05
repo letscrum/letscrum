@@ -10,7 +10,6 @@ import (
 	"github.com/letscrum/letscrum/internal/dao"
 	"github.com/letscrum/letscrum/internal/model"
 	"github.com/letscrum/letscrum/pkg/utils"
-	"github.com/spf13/cast"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -31,13 +30,13 @@ func NewSprintService(dao dao.Interface) *SprintService {
 }
 
 func (s *SprintService) Create(ctx context.Context, req *projectv1.CreateSprintRequest) (*projectv1.CreateSprintResponse, error) {
-	jwt, err := utils.AuthJWT(ctx)
+	claims, err := utils.GetTokenDetails(ctx)
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 	var reqProject model.Project
 	reqProject.ID = req.ProjectId
-	reqProject.CreatedUser.ID = cast.ToInt64(jwt.Id)
+	reqProject.CreatedUser.ID = int64(claims.ID)
 	member, err := s.projectMemberDao.GetByProject(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.PermissionDenied, err.Error())
@@ -85,13 +84,13 @@ func (s *SprintService) Create(ctx context.Context, req *projectv1.CreateSprintR
 }
 
 func (s *SprintService) List(ctx context.Context, req *projectv1.ListSprintRequest) (*projectv1.ListSprintResponse, error) {
-	jwt, err := utils.AuthJWT(ctx)
+	claims, err := utils.GetTokenDetails(ctx)
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 	var reqProject model.Project
 	reqProject.ID = req.ProjectId
-	reqProject.CreatedUser.ID = cast.ToInt64(jwt.Id)
+	reqProject.CreatedUser.ID = int64(claims.ID)
 	member, err := s.projectMemberDao.GetByProject(reqProject)
 	if err != nil || member == nil {
 		return nil, status.Error(codes.PermissionDenied, err.Error())

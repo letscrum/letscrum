@@ -35,16 +35,12 @@ func Auth(ctx context.Context) (context.Context, error) {
 		return nil, fmt.Errorf("auth from md err:%v", err)
 	}
 
-	println(token)
 	tokenInfo, err := utils.ParseToken(token)
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "invalid auth token: %v", err)
 	}
 
-	println(tokenInfo.Id)
-
-	type ctxKey string
-	newCtx := context.WithValue(ctx, ctxKey("tokenInfo"), tokenInfo)
+	newCtx := context.WithValue(ctx, "token", tokenInfo)
 
 	return newCtx, nil
 }

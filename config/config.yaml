@@ -9,8 +9,8 @@ server:
       auth:
         enabled: true
         ignoreMethods:
-          - GetVersion
-          - SignIn
+          - Letscrum/GetVersion
+          - Letscrum/SignIn
 
 data:
   database:

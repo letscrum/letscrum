@@ -11,7 +11,6 @@ import (
 	"github.com/letscrum/letscrum/internal/dao"
 	"github.com/letscrum/letscrum/internal/model"
 	"github.com/letscrum/letscrum/pkg/utils"
-	"github.com/spf13/cast"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -34,10 +33,6 @@ func NewProjectService(dao dao.Interface) *ProjectService {
 }
 
 func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectRequest) (*projectv1.GetProjectResponse, error) {
-	_, err := utils.AuthJWT(ctx)
-	if err != nil {
-		return nil, status.Error(codes.Unauthenticated, err.Error())
-	}
 	var reqProject model.Project
 	reqProject.ID = req.ProjectId
 	project, err := s.projectDao.Get(reqProject)
@@ -125,10 +120,6 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 }
 
 func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectRequest) (*projectv1.ListProjectResponse, error) {
-
-	a := ctx.Value("tokenInfo").(utils.LetscrumClaims).Id
-	println(a)
-
 	projects, err := s.projectDao.List(req.Page, req.Size, req.Keyword)
 	if err != nil {
 		result := status.Convert(err)
@@ -181,12 +172,9 @@ func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectReq
 }
 
 func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjectRequest) (*projectv1.CreateProjectResponse, error) {
-	jwt, err := utils.AuthJWT(ctx)
+	claims, err := utils.GetTokenDetails(ctx)
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
-	}
-	if !jwt.IsSuperAdmin {
-		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
 	if req.DisplayName == "" {
 		return nil, status.Error(codes.InvalidArgument, "project display name can't be empty.")
@@ -195,7 +183,7 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 		Name:        req.DisplayName,
 		DisplayName: req.DisplayName,
 		Description: req.Description,
-		CreatedBy:   cast.ToInt64(jwt.Id),
+		CreatedBy:   int64(claims.ID),
 	}
 	project, err := s.projectDao.Create(newProject)
 	if err != nil {
@@ -235,18 +223,18 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 }
 
 func (s *ProjectService) Update(ctx context.Context, req *projectv1.UpdateProjectRequest) (*projectv1.UpdateProjectResponse, error) {
-	jwt, err := utils.AuthJWT(ctx)
+	claims, err := utils.GetTokenDetails(ctx)
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 	var reqProject model.Project
 	reqProject.ID = req.ProjectId
-	reqProject.CreatedUser.ID = cast.ToInt64(jwt.Id)
+	reqProject.CreatedUser.ID = int64(claims.ID)
 	myMember, err := s.projectMemberDao.GetByProject(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
-	if !myMember.IsAdmin || !jwt.IsSuperAdmin {
+	if !myMember.IsAdmin || !claims.IsSuperAdmin {
 		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
 	project, err := s.projectDao.Get(reqProject)
@@ -266,11 +254,11 @@ func (s *ProjectService) Update(ctx context.Context, req *projectv1.UpdateProjec
 }
 
 func (s *ProjectService) Delete(ctx context.Context, req *projectv1.DeleteProjectRequest) (*projectv1.DeleteProjectResponse, error) {
-	jwt, err := utils.AuthJWT(ctx)
+	claims, err := utils.GetTokenDetails(ctx)
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
-	user, err := s.userDao.Get(cast.ToInt64(jwt.Id))
+	user, err := s.userDao.Get(int64(claims.ID))
 	if err != nil {
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
