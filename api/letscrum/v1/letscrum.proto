@@ -11,8 +11,28 @@ import "api/item/v1/feature.proto";
 import "api/item/v1/work_item.proto";
 import "api/item/v1/task.proto";
 import "api/user/v1/user.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
 
 option go_package = "github.com/letscrum/letscrum/api/letscrum/v1";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  security_definitions: {
+    security: {
+      key: "bearer";
+      value: {
+        type: TYPE_API_KEY
+        in: IN_HEADER
+        name: "Authorization"
+        description: "Authentication token, prefixed by bearer: bearer token"
+      }
+    }
+  }
+  security: {
+    security_requirement: {
+      key: "bearer"
+    }
+  }
+};
 
 service Letscrum {
   rpc GetVersion(google.protobuf.Empty) returns (letscrum.api.general.v1.GetVersionResponse) {

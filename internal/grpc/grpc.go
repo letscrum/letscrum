@@ -7,15 +7,16 @@ import (
 	"os"
 	"time"
 
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/auth"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/selector"
 	v1 "github.com/letscrum/letscrum/api/letscrum/v1"
-	servicev1 "github.com/letscrum/letscrum/internal/service/v1"
-	"github.com/letscrum/letscrum/pkg/utils"
-
 	"github.com/letscrum/letscrum/internal/dao"
 	"github.com/letscrum/letscrum/internal/dao/mysql"
+	"github.com/letscrum/letscrum/internal/mid"
+	servicev1 "github.com/letscrum/letscrum/internal/service/v1"
 	"github.com/letscrum/letscrum/pkg/db"
 	"github.com/letscrum/letscrum/pkg/log"
-
+	"github.com/letscrum/letscrum/pkg/utils"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"gorm.io/gorm/logger"
@@ -37,11 +38,14 @@ func Run(ctx context.Context, opts utils.Options) error {
 		<-ctx.Done()
 	}()
 
-	//opts := grpc.UnaryInterceptor(
-	//    grpc_auth.UnaryServerInterceptor(mid.Auth),
-	//)
-
-	s := grpc.NewServer()
+	s := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(
+			selector.UnaryServerInterceptor(auth.UnaryServerInterceptor(mid.Auth), selector.MatchFunc(mid.AllButHealthZ)),
+		),
+		grpc.ChainStreamInterceptor(
+			selector.StreamServerInterceptor(auth.StreamServerInterceptor(mid.Auth), selector.MatchFunc(mid.AllButHealthZ)),
+		),
+	)
 
 	var daoInterface dao.Interface
 	if daoInterface, err = initDao(); err != nil {

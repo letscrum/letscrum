@@ -5,7 +5,7 @@ go 1.22.3
 require (
 	github.com/golang-jwt/jwt v3.2.0+incompatible
 	github.com/golang/glog v1.2.1
-	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
+	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.1.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.20.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pkg/errors v0.9.1
