@@ -52,7 +52,7 @@ api_gen:
 		api/item/v1/work_item.proto \
 		api/item/v1/task.proto \
 		api/user/v1/user.proto
-	cp -R *.swagger.json docs/swagger-ui/letscrum.swagger.json
+	cp -R *.swagger.json swagger-ui/letscrum.swagger.json
 	rm *.swagger.json
 
 api_clean:

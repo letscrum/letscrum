@@ -8,9 +8,9 @@ import (
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	v1 "github.com/letscrum/letscrum/api/letscrum/v1"
-	swaggerui "github.com/letscrum/letscrum/docs/swagger-ui"
 	"github.com/letscrum/letscrum/pkg/log"
 	"github.com/letscrum/letscrum/pkg/utils"
+	swaggerui "github.com/letscrum/letscrum/swagger-ui"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
