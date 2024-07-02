@@ -2,6 +2,7 @@ package v1
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	generalv1 "github.com/letscrum/letscrum/api/general/v1"
@@ -16,16 +17,14 @@ import (
 
 type SprintService struct {
 	v1.UnimplementedSprintServer
-	sprintDao        dao.SprintDao
-	projectMemberDao dao.ProjectMemberDao
-	sprintMemberDao  dao.SprintMemberDao
+	sprintDao  dao.SprintDao
+	projectDao dao.ProjectDao
 }
 
 func NewSprintService(dao dao.Interface) *SprintService {
 	return &SprintService{
-		sprintDao:        dao.SprintDao(),
-		projectMemberDao: dao.ProjectMemberDao(),
-		sprintMemberDao:  dao.SprintMemberDao(),
+		sprintDao:  dao.SprintDao(),
+		projectDao: dao.ProjectDao(),
 	}
 }
 
@@ -37,19 +36,28 @@ func (s *SprintService) Create(ctx context.Context, req *projectv1.CreateSprintR
 	var reqProject model.Project
 	reqProject.ID = req.ProjectId
 	reqProject.CreatedUser.ID = int64(claims.ID)
-	member, err := s.projectMemberDao.GetByProject(reqProject)
+	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
-		return nil, status.Error(codes.PermissionDenied, err.Error())
+		return nil, status.Error(codes.Unknown, err.Error())
 	}
-	if !member.IsAdmin {
-		return nil, status.Error(codes.PermissionDenied, err.Error())
+	var projectMembers []*projectv1.ProjectMember
+	err = json.Unmarshal([]byte(project.Members), &projectMembers)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
 	}
+	for _, m := range projectMembers {
+		if m.UserId == int64(claims.ID) && m.IsAdmin == false {
+			return nil, status.Error(codes.PermissionDenied, err.Error())
+		}
+	}
+
 	newSprint := model.Sprint{
 		ProjectID: req.ProjectId,
 		Name:      req.Name,
 		StartDate: time.Unix(req.StartDate, 0),
 		EndDate:   time.Unix(req.EndDate, 0),
 	}
+
 	sprint, err := s.sprintDao.Create(newSprint)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
@@ -57,25 +65,6 @@ func (s *SprintService) Create(ctx context.Context, req *projectv1.CreateSprintR
 	success := false
 	if sprint.ID > 0 {
 		success = true
-	}
-	projectMembers, err := s.projectMemberDao.ListByProject(reqProject, 1, 999)
-	if err != nil {
-		return nil, status.Error(codes.Unknown, err.Error())
-	}
-	var sprintMembers []model.SprintMember
-	for _, pm := range projectMembers {
-		sprintMember := model.SprintMember{
-			SprintID: sprint.ID,
-			UserID:   pm.UserID,
-		}
-		sprintMembers = append(sprintMembers, sprintMember)
-	}
-	if len(sprintMembers) > 0 {
-		successMembers, err := s.sprintMemberDao.BatchAdd(sprintMembers)
-		if err != nil {
-			return nil, status.Error(codes.Unknown, err.Error())
-		}
-		success = successMembers != nil
 	}
 	return &projectv1.CreateSprintResponse{
 		Success: success,
@@ -91,9 +80,19 @@ func (s *SprintService) List(ctx context.Context, req *projectv1.ListSprintReque
 	var reqProject model.Project
 	reqProject.ID = req.ProjectId
 	reqProject.CreatedUser.ID = int64(claims.ID)
-	member, err := s.projectMemberDao.GetByProject(reqProject)
-	if err != nil || member == nil {
-		return nil, status.Error(codes.PermissionDenied, err.Error())
+	project, err := s.projectDao.Get(reqProject)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	var projectMembers []*projectv1.ProjectMember
+	err = json.Unmarshal([]byte(project.Members), &projectMembers)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	for _, m := range projectMembers {
+		if m.UserId == int64(claims.ID) && m.IsAdmin == false {
+			return nil, status.Error(codes.PermissionDenied, err.Error())
+		}
 	}
 	sprints, err := s.sprintDao.ListByProject(reqProject, req.Page, req.Size, req.Keyword)
 	if err != nil {
@@ -122,22 +121,16 @@ func (s *SprintService) List(ctx context.Context, req *projectv1.ListSprintReque
 			sprintStatus = projectv1.Sprint_Future
 			break
 		}
-		members, err := s.sprintMemberDao.ListBySprint(*sprint, 1, 999)
-		if err != nil {
-			return nil, status.Error(codes.Unknown, err.Error())
-		}
-		var memberList []*projectv1.SprintMember
-		for _, m := range members {
+		var sprintMembers []*projectv1.SprintMember
+		err = json.Unmarshal([]byte(sprint.Members), &sprintMembers)
+		for _, m := range sprintMembers {
 			var member = &projectv1.SprintMember{
-				Id:        m.ID,
-				UserId:    m.UserID,
-				SprintId:  m.SprintID,
-				UserName:  m.MemberUser.Name,
-				UserEmail: m.MemberUser.Email,
-				Role:      m.Role,
-				Capacity:  m.Capacity,
+				UserId:   m.UserId,
+				UserName: m.UserName,
+				Role:     m.Role,
+				Capacity: m.Capacity,
 			}
-			memberList = append(memberList, member)
+			sprintMembers = append(sprintMembers, member)
 		}
 		var currentSprint = &projectv1.Sprint{
 			Id:        sprint.ID,
@@ -148,7 +141,7 @@ func (s *SprintService) List(ctx context.Context, req *projectv1.ListSprintReque
 			Status:    sprintStatus,
 			CreatedAt: sprint.CreatedAt.Unix(),
 			UpdatedAt: sprint.UpdatedAt.Unix(),
-			Members:   memberList,
+			Members:   sprintMembers,
 		}
 		list = append(list, currentSprint)
 	}

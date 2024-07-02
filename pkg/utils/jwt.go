@@ -9,17 +9,19 @@ import (
 	jwt "github.com/golang-jwt/jwt/v5"
 )
 
-func GenerateTokens(userId float64, isSuperAdmin bool) (string, string, error) {
+func GenerateTokens(userId float64, userName string, isSuperAdmin bool) (string, string, error) {
 	nowTime := time.Now()
 	accessTokenExpireTime := nowTime.Add(time.Hour * 720)
 	accessTokenClaims := jwt.MapClaims{
 		"iss": userId,
+		"sub": userName,
 		"aud": isSuperAdmin,
 		"exp": accessTokenExpireTime.Unix(),
 	}
 	refreshTokenExpireTime := nowTime.Add(time.Hour * 720 * 2)
 	refreshTokenClaims := jwt.MapClaims{
 		"iss": userId,
+		"sub": userName,
 		"aud": isSuperAdmin,
 		"exp": refreshTokenExpireTime.Unix(),
 	}
@@ -54,6 +56,7 @@ func ParseToken(token string) (jwt.MapClaims, error) {
 
 type UserClaims struct {
 	ID             float64   `json:"id"`
+	Name           string    `json:"name"`
 	IsSuperAdmin   bool      `json:"is_super_admin"`
 	ExpirationTime time.Time `json:"exp"`
 }
@@ -65,6 +68,7 @@ func GetTokenDetails(ctx context.Context) (UserClaims, error) {
 	}
 	user := UserClaims{
 		ID:             claims["iss"].(float64),
+		Name:           claims["sub"].(string),
 		IsSuperAdmin:   claims["aud"].(bool),
 		ExpirationTime: time.Unix(int64(claims["exp"].(float64)), 0),
 	}

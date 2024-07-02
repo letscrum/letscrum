@@ -55,18 +55,14 @@ func Run(ctx context.Context, opts utils.Options) error {
 	letscrumService := servicev1.NewLetscrumService(daoInterface)
 	userService := servicev1.NewUserService(daoInterface)
 	projectService := servicev1.NewProjectService(daoInterface)
-	projectMemberService := servicev1.NewProjectMemberService(daoInterface)
 	sprintService := servicev1.NewSprintService(daoInterface)
-	sprintMemberService := servicev1.NewSprintMemberService(daoInterface)
 	workItemService := servicev1.NewWorkItemService(daoInterface)
 	taskService := servicev1.NewTaskService(daoInterface)
 
 	v1.RegisterLetscrumServer(s, letscrumService)
 	v1.RegisterUserServer(s, userService)
 	v1.RegisterProjectServer(s, projectService)
-	v1.RegisterProjectMemberServer(s, projectMemberService)
 	v1.RegisterSprintServer(s, sprintService)
-	v1.RegisterSprintMemberServer(s, sprintMemberService)
 	v1.RegisterWorkItemServer(s, workItemService)
 	v1.RegisterTaskServer(s, taskService)
 

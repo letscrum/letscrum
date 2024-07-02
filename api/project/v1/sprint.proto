@@ -25,13 +25,10 @@ message Sprint {
 }
 
 message SprintMember {
-  int64 id = 1;
-  int64 user_id = 2;
-  int64 sprint_id = 3;
-  string user_name = 4;
-  string user_email = 5;
-  string role = 6;
-  float capacity = 7;
+  int64 user_id = 1;
+  string user_name = 2;
+  string role = 3;
+  float capacity = 4;
 }
 
 message CreateSprintRequest {

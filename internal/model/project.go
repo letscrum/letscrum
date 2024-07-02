@@ -6,6 +6,7 @@ type Project struct {
 	Name        string `gorm:"column:name;size:255"`
 	DisplayName string `gorm:"column:display_name;size:255"`
 	Description string `gorm:"column:description;size:5000"`
+	Members     string `gorm:"column:members;size:5000"`
 	CreatedBy   int64  `gorm:"column:create_by"`
 	CreatedUser User   `gorm:"foreignKey:CreatedBy"`
 }

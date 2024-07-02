@@ -2,6 +2,7 @@ package v1
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	generalv1 "github.com/letscrum/letscrum/api/general/v1"
@@ -17,18 +18,16 @@ import (
 
 type ProjectService struct {
 	v1.UnimplementedProjectServer
-	projectDao       dao.ProjectDao
-	userDao          dao.UserDao
-	projectMemberDao dao.ProjectMemberDao
-	sprintDao        dao.SprintDao
+	projectDao dao.ProjectDao
+	userDao    dao.UserDao
+	sprintDao  dao.SprintDao
 }
 
 func NewProjectService(dao dao.Interface) *ProjectService {
 	return &ProjectService{
-		projectDao:       dao.ProjectDao(),
-		userDao:          dao.UserDao(),
-		projectMemberDao: dao.ProjectMemberDao(),
-		sprintDao:        dao.SprintDao(),
+		projectDao: dao.ProjectDao(),
+		userDao:    dao.UserDao(),
+		sprintDao:  dao.SprintDao(),
 	}
 }
 
@@ -45,22 +44,6 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 	}
 	if project.ID == 0 {
 		return nil, status.Error(codes.NotFound, "project not fount.")
-	}
-	members, err := s.projectMemberDao.ListByProject(reqProject, 1, 999)
-	if err != nil {
-		return nil, status.Error(codes.Unknown, err.Error())
-	}
-	var memberList []*projectv1.ProjectMember
-	for _, m := range members {
-		var member = &projectv1.ProjectMember{
-			Id:             m.ID,
-			UserId:         m.UserID,
-			ProjectId:      m.ProjectID,
-			UserName:       m.MemberUser.Name,
-			IsSuperAdmin:   m.MemberUser.IsSuperAdmin,
-			IsProjectAdmin: m.IsAdmin,
-		}
-		memberList = append(memberList, member)
 	}
 	sprints, err := s.sprintDao.ListByProject(reqProject, 1, 999, "")
 	if err != nil {
@@ -100,6 +83,11 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 			break
 		}
 	}
+	var members []*projectv1.ProjectMember
+	err = json.Unmarshal([]byte(project.Members), &members)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
 	return &projectv1.GetProjectResponse{
 		Item: &projectv1.Project{
 			Id:          project.ID,
@@ -111,7 +99,7 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 				Name:         project.CreatedUser.Name,
 				IsSuperAdmin: project.CreatedUser.IsSuperAdmin,
 			},
-			Members:       memberList,
+			Members:       members,
 			CurrentSprint: &sprint,
 			CreatedAt:     project.CreatedAt.Unix(),
 			UpdatedAt:     project.UpdatedAt.Unix(),
@@ -131,11 +119,19 @@ func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectReq
 	}
 	var list []*projectv1.Project
 	for _, p := range projects {
+		var members []*projectv1.ProjectMember
+		if p.Members != "" {
+			err = json.Unmarshal([]byte(p.Members), &members)
+			if err != nil {
+				return nil, status.Error(codes.Unknown, err.Error())
+			}
+		}
 		var project = &projectv1.Project{
 			Id:          p.ID,
 			Name:        p.Name,
 			DisplayName: p.DisplayName,
 			Description: p.Description,
+			Members:     members,
 			CreatedUser: &userV1.User{
 				Id:           p.CreatedUser.ID,
 				Name:         p.CreatedUser.Name,
@@ -143,21 +139,6 @@ func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectReq
 			},
 			CreatedAt: p.CreatedAt.Unix(),
 			UpdatedAt: p.UpdatedAt.Unix(),
-		}
-		members, err := s.projectMemberDao.ListByProject(*p, 1, 999)
-		if err != nil {
-			return nil, status.Error(codes.Unknown, err.Error())
-		}
-		for _, m := range members {
-			var member = &projectv1.ProjectMember{
-				Id:             m.ID,
-				UserId:         m.UserID,
-				ProjectId:      m.ProjectID,
-				UserName:       m.MemberUser.Name,
-				IsSuperAdmin:   m.MemberUser.IsSuperAdmin,
-				IsProjectAdmin: m.IsAdmin,
-			}
-			project.Members = append(project.Members, member)
 		}
 		list = append(list, project)
 	}
@@ -177,13 +158,40 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
+	// if claims.IsSuperAdmin is false permission dene
+	if !claims.IsSuperAdmin {
+		return nil, status.Error(codes.PermissionDenied, err.Error())
+	}
 	if req.DisplayName == "" {
 		return nil, status.Error(codes.InvalidArgument, "project display name can't be empty.")
 	}
+	// convert req.Members to project Members
+	var members []*projectv1.ProjectMember
+	members = append(members, &projectv1.ProjectMember{
+		UserId:   int64(claims.ID),
+		UserName: claims.Name,
+		IsAdmin:  true,
+	})
+	users, err := s.userDao.ListByIds(1, 999, req.Members)
+	for _, u := range users {
+		isAdmin := false
+		if u.IsSuperAdmin == true {
+			isAdmin = true
+		}
+		member := &projectv1.ProjectMember{
+			UserId:   u.ID,
+			UserName: u.Name,
+			IsAdmin:  isAdmin,
+		}
+		members = append(members, member)
+	}
+	// convert members to json string
+	membersJson, err := json.Marshal(members)
 	newProject := model.Project{
 		Name:        req.DisplayName,
 		DisplayName: req.DisplayName,
 		Description: req.Description,
+		Members:     string(membersJson),
 		CreatedBy:   int64(claims.ID),
 	}
 	project, err := s.projectDao.Create(newProject)
@@ -193,29 +201,6 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 	success := false
 	if project.ID > 0 {
 		success = true
-	}
-	var projectMembers []model.ProjectMember
-	projectMembers = append(projectMembers, model.ProjectMember{
-		ProjectID: project.ID,
-		UserID:    project.CreatedBy,
-		IsAdmin:   true,
-	})
-	for _, u := range req.Members {
-		if u != project.CreatedBy {
-			projectMember := model.ProjectMember{
-				ProjectID: project.ID,
-				UserID:    u,
-				IsAdmin:   false,
-			}
-			projectMembers = append(projectMembers, projectMember)
-		}
-	}
-	if len(projectMembers) > 0 {
-		successMembers, err := s.projectMemberDao.BatchAdd(projectMembers)
-		if err != nil {
-			return nil, status.Error(codes.Unknown, err.Error())
-		}
-		success = successMembers != nil
 	}
 	return &projectv1.CreateProjectResponse{
 		Success: success,
@@ -231,23 +216,44 @@ func (s *ProjectService) Update(ctx context.Context, req *projectv1.UpdateProjec
 	var reqProject model.Project
 	reqProject.ID = req.ProjectId
 	reqProject.CreatedUser.ID = int64(claims.ID)
-	myMember, err := s.projectMemberDao.GetByProject(reqProject)
-	if err != nil {
-		return nil, status.Error(codes.PermissionDenied, err.Error())
-	}
-	if !myMember.IsAdmin || !claims.IsSuperAdmin {
-		return nil, status.Error(codes.PermissionDenied, err.Error())
-	}
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		return nil, status.Error(codes.PermissionDenied, err.Error())
+	}
+	var projectMembers []*projectv1.ProjectMember
+	err = json.Unmarshal([]byte(project.Members), &projectMembers)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	for _, m := range projectMembers {
+		if m.UserId == int64(claims.ID) && m.IsAdmin == false {
+			return nil, status.Error(codes.PermissionDenied, err.Error())
+		}
 	}
 	project.DisplayName = req.DisplayName
 	project.Description = req.Description
+	// convert req.Members to project Members
+	var members []*projectv1.ProjectMember
+	users, err := s.userDao.ListByIds(1, 999, req.Members)
+	for _, u := range users {
+		isAdmin := false
+		if u.IsSuperAdmin == true {
+			isAdmin = true
+		}
+		member := &projectv1.ProjectMember{
+			UserId:   u.ID,
+			UserName: u.Name,
+			IsAdmin:  isAdmin,
+		}
+		members = append(members, member)
+	}
+	membersJson, err := json.Marshal(members)
+	project.Members = string(membersJson)
 	updatedProject, err := s.projectDao.Update(*project)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
+
 	return &projectv1.UpdateProjectResponse{
 		Success: updatedProject != nil,
 		Id:      updatedProject.ID,

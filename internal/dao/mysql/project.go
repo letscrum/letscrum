@@ -25,7 +25,7 @@ func (d ProjectDao) Create(project model.Project) (*model.Project, error) {
 }
 
 func (d ProjectDao) Update(project model.Project) (*model.Project, error) {
-	if err := d.DB.Model(&model.Project{}).Where("id = ?", project.ID).Update("display_name", project.DisplayName).Error; err != nil {
+	if err := d.DB.Model(&model.Project{}).Where("id = ?", project.ID).Updates(project).Error; err != nil {
 		return nil, err
 	}
 	return &project, nil

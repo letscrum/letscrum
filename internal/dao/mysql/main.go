@@ -34,16 +34,8 @@ func (d *Dao) ProjectDao() dao.ProjectDao {
 	return NewProjectDao(d.DB)
 }
 
-func (d *Dao) ProjectMemberDao() dao.ProjectMemberDao {
-	return NewProjectMemberDao(d.DB)
-}
-
 func (d *Dao) SprintDao() dao.SprintDao {
 	return NewSprintDao(d.DB)
-}
-
-func (d *Dao) SprintMemberDao() dao.SprintMemberDao {
-	return NewSprintMemberDao(d.DB)
 }
 
 type ColumnType interface {
@@ -78,9 +70,7 @@ func GetDao(opts *db.Options) (dao.Interface, error) {
 	initErr := dbIns.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
 		&model.User{},
 		&model.Project{},
-		&model.ProjectMember{},
 		&model.Sprint{},
-		&model.SprintMember{},
 		&model.Epic{},
 		&model.Feature{},
 		&model.WorkItem{},
