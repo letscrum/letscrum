@@ -32,7 +32,7 @@ func (s *UserService) List(ctx context.Context, req *userV1.ListUserRequest) (*u
 	var list []*userV1.User
 	for _, u := range users {
 		list = append(list, &userV1.User{
-			Id:           u.ID,
+			Id:           u.Id,
 			Name:         u.Name,
 			Email:        u.Email,
 			IsSuperAdmin: u.IsSuperAdmin,

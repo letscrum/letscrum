@@ -7,12 +7,12 @@ import (
 type Sprint struct {
 	Model
 
-	ProjectID   int64     `gorm:"column:project_id"`
+	ProjectId   int64     `gorm:"column:project_id"`
 	Name        string    `gorm:"column:name;size:255"`
 	Members     string    `gorm:"column:members;size:5000"`
 	StartDate   time.Time `gorm:"column:start_date"`
 	EndDate     time.Time `gorm:"column:end_date"`
-	FromProject Project   `gorm:"foreignKey:ProjectID"`
+	FromProject Project   `gorm:"foreignKey:ProjectId"`
 }
 
 //

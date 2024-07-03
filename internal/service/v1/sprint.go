@@ -34,8 +34,8 @@ func (s *SprintService) Create(ctx context.Context, req *projectv1.CreateSprintR
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 	var reqProject model.Project
-	reqProject.ID = req.ProjectId
-	reqProject.CreatedUser.ID = int64(claims.ID)
+	reqProject.Id = req.ProjectId
+	reqProject.CreatedUser.Id = int64(claims.ID)
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
@@ -52,7 +52,7 @@ func (s *SprintService) Create(ctx context.Context, req *projectv1.CreateSprintR
 	}
 
 	newSprint := model.Sprint{
-		ProjectID: req.ProjectId,
+		ProjectId: req.ProjectId,
 		Name:      req.Name,
 		StartDate: time.Unix(req.StartDate, 0),
 		EndDate:   time.Unix(req.EndDate, 0),
@@ -63,12 +63,12 @@ func (s *SprintService) Create(ctx context.Context, req *projectv1.CreateSprintR
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
 	success := false
-	if sprint.ID > 0 {
+	if sprint.Id > 0 {
 		success = true
 	}
 	return &projectv1.CreateSprintResponse{
 		Success: success,
-		Id:      sprint.ID,
+		Id:      sprint.Id,
 	}, nil
 }
 
@@ -78,8 +78,8 @@ func (s *SprintService) List(ctx context.Context, req *projectv1.ListSprintReque
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 	var reqProject model.Project
-	reqProject.ID = req.ProjectId
-	reqProject.CreatedUser.ID = int64(claims.ID)
+	reqProject.Id = req.ProjectId
+	reqProject.CreatedUser.Id = int64(claims.ID)
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
@@ -133,8 +133,8 @@ func (s *SprintService) List(ctx context.Context, req *projectv1.ListSprintReque
 			sprintMembers = append(sprintMembers, member)
 		}
 		var currentSprint = &projectv1.Sprint{
-			Id:        sprint.ID,
-			ProjectId: sprint.ProjectID,
+			Id:        sprint.Id,
+			ProjectId: sprint.ProjectId,
 			Name:      sprint.Name,
 			StartDate: sprint.StartDate.Unix(),
 			EndDate:   sprint.EndDate.Unix(),

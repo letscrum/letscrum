@@ -33,7 +33,7 @@ func NewProjectService(dao dao.Interface) *ProjectService {
 
 func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectRequest) (*projectv1.GetProjectResponse, error) {
 	var reqProject model.Project
-	reqProject.ID = req.ProjectId
+	reqProject.Id = req.ProjectId
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		result := status.Convert(err)
@@ -42,7 +42,7 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 		}
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
-	if project.ID == 0 {
+	if project.Id == 0 {
 		return nil, status.Error(codes.NotFound, "project not fount.")
 	}
 	sprints, err := s.sprintDao.ListByProject(reqProject, 1, 999, "")
@@ -58,8 +58,8 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 		// Set the 1st Sprint as default
 		if i == 0 {
 			sprint = projectv1.Sprint{
-				Id:        s.ID,
-				ProjectId: s.ProjectID,
+				Id:        s.Id,
+				ProjectId: s.ProjectId,
 				Name:      s.Name,
 				StartDate: s.StartDate.Unix(),
 				EndDate:   s.EndDate.Unix(),
@@ -71,8 +71,8 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 		// Set the real current sprint
 		if time.Now().After(s.StartDate) && time.Now().Before(s.EndDate) {
 			sprint = projectv1.Sprint{
-				Id:        s.ID,
-				ProjectId: s.ProjectID,
+				Id:        s.Id,
+				ProjectId: s.ProjectId,
 				Name:      s.Name,
 				StartDate: s.StartDate.Unix(),
 				EndDate:   s.EndDate.Unix(),
@@ -90,12 +90,12 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 	}
 	return &projectv1.GetProjectResponse{
 		Item: &projectv1.Project{
-			Id:          project.ID,
+			Id:          project.Id,
 			Name:        project.Name,
 			DisplayName: project.DisplayName,
 			Description: project.Description,
 			CreatedUser: &userV1.User{
-				Id:           project.CreatedUser.ID,
+				Id:           project.CreatedUser.Id,
 				Name:         project.CreatedUser.Name,
 				IsSuperAdmin: project.CreatedUser.IsSuperAdmin,
 			},
@@ -127,13 +127,13 @@ func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectReq
 			}
 		}
 		var project = &projectv1.Project{
-			Id:          p.ID,
+			Id:          p.Id,
 			Name:        p.Name,
 			DisplayName: p.DisplayName,
 			Description: p.Description,
 			Members:     members,
 			CreatedUser: &userV1.User{
-				Id:           p.CreatedUser.ID,
+				Id:           p.CreatedUser.Id,
 				Name:         p.CreatedUser.Name,
 				IsSuperAdmin: p.CreatedUser.IsSuperAdmin,
 			},
@@ -158,53 +158,77 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
-	// if claims.IsSuperAdmin is false permission dene
-	if !claims.IsSuperAdmin {
-		return nil, status.Error(codes.PermissionDenied, err.Error())
+	user, err := s.userDao.Get(int64(claims.ID))
+	if err != nil {
+		return nil, status.Error(codes.NotFound, err.Error())
+	}
+	if !user.IsSuperAdmin {
+		return nil, status.Error(codes.PermissionDenied, "No permission.")
 	}
 	if req.DisplayName == "" {
 		return nil, status.Error(codes.InvalidArgument, "project display name can't be empty.")
 	}
-	// convert req.Members to project Members
 	var members []*projectv1.ProjectMember
+	// add current user as project admin
 	members = append(members, &projectv1.ProjectMember{
-		UserId:   int64(claims.ID),
-		UserName: claims.Name,
-		IsAdmin:  true,
+		UserId:   user.Id,
+		UserName: user.Name,
+		IsAdmin:  user.IsSuperAdmin,
 	})
-	users, err := s.userDao.ListByIds(1, 999, req.Members)
-	for _, u := range users {
-		isAdmin := false
-		if u.IsSuperAdmin == true {
-			isAdmin = true
+	if req.Members != nil && len(req.Members) > 0 {
+		// convert req.Members to id list
+		var userIds []int64
+		for _, m := range req.Members {
+			userIds = append(userIds, m.UserId)
 		}
-		member := &projectv1.ProjectMember{
-			UserId:   u.ID,
-			UserName: u.Name,
-			IsAdmin:  isAdmin,
+		users, err := s.userDao.ListByIds(1, 999, userIds)
+		if err != nil {
+			return nil, status.Error(codes.Unknown, err.Error())
 		}
-		members = append(members, member)
+		// add members to project members
+		for _, u := range users {
+			isAdmin := false
+			if u.IsSuperAdmin == true {
+				isAdmin = true
+			} else {
+				for _, m := range req.Members {
+					if m.UserId == u.Id {
+						isAdmin = m.IsAdmin
+						break
+					}
+				}
+			}
+			member := &projectv1.ProjectMember{
+				UserId:   u.Id,
+				UserName: u.Name,
+				IsAdmin:  isAdmin,
+			}
+			members = append(members, member)
+		}
 	}
 	// convert members to json string
 	membersJson, err := json.Marshal(members)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
 	newProject := model.Project{
 		Name:        req.DisplayName,
 		DisplayName: req.DisplayName,
 		Description: req.Description,
 		Members:     string(membersJson),
-		CreatedBy:   int64(claims.ID),
+		CreatedBy:   user.Id,
 	}
 	project, err := s.projectDao.Create(newProject)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
 	success := false
-	if project.ID > 0 {
+	if project.Id > 0 {
 		success = true
 	}
 	return &projectv1.CreateProjectResponse{
 		Success: success,
-		Id:      project.ID,
+		Id:      project.Id,
 	}, nil
 }
 
@@ -213,12 +237,19 @@ func (s *ProjectService) Update(ctx context.Context, req *projectv1.UpdateProjec
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
+	user, err := s.userDao.Get(int64(claims.ID))
+	if err != nil {
+		return nil, status.Error(codes.NotFound, err.Error())
+	}
 	var reqProject model.Project
-	reqProject.ID = req.ProjectId
-	reqProject.CreatedUser.ID = int64(claims.ID)
+	reqProject.Id = req.ProjectId
+	reqProject.CreatedUser.Id = user.Id
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
-		return nil, status.Error(codes.PermissionDenied, err.Error())
+		return nil, status.Error(codes.NotFound, err.Error())
+	}
+	if project.Id == 0 {
+		return nil, status.Error(codes.NotFound, "project not fount.")
 	}
 	var projectMembers []*projectv1.ProjectMember
 	err = json.Unmarshal([]byte(project.Members), &projectMembers)
@@ -226,29 +257,31 @@ func (s *ProjectService) Update(ctx context.Context, req *projectv1.UpdateProjec
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
 	for _, m := range projectMembers {
-		if m.UserId == int64(claims.ID) && m.IsAdmin == false {
-			return nil, status.Error(codes.PermissionDenied, err.Error())
+		if m.UserId == user.Id && m.IsAdmin == false {
+			if user.IsSuperAdmin == false {
+				return nil, status.Error(codes.PermissionDenied, err.Error())
+			}
 		}
 	}
 	project.DisplayName = req.DisplayName
 	project.Description = req.Description
-	// convert req.Members to project Members
 	var members []*projectv1.ProjectMember
-	users, err := s.userDao.ListByIds(1, 999, req.Members)
-	for _, u := range users {
-		isAdmin := false
-		if u.IsSuperAdmin == true {
-			isAdmin = true
+	if req.Members != nil && len(req.Members) > 0 {
+		for _, m := range req.Members {
+			member := &projectv1.ProjectMember{
+				UserId:   m.UserId,
+				UserName: m.UserName,
+				IsAdmin:  m.IsAdmin,
+			}
+			members = append(members, member)
 		}
-		member := &projectv1.ProjectMember{
-			UserId:   u.ID,
-			UserName: u.Name,
-			IsAdmin:  isAdmin,
-		}
-		members = append(members, member)
 	}
 	membersJson, err := json.Marshal(members)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
 	project.Members = string(membersJson)
+
 	updatedProject, err := s.projectDao.Update(*project)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
@@ -256,7 +289,7 @@ func (s *ProjectService) Update(ctx context.Context, req *projectv1.UpdateProjec
 
 	return &projectv1.UpdateProjectResponse{
 		Success: updatedProject != nil,
-		Id:      updatedProject.ID,
+		Id:      updatedProject.Id,
 	}, nil
 }
 
@@ -270,17 +303,17 @@ func (s *ProjectService) Delete(ctx context.Context, req *projectv1.DeleteProjec
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
 	if !user.IsSuperAdmin {
-		return nil, status.Error(codes.PermissionDenied, err.Error())
+		return nil, status.Error(codes.PermissionDenied, "No permission.")
 	}
 	var reqProject model.Project
-	reqProject.ID = req.ProjectId
+	reqProject.Id = req.ProjectId
 	deletedProject, err := s.projectDao.Delete(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
 	return &projectv1.DeleteProjectResponse{
 		Success: deletedProject != nil,
-		Id:      deletedProject.ID,
+		Id:      deletedProject.Id,
 	}, nil
 }
 

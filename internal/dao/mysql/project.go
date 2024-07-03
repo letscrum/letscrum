@@ -11,7 +11,7 @@ type ProjectDao struct {
 
 func (d ProjectDao) Get(project model.Project) (*model.Project, error) {
 	var p *model.Project
-	if err := d.DB.Where("id = ?", project.ID).Preload("CreatedUser").Find(&p).Error; err != nil {
+	if err := d.DB.Where("id = ?", project.Id).Preload("CreatedUser").Find(&p).Error; err != nil {
 		return nil, err
 	}
 	return p, nil
@@ -25,14 +25,14 @@ func (d ProjectDao) Create(project model.Project) (*model.Project, error) {
 }
 
 func (d ProjectDao) Update(project model.Project) (*model.Project, error) {
-	if err := d.DB.Model(&model.Project{}).Where("id = ?", project.ID).Updates(project).Error; err != nil {
+	if err := d.DB.Model(&model.Project{}).Where("id = ?", project.Id).Updates(project).Error; err != nil {
 		return nil, err
 	}
 	return &project, nil
 }
 
 func (d ProjectDao) Delete(project model.Project) (*model.Project, error) {
-	if err := d.DB.Where("id = ?", project.ID).Delete(&model.Project{}).Error; err != nil {
+	if err := d.DB.Where("id = ?", project.Id).Delete(&model.Project{}).Error; err != nil {
 		return nil, err
 	}
 	return &project, nil

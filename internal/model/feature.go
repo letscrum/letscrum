@@ -3,16 +3,16 @@ package model
 type Feature struct {
 	Model
 
-	ProjectID   int64   `gorm:"column:project_id"`
-	SprintID    int64   `gorm:"column:sprint_id"`
-	EpicID      int64   `gorm:"column:epic_id"`
+	ProjectId   int64   `gorm:"column:project_id"`
+	SprintId    int64   `gorm:"column:sprint_id"`
+	EpicId      int64   `gorm:"column:epic_id"`
 	Title       string  `gorm:"column:title;size:1000"`
 	Description string  `gorm:"column:description;size:5000"`
 	AssignTo    int64   `gorm:"column:assign_to"`
 	CreatedBy   int64   `gorm:"column:created_by"`
 	AssignUser  User    `gorm:"foreignKey:AssignTo"`
 	CreatedUser User    `gorm:"foreignKey:CreatedBy"`
-	FromProject Project `gorm:"foreignKey:ProjectID"`
-	FromSprint  Sprint  `gorm:"foreignKey:SprintID"`
-	FromEpic    Epic    `gorm:"foreignKey:EpicID"`
+	FromProject Project `gorm:"foreignKey:ProjectId"`
+	FromSprint  Sprint  `gorm:"foreignKey:SprintId"`
+	FromEpic    Epic    `gorm:"foreignKey:EpicId"`
 }

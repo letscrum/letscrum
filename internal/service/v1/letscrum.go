@@ -44,16 +44,16 @@ func (s *LetscrumService) SignIn(ctx context.Context, req *userv1.SignInRequest)
 		}
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
-	if user.ID == 0 {
+	if user.Id == 0 {
 		return nil, status.Error(codes.NotFound, "user not fount.")
 	}
-	accessToken, refreshToken, errGenTokens := utils.GenerateTokens(float64(user.ID), user.Name, user.IsSuperAdmin)
+	accessToken, refreshToken, errGenTokens := utils.GenerateTokens(float64(user.Id), user.IsSuperAdmin)
 	if errGenTokens != nil {
 		return nil, errGenTokens
 	}
 	return &userv1.SignInResponse{
 		Item: &userv1.User{
-			Id:           user.ID,
+			Id:           user.Id,
 			Name:         user.Name,
 			Email:        user.Email,
 			IsSuperAdmin: user.IsSuperAdmin,
