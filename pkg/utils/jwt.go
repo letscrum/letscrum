@@ -53,7 +53,7 @@ func ParseToken(token string) (jwt.MapClaims, error) {
 }
 
 type UserClaims struct {
-	ID             float64   `json:"id"`
+	Id             float64   `json:"id"`
 	IsSuperAdmin   bool      `json:"is_super_admin"`
 	ExpirationTime time.Time `json:"exp"`
 }
@@ -64,7 +64,7 @@ func GetTokenDetails(ctx context.Context) (UserClaims, error) {
 		return UserClaims{}, errors.New("token claims not found")
 	}
 	user := UserClaims{
-		ID:             claims["iss"].(float64),
+		Id:             claims["iss"].(float64),
 		IsSuperAdmin:   claims["aud"].(bool),
 		ExpirationTime: time.Unix(int64(claims["exp"].(float64)), 0),
 	}

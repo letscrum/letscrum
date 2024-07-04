@@ -8,7 +8,7 @@ import (
 	generalv1 "github.com/letscrum/letscrum/api/general/v1"
 	v1 "github.com/letscrum/letscrum/api/letscrum/v1"
 	projectv1 "github.com/letscrum/letscrum/api/project/v1"
-	userV1 "github.com/letscrum/letscrum/api/user/v1"
+	userv1 "github.com/letscrum/letscrum/api/user/v1"
 	"github.com/letscrum/letscrum/internal/dao"
 	"github.com/letscrum/letscrum/internal/model"
 	"github.com/letscrum/letscrum/pkg/utils"
@@ -94,7 +94,7 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 			Name:        project.Name,
 			DisplayName: project.DisplayName,
 			Description: project.Description,
-			CreatedUser: &userV1.User{
+			CreatedUser: &userv1.User{
 				Id:           project.CreatedUser.Id,
 				Name:         project.CreatedUser.Name,
 				IsSuperAdmin: project.CreatedUser.IsSuperAdmin,
@@ -132,7 +132,7 @@ func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectReq
 			DisplayName: p.DisplayName,
 			Description: p.Description,
 			Members:     members,
-			CreatedUser: &userV1.User{
+			CreatedUser: &userv1.User{
 				Id:           p.CreatedUser.Id,
 				Name:         p.CreatedUser.Name,
 				IsSuperAdmin: p.CreatedUser.IsSuperAdmin,
@@ -158,7 +158,7 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
-	user, err := s.userDao.Get(int64(claims.ID))
+	user, err := s.userDao.Get(int64(claims.Id))
 	if err != nil {
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
@@ -237,7 +237,7 @@ func (s *ProjectService) Update(ctx context.Context, req *projectv1.UpdateProjec
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
-	user, err := s.userDao.Get(int64(claims.ID))
+	user, err := s.userDao.Get(int64(claims.Id))
 	if err != nil {
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
@@ -298,7 +298,7 @@ func (s *ProjectService) Delete(ctx context.Context, req *projectv1.DeleteProjec
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
-	user, err := s.userDao.Get(int64(claims.ID))
+	user, err := s.userDao.Get(int64(claims.Id))
 	if err != nil {
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
@@ -346,7 +346,7 @@ func (s *ProjectService) Delete(ctx context.Context, req *projectv1.DeleteProjec
 //            Id:          p.Id,
 //            Name:        p.Name,
 //            DisplayName: p.DisplayName,
-//            CreatedUser: &userV1.User{
+//            CreatedUser: &userv1.User{
 //                Id:   p.CreatedUser.Id,
 //                Name: p.CreatedUser.Name,
 //            },

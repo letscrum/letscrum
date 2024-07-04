@@ -35,7 +35,7 @@ func (s *SprintService) Create(ctx context.Context, req *projectv1.CreateSprintR
 	}
 	var reqProject model.Project
 	reqProject.Id = req.ProjectId
-	reqProject.CreatedUser.Id = int64(claims.ID)
+	reqProject.CreatedUser.Id = int64(claims.Id)
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
@@ -46,8 +46,8 @@ func (s *SprintService) Create(ctx context.Context, req *projectv1.CreateSprintR
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
 	for _, m := range projectMembers {
-		if m.UserId == int64(claims.ID) && m.IsAdmin == false {
-			return nil, status.Error(codes.PermissionDenied, err.Error())
+		if m.UserId == int64(claims.Id) && m.IsAdmin == false {
+			return nil, status.Error(codes.PermissionDenied, "No permission.")
 		}
 	}
 
@@ -79,7 +79,7 @@ func (s *SprintService) List(ctx context.Context, req *projectv1.ListSprintReque
 	}
 	var reqProject model.Project
 	reqProject.Id = req.ProjectId
-	reqProject.CreatedUser.Id = int64(claims.ID)
+	reqProject.CreatedUser.Id = int64(claims.Id)
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
@@ -90,8 +90,8 @@ func (s *SprintService) List(ctx context.Context, req *projectv1.ListSprintReque
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
 	for _, m := range projectMembers {
-		if m.UserId == int64(claims.ID) && m.IsAdmin == false {
-			return nil, status.Error(codes.PermissionDenied, err.Error())
+		if m.UserId == int64(claims.Id) && m.IsAdmin == false {
+			return nil, status.Error(codes.PermissionDenied, "No permission.")
 		}
 	}
 	sprints, err := s.sprintDao.ListByProject(reqProject, req.Page, req.Size, req.Keyword)

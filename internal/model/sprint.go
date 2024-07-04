@@ -7,12 +7,12 @@ import (
 type Sprint struct {
 	Model
 
-	ProjectId   int64     `gorm:"column:project_id"`
-	Name        string    `gorm:"column:name;size:255"`
-	Members     string    `gorm:"column:members;size:5000"`
-	StartDate   time.Time `gorm:"column:start_date"`
-	EndDate     time.Time `gorm:"column:end_date"`
-	FromProject Project   `gorm:"foreignKey:ProjectId"`
+	ProjectId   int64     `gorm:"column:project_id" json:"project_id,omitempty"`
+	Name        string    `gorm:"column:name;size:255" json:"name,omitempty"`
+	Members     string    `gorm:"column:members;size:5000" json:"members,omitempty"`
+	StartDate   time.Time `gorm:"column:start_date" json:"start_date,omitempty"`
+	EndDate     time.Time `gorm:"column:end_date" json:"end_date,omitempty"`
+	FromProject Project   `gorm:"foreignKey:ProjectId" json:"from_project,omitempty"`
 }
 
 //

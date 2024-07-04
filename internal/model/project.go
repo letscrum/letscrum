@@ -3,12 +3,12 @@ package model
 type Project struct {
 	Model
 
-	Name        string `gorm:"column:name;size:255"`
-	DisplayName string `gorm:"column:display_name;size:255"`
-	Description string `gorm:"column:description;size:5000"`
-	Members     string `gorm:"column:members;size:5000"`
-	CreatedBy   int64  `gorm:"column:create_by"`
-	CreatedUser User   `gorm:"foreignKey:CreatedBy"`
+	Name        string `gorm:"column:name;size:255" json:"name,omitempty"`
+	DisplayName string `gorm:"column:display_name;size:255" json:"display_name,omitempty"`
+	Description string `gorm:"column:description;size:5000" json:"description,omitempty"`
+	Members     string `gorm:"column:members;size:5000" json:"members,omitempty"`
+	CreatedBy   int64  `gorm:"column:create_by" json:"created_by,omitempty"`
+	CreatedUser User   `gorm:"foreignKey:CreatedBy" json:"created_user,omitempty"`
 }
 
 //
