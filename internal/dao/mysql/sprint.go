@@ -47,11 +47,18 @@ func (s SprintDao) Update(sprint model.Sprint) (*model.Sprint, error) {
 	return &sprint, nil
 }
 
-func (s SprintDao) Delete(sprint model.Sprint) (*model.Sprint, error) {
+func (s SprintDao) Delete(sprint model.Sprint) (bool, error) {
 	if err := s.DB.Where("id = ?", sprint.Id).Delete(&model.Sprint{}).Error; err != nil {
-		return nil, err
+		return false, err
 	}
-	return &sprint, nil
+	return true, nil
+}
+
+func (s SprintDao) DeleteByProject(project model.Project) (bool, error) {
+	if err := s.DB.Where("project_id = ?", project.Id).Delete(&model.Sprint{}).Error; err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 func NewSprintDao(d *gorm.DB) *SprintDao {

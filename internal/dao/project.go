@@ -10,5 +10,5 @@ type ProjectDao interface {
 	Count(keyword string) int64
 	Create(project model.Project) (*model.Project, error)
 	Update(project model.Project) (*model.Project, error)
-	Delete(project model.Project) (*model.Project, error)
+	Delete(project model.Project) (bool, error)
 }

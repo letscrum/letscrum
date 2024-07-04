@@ -259,7 +259,7 @@ func (s *ProjectService) Update(ctx context.Context, req *projectv1.UpdateProjec
 	for _, m := range projectMembers {
 		if m.UserId == user.Id && m.IsAdmin == false {
 			if user.IsSuperAdmin == false {
-				return nil, status.Error(codes.PermissionDenied, err.Error())
+				return nil, status.Error(codes.PermissionDenied, "No permission.")
 			}
 		}
 	}
@@ -307,13 +307,14 @@ func (s *ProjectService) Delete(ctx context.Context, req *projectv1.DeleteProjec
 	}
 	var reqProject model.Project
 	reqProject.Id = req.ProjectId
+	deleteSprints, err := s.sprintDao.DeleteByProject(reqProject)
 	deletedProject, err := s.projectDao.Delete(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
 	return &projectv1.DeleteProjectResponse{
-		Success: deletedProject != nil,
-		Id:      deletedProject.Id,
+		Success: deletedProject && deleteSprints,
+		Id:      reqProject.Id,
 	}, nil
 }
 

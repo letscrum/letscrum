@@ -8,5 +8,6 @@ type SprintDao interface {
 	CountByProject(project model.Project, keyword string) int64
 	Create(sprint model.Sprint) (*model.Sprint, error)
 	Update(sprint model.Sprint) (*model.Sprint, error)
-	Delete(sprint model.Sprint) (*model.Sprint, error)
+	Delete(sprint model.Sprint) (bool, error)
+	DeleteByProject(project model.Project) (bool, error)
 }

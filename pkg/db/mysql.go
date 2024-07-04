@@ -21,6 +21,7 @@ type Options struct {
 	MaxIdleConnections    int
 	MaxOpenConnections    int
 	MaxConnectionLifeTime time.Duration
+	AutoCreateAdmin       bool
 	Logger                logger.Interface
 }
 

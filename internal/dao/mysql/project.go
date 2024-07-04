@@ -31,11 +31,11 @@ func (d ProjectDao) Update(project model.Project) (*model.Project, error) {
 	return &project, nil
 }
 
-func (d ProjectDao) Delete(project model.Project) (*model.Project, error) {
+func (d ProjectDao) Delete(project model.Project) (bool, error) {
 	if err := d.DB.Where("id = ?", project.Id).Delete(&model.Project{}).Error; err != nil {
-		return nil, err
+		return false, err
 	}
-	return &project, nil
+	return true, nil
 }
 
 func (d ProjectDao) Count(keyword string) int64 {

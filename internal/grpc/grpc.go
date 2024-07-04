@@ -100,6 +100,7 @@ func initDao() (dao.Interface, error) {
 		Database:              viper.GetString("data.database.database"),
 		MaxIdleConnections:    viper.GetInt("data.database.max-idle-connections"),
 		MaxOpenConnections:    viper.GetInt("data.database.max-open-connections"),
+		AutoCreateAdmin:       viper.GetBool("data.database.auto-create-admin"),
 		MaxConnectionLifeTime: time.Duration(viper.GetInt("data.database.max-connection-lifetime")) * time.Second,
 		Logger:                newLogger,
 	}
