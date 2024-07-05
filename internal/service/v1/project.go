@@ -179,7 +179,9 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 		// convert req.Members to id list
 		var userIds []int64
 		for _, m := range req.Members {
-			userIds = append(userIds, m.UserId)
+			if m.UserId != user.Id {
+				userIds = append(userIds, m.UserId)
+			}
 		}
 		users, err := s.userDao.ListByIds(1, 999, userIds)
 		if err != nil {
