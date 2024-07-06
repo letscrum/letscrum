@@ -51,9 +51,25 @@ func (s *SprintService) Create(ctx context.Context, req *projectv1.CreateSprintR
 		}
 	}
 
+	// add sprint members from project members
+	var sprintMembers []*projectv1.SprintMember
+	for _, m := range projectMembers {
+		var member = &projectv1.SprintMember{
+			UserId:   m.UserId,
+			UserName: m.UserName,
+			Capacity: 0,
+		}
+		sprintMembers = append(sprintMembers, member)
+	}
+	members, err := json.Marshal(sprintMembers)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+
 	newSprint := model.Sprint{
 		ProjectId: req.ProjectId,
 		Name:      req.Name,
+		Members:   string(members),
 		StartDate: time.Unix(req.StartDate, 0),
 		EndDate:   time.Unix(req.EndDate, 0),
 	}
@@ -123,14 +139,9 @@ func (s *SprintService) List(ctx context.Context, req *projectv1.ListSprintReque
 		}
 		var sprintMembers []*projectv1.SprintMember
 		err = json.Unmarshal([]byte(sprint.Members), &sprintMembers)
-		for _, m := range sprintMembers {
-			var member = &projectv1.SprintMember{
-				UserId:   m.UserId,
-				UserName: m.UserName,
-				Role:     m.Role,
-				Capacity: m.Capacity,
-			}
-			sprintMembers = append(sprintMembers, member)
+		if err != nil {
+			println(sprint.Members)
+			return nil, status.Error(codes.Unknown, err.Error())
 		}
 		var currentSprint = &projectv1.Sprint{
 			Id:        sprint.Id,

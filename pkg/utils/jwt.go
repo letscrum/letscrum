@@ -9,6 +9,8 @@ import (
 	jwt "github.com/golang-jwt/jwt/v5"
 )
 
+type key string
+
 func GenerateTokens(userId float64, isSuperAdmin bool) (string, string, error) {
 	nowTime := time.Now()
 	accessTokenExpireTime := nowTime.Add(time.Hour * 720)

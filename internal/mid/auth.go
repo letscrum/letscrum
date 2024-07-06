@@ -40,8 +40,7 @@ func Auth(ctx context.Context) (context.Context, error) {
 		return nil, status.Errorf(codes.Unauthenticated, "invalid auth token: %v", err)
 	}
 
-	newCtx := context.WithValue(ctx, "token", tokenInfo)
-
+	newCtx := context.WithValue(ctx, "token", tokenInfo) // nolint
 	return newCtx, nil
 }
 

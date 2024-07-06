@@ -309,13 +309,12 @@ func (s *ProjectService) Delete(ctx context.Context, req *projectv1.DeleteProjec
 	}
 	var reqProject model.Project
 	reqProject.Id = req.ProjectId
-	deleteSprints, err := s.sprintDao.DeleteByProject(reqProject)
 	deletedProject, err := s.projectDao.Delete(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
 	return &projectv1.DeleteProjectResponse{
-		Success: deletedProject && deleteSprints,
+		Success: deletedProject,
 		Id:      reqProject.Id,
 	}, nil
 }
