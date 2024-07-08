@@ -167,6 +167,78 @@ func (s *SprintService) List(ctx context.Context, req *projectv1.ListSprintReque
 	}, nil
 }
 
+func (s *SprintService) Update(ctx context.Context, req *projectv1.UpdateSprintRequest) (*projectv1.UpdateSprintResponse, error) {
+	claims, err := utils.GetTokenDetails(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	var reqProject model.Project
+	reqProject.Id = req.ProjectId
+	reqProject.CreatedUser.Id = int64(claims.Id)
+	project, err := s.projectDao.Get(reqProject)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	var projectMembers []*projectv1.ProjectMember
+	err = json.Unmarshal([]byte(project.Members), &projectMembers)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	for _, m := range projectMembers {
+		if m.UserId == int64(claims.Id) && m.IsAdmin == false {
+			return nil, status.Error(codes.PermissionDenied, "No permission.")
+		}
+	}
+	var sprint model.Sprint
+	sprint.Id = req.SprintId
+	sprint.ProjectId = req.ProjectId
+	sprint.Name = req.Name
+	sprint.StartDate = time.Unix(req.StartDate, 0)
+	sprint.EndDate = time.Unix(req.EndDate, 0)
+	updateSprint, err := s.sprintDao.Update(sprint)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	return &projectv1.UpdateSprintResponse{
+		Success: updateSprint != nil,
+		Id:      updateSprint.Id,
+	}, nil
+}
+
+func (s *SprintService) Delete(ctx context.Context, req *projectv1.DeleteSprintRequest) (*projectv1.DeleteSprintResponse, error) {
+	claims, err := utils.GetTokenDetails(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	var reqProject model.Project
+	reqProject.Id = req.ProjectId
+	reqProject.CreatedUser.Id = int64(claims.Id)
+	project, err := s.projectDao.Get(reqProject)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	var projectMembers []*projectv1.ProjectMember
+	err = json.Unmarshal([]byte(project.Members), &projectMembers)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	for _, m := range projectMembers {
+		if m.UserId == int64(claims.Id) && m.IsAdmin == false {
+			return nil, status.Error(codes.PermissionDenied, "No permission.")
+		}
+	}
+	var sprint model.Sprint
+	sprint.Id = req.SprintId
+	deleteSprint, err := s.sprintDao.Delete(sprint)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	return &projectv1.DeleteSprintResponse{
+		Success: deleteSprint,
+	}, nil
+
+}
+
 //
 //func Create(projectId int64, name string, startDate time.Time, endDate time.Time) (int64, error) {
 //    sprintId, err := sprintmodel.CreateSprint(projectId, name, startDate, endDate)
