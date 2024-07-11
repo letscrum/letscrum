@@ -95,7 +95,7 @@ func (s WorkItemService) Create(ctx context.Context, req *itemv1.CreateWorkItemR
 	}, nil
 }
 
-func (s WorkItemService) ListByProject(ctx context.Context, req *itemv1.ListWorkItemRequest) (*itemv1.ListWorkItemResponse, error) {
+func (s WorkItemService) List(ctx context.Context, req *itemv1.ListWorkItemRequest) (*itemv1.ListWorkItemResponse, error) {
 	claims, err := utils.GetTokenDetails(ctx)
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
@@ -123,9 +123,22 @@ func (s WorkItemService) ListByProject(ctx context.Context, req *itemv1.ListWork
 		return nil, status.Error(codes.PermissionDenied, "You are not a member of this project")
 	}
 	req.Page, req.Size = utils.Pagination(req.Page, req.Size)
-	workItems, err := s.workItemDao.ListByProject(req.ProjectId, req.Page, req.Size, req.Keyword)
-	if err != nil {
-		return nil, status.Error(codes.Unknown, err.Error())
+	var workItems []*model.WorkItem
+	count := int64(0)
+	if req.ProjectId > 0 {
+		if req.SprintId > 0 {
+			workItems, err = s.workItemDao.ListBySprint(req.SprintId, req.Page, req.Size, req.Keyword)
+			if err != nil {
+				return nil, status.Error(codes.Unknown, err.Error())
+			}
+			count = s.workItemDao.CountBySprint(req.SprintId, req.Keyword)
+		} else {
+			workItems, err = s.workItemDao.ListByProject(req.ProjectId, req.Page, req.Size, req.Keyword)
+			if err != nil {
+				return nil, status.Error(codes.Unknown, err.Error())
+			}
+			count = s.workItemDao.CountByProject(req.ProjectId, req.Keyword)
+		}
 	}
 	// get workitemIds list by workItems
 	var workItemIds []int64
@@ -186,110 +199,6 @@ func (s WorkItemService) ListByProject(ctx context.Context, req *itemv1.ListWork
 			Tasks:       taskList,
 		})
 	}
-	count := s.workItemDao.CountByProject(req.ProjectId, req.Keyword)
-	return &itemv1.ListWorkItemResponse{
-		Items: items,
-		Pagination: &generalv1.Pagination{
-			Page:  req.Page,
-			Size:  req.Size,
-			Total: int32(count),
-		},
-	}, nil
-}
-
-func (s WorkItemService) ListBySprint(ctx context.Context, req *itemv1.ListWorkItemRequest) (*itemv1.ListWorkItemResponse, error) {
-	claims, err := utils.GetTokenDetails(ctx)
-	if err != nil {
-		return nil, status.Error(codes.Unauthenticated, err.Error())
-	}
-	var reqProject model.Project
-	reqProject.Id = req.ProjectId
-	project, err := s.projectDao.Get(reqProject)
-	if err != nil {
-		return nil, status.Error(codes.NotFound, err.Error())
-	}
-	var projectMembers []*projectv1.ProjectMember
-	err = json.Unmarshal([]byte(project.Members), &projectMembers)
-	if err != nil {
-		return nil, status.Error(codes.Unknown, err.Error())
-	}
-	// check claims.UserId in projectMembers
-	var isMember bool
-	for _, m := range projectMembers {
-		if m.UserId == int64(claims.Id) {
-			isMember = true
-			break
-		}
-	}
-	if !isMember {
-		return nil, status.Error(codes.PermissionDenied, "You are not a member of this project")
-	}
-	req.Page, req.Size = utils.Pagination(req.Page, req.Size)
-	workItems, err := s.workItemDao.ListBySprint(req.SprintId, req.Page, req.Size, req.Keyword)
-	if err != nil {
-		return nil, status.Error(codes.Unknown, err.Error())
-	}
-
-	// get workitemIds list by workItems
-	var workItemIds []int64
-	for _, w := range workItems {
-		workItemIds = append(workItemIds, w.Id)
-	}
-	// get tasks by workItemIds
-	tasks, err := s.taskDao.ListByWorkItemIds(workItemIds)
-
-	var items []*itemv1.WorkItem
-	for _, w := range workItems {
-		// convert w.AssignUser to userv1.User
-		assignUser := &userv1.User{
-			Id:    w.AssignUser.Id,
-			Name:  w.AssignUser.Name,
-			Email: w.AssignUser.Email,
-		}
-		// convert w.CreatedUser to userv1.User
-		createdUser := &userv1.User{
-			Id:    w.CreatedUser.Id,
-			Name:  w.CreatedUser.Name,
-			Email: w.CreatedUser.Email,
-		}
-		// get tasks by workItemId from tasks
-		var taskList []*itemv1.Task
-		for _, t := range tasks {
-			if t.WorkItemId == w.Id {
-				taskList = append(taskList, &itemv1.Task{
-					Id:          t.Id,
-					WorkItemId:  t.WorkItemId,
-					Title:       t.Title,
-					Description: t.Description,
-					Status:      itemv1.Task_TaskStatus(itemv1.Task_TaskStatus_value[t.Status]),
-					AssignUser: &userv1.User{
-						Id:    t.AssignUser.Id,
-						Name:  t.AssignUser.Name,
-						Email: t.AssignUser.Email,
-					},
-					CreatedUser: &userv1.User{
-						Id:    t.CreatedUser.Id,
-						Name:  t.CreatedUser.Name,
-						Email: t.CreatedUser.Email,
-					},
-				})
-			}
-		}
-		items = append(items, &itemv1.WorkItem{
-			Id:          w.Id,
-			ProjectId:   w.ProjectId,
-			SprintId:    w.SprintId,
-			FeatureId:   w.FeatureId,
-			Title:       w.Title,
-			Type:        itemv1.WorkItemType(itemv1.WorkItemType_value[w.Type]),
-			Description: w.Description,
-			Status:      itemv1.WorkItemStatus(itemv1.WorkItemStatus_value[w.Status]),
-			AssignUser:  assignUser,
-			CreatedUser: createdUser,
-			Tasks:       taskList,
-		})
-	}
-	count := s.workItemDao.CountBySprint(req.SprintId, req.Keyword)
 	return &itemv1.ListWorkItemResponse{
 		Items: items,
 		Pagination: &generalv1.Pagination{

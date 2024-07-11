@@ -183,15 +183,9 @@ service WorkItem {
     };
   }
 
-  rpc ListByProject(letscrum.api.item.v1.ListWorkItemRequest) returns (letscrum.api.item.v1.ListWorkItemResponse) {
+  rpc List(letscrum.api.item.v1.ListWorkItemRequest) returns (letscrum.api.item.v1.ListWorkItemResponse) {
     option (google.api.http) = {
       get: "/api/v1/projects/{project_id}/workitems"
-    };
-  }
-
-  rpc ListBySprint(letscrum.api.item.v1.ListWorkItemRequest) returns (letscrum.api.item.v1.ListWorkItemResponse) {
-    option (google.api.http) = {
-      get: "/api/v1/projects/{project_id}/sprints/{sprint_id}/workitems"
     };
   }
 
