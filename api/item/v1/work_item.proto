@@ -41,7 +41,6 @@ message CreateWorkItemRequest {
   int64 project_id = 1;
   WorkItemType type = 2;
   string title = 3;
-  // Optional
   int64 sprint_id = 4;
   int64 feature_id = 5;
   string description = 6;
@@ -49,7 +48,7 @@ message CreateWorkItemRequest {
 
 message CreateWorkItemResponse {
   bool success = 1;
-  int64 id = 2;
+  WorkItem item = 2;
 }
 
 message GetWorkItemRequest {
@@ -72,4 +71,19 @@ message ListWorkItemRequest {
 message ListWorkItemResponse {
   repeated WorkItem items = 1;
   letscrum.api.general.v1.Pagination pagination = 2;
+}
+
+message UpdateWorkItemRequest {
+  int64 work_item_id = 1;
+  WorkItemStatus status = 3;
+  string title = 4;
+  string description = 5;
+  int64 sprint_id = 6;
+  int64 feature_id = 7;
+  int64 assign_user_id = 8;
+}
+
+message UpdateWorkItemResponse {
+  bool success = 1;
+  WorkItem item = 2;
 }

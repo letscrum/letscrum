@@ -58,13 +58,19 @@ func (w WorkItemDao) Create(workItem model.WorkItem) (*model.WorkItem, error) {
 }
 
 func (w WorkItemDao) Update(workItem model.WorkItem) (*model.WorkItem, error) {
-	//TODO implement me
-	panic("implement me")
+	// update work item to database
+	if err := w.DB.Model(&model.WorkItem{}).Where("id = ?", workItem.Id).Updates(workItem).Error; err != nil {
+		return nil, err
+	}
+	return &workItem, nil
 }
 
 func (w WorkItemDao) Delete(workItem model.WorkItem) (bool, error) {
-	//TODO implement me
-	panic("implement me")
+	// delete work item from database
+	if err := w.DB.Where("id = ?", workItem.Id).Delete(&model.WorkItem{}).Error; err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 func NewWorkItemDao(d *gorm.DB) *WorkItemDao {

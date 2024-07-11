@@ -37,6 +37,7 @@ message CreateTaskRequest {
 
 message CreateTaskResponse {
   bool success = 1;
+  Task item = 2;
 }
 
 message GetTaskRequest {
@@ -46,18 +47,34 @@ message GetTaskRequest {
 }
 
 message GetTaskResponse {
-  Task items = 1;
+  Task item = 1;
 }
 
 message ListTaskRequest {
   int64 project_id = 1;
-  int64 work_item_id = 2;
-  int32 page = 3;
-  int32 size = 4;
-  string keyword = 5;
+  int64 sprint_id = 2;
+  int64 work_item_id = 3;
+  int32 page = 4;
+  int32 size = 5;
+  string keyword = 6;
 }
 
 message ListTaskResponse {
   repeated Task items = 1;
   letscrum.api.general.v1.Pagination pagination = 2;
+}
+
+message UpdateTaskRequest {
+  int64 task_id = 1;
+  int64 project_id = 2;
+  int64 work_item_id = 3;
+  string title = 4;
+  string description = 5;
+  Task.TaskStatus status = 6;
+  int64 assign_user_id = 7;
+}
+
+message UpdateTaskResponse {
+  bool success = 1;
+  Task item = 2;
 }

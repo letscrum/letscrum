@@ -20,6 +20,7 @@ type WorkItemService struct {
 	v1.UnimplementedWorkItemServer
 	workItemDao dao.WorkItemDao
 	projectDao  dao.ProjectDao
+	taskDao     dao.TaskDao
 }
 
 func (s WorkItemService) Create(ctx context.Context, req *itemv1.CreateWorkItemRequest) (*itemv1.CreateWorkItemResponse, error) {
@@ -63,13 +64,34 @@ func (s WorkItemService) Create(ctx context.Context, req *itemv1.CreateWorkItemR
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
+
+	var resWorkItem itemv1.WorkItem
+
 	success := false
 	if workItem.Id > 0 {
 		success = true
+		resWorkItem = itemv1.WorkItem{
+			Id:          workItem.Id,
+			ProjectId:   workItem.ProjectId,
+			SprintId:    workItem.SprintId,
+			FeatureId:   workItem.FeatureId,
+			Title:       workItem.Title,
+			Type:        itemv1.WorkItemType(itemv1.WorkItemType_value[workItem.Type]),
+			Description: workItem.Description,
+			Status:      itemv1.WorkItemStatus(itemv1.WorkItemStatus_value[workItem.Status]),
+			AssignUser:  nil,
+			CreatedUser: &userv1.User{
+				Id:    workItem.CreatedUser.Id,
+				Name:  workItem.CreatedUser.Name,
+				Email: workItem.CreatedUser.Email,
+			},
+			CreatedAt: workItem.CreatedAt.Unix(),
+			UpdatedAt: workItem.UpdatedAt.Unix(),
+		}
 	}
 	return &itemv1.CreateWorkItemResponse{
 		Success: success,
-		Id:      workItem.Id,
+		Item:    &resWorkItem,
 	}, nil
 }
 
@@ -105,6 +127,14 @@ func (s WorkItemService) ListByProject(ctx context.Context, req *itemv1.ListWork
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
+	// get workitemIds list by workItems
+	var workItemIds []int64
+	for _, w := range workItems {
+		workItemIds = append(workItemIds, w.Id)
+	}
+	// get tasks by workItemIds
+	tasks, err := s.taskDao.ListByWorkItemIds(workItemIds)
+
 	var items []*itemv1.WorkItem
 	for _, w := range workItems {
 		// convert w.AssignUser to userv1.User
@@ -119,6 +149,29 @@ func (s WorkItemService) ListByProject(ctx context.Context, req *itemv1.ListWork
 			Name:  w.CreatedUser.Name,
 			Email: w.CreatedUser.Email,
 		}
+		// get tasks by workItemId from tasks
+		var taskList []*itemv1.Task
+		for _, t := range tasks {
+			if t.WorkItemId == w.Id {
+				taskList = append(taskList, &itemv1.Task{
+					Id:          t.Id,
+					WorkItemId:  t.WorkItemId,
+					Title:       t.Title,
+					Description: t.Description,
+					Status:      itemv1.Task_TaskStatus(itemv1.Task_TaskStatus_value[t.Status]),
+					AssignUser: &userv1.User{
+						Id:    t.AssignUser.Id,
+						Name:  t.AssignUser.Name,
+						Email: t.AssignUser.Email,
+					},
+					CreatedUser: &userv1.User{
+						Id:    t.CreatedUser.Id,
+						Name:  t.CreatedUser.Name,
+						Email: t.CreatedUser.Email,
+					},
+				})
+			}
+		}
 		items = append(items, &itemv1.WorkItem{
 			Id:          w.Id,
 			ProjectId:   w.ProjectId,
@@ -130,6 +183,7 @@ func (s WorkItemService) ListByProject(ctx context.Context, req *itemv1.ListWork
 			Status:      itemv1.WorkItemStatus(itemv1.WorkItemStatus_value[w.Status]),
 			AssignUser:  assignUser,
 			CreatedUser: createdUser,
+			Tasks:       taskList,
 		})
 	}
 	count := s.workItemDao.CountByProject(req.ProjectId, req.Keyword)
@@ -175,6 +229,15 @@ func (s WorkItemService) ListBySprint(ctx context.Context, req *itemv1.ListWorkI
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
+
+	// get workitemIds list by workItems
+	var workItemIds []int64
+	for _, w := range workItems {
+		workItemIds = append(workItemIds, w.Id)
+	}
+	// get tasks by workItemIds
+	tasks, err := s.taskDao.ListByWorkItemIds(workItemIds)
+
 	var items []*itemv1.WorkItem
 	for _, w := range workItems {
 		// convert w.AssignUser to userv1.User
@@ -189,6 +252,29 @@ func (s WorkItemService) ListBySprint(ctx context.Context, req *itemv1.ListWorkI
 			Name:  w.CreatedUser.Name,
 			Email: w.CreatedUser.Email,
 		}
+		// get tasks by workItemId from tasks
+		var taskList []*itemv1.Task
+		for _, t := range tasks {
+			if t.WorkItemId == w.Id {
+				taskList = append(taskList, &itemv1.Task{
+					Id:          t.Id,
+					WorkItemId:  t.WorkItemId,
+					Title:       t.Title,
+					Description: t.Description,
+					Status:      itemv1.Task_TaskStatus(itemv1.Task_TaskStatus_value[t.Status]),
+					AssignUser: &userv1.User{
+						Id:    t.AssignUser.Id,
+						Name:  t.AssignUser.Name,
+						Email: t.AssignUser.Email,
+					},
+					CreatedUser: &userv1.User{
+						Id:    t.CreatedUser.Id,
+						Name:  t.CreatedUser.Name,
+						Email: t.CreatedUser.Email,
+					},
+				})
+			}
+		}
 		items = append(items, &itemv1.WorkItem{
 			Id:          w.Id,
 			ProjectId:   w.ProjectId,
@@ -200,6 +286,7 @@ func (s WorkItemService) ListBySprint(ctx context.Context, req *itemv1.ListWorkI
 			Status:      itemv1.WorkItemStatus(itemv1.WorkItemStatus_value[w.Status]),
 			AssignUser:  assignUser,
 			CreatedUser: createdUser,
+			Tasks:       taskList,
 		})
 	}
 	count := s.workItemDao.CountBySprint(req.SprintId, req.Keyword)
@@ -222,5 +309,6 @@ func NewWorkItemService(dao dao.Interface) *WorkItemService {
 	return &WorkItemService{
 		workItemDao: dao.WorkItemDao(),
 		projectDao:  dao.ProjectDao(),
+		taskDao:     dao.TaskDao(),
 	}
 }

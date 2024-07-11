@@ -221,6 +221,13 @@ service Task {
       get: "/api/v1/projects/{project_id}/workitems/{work_item_id}/tasks/{task_id}"
     };
   }
+
+  rpc Update(letscrum.api.item.v1.UpdateTaskRequest) returns (letscrum.api.item.v1.UpdateTaskResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/projects/{project_id}/workitems/{work_item_id}/tasks/{task_id}"
+      body: "*"
+    };
+  }
 }
 
 service User {
