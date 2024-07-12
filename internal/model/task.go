@@ -12,9 +12,9 @@ type Task struct {
 	AssignTo     int64    `gorm:"column:assign_to;default:null" json:"assign_to,omitempty"`
 	Remaining    float32  `gorm:"column:remaining" json:"remaining,omitempty"`
 	CreatedBy    int64    `gorm:"column:created_by" json:"created_by,omitempty"`
-	AssignUser   User     `gorm:"foreignKey:AssignTo;constraint:false" json:"assign_user,omitempty"`
+	AssignUser   User     `gorm:"foreignKey:AssignTo" json:"assign_user,omitempty"`
 	CreatedUser  User     `gorm:"foreignKey:CreatedBy" json:"created_user,omitempty"`
 	FromProject  Project  `gorm:"foreignKey:ProjectId" json:"from_project,omitempty"`
-	FromSprint   Sprint   `gorm:"foreignKey:SprintId;constraint:false" json:"from_sprint,omitempty"`
-	FromWorkItem WorkItem `gorm:"foreignKey:WorkItemId;constraint:false" json:"from_work_item,omitempty"`
+	FromSprint   Sprint   `gorm:"foreignKey:SprintId" json:"from_sprint,omitempty"`
+	FromWorkItem WorkItem `gorm:"foreignKey:WorkItemId" json:"from_work_item,omitempty"`
 }

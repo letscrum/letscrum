@@ -11,7 +11,7 @@ type TaskDao struct {
 
 func (t TaskDao) ListByWorkItemIds(workItemIds []int64) ([]*model.Task, error) {
 	var tasks []*model.Task
-	err := t.DB.Where("work_item_id IN ?", workItemIds).Find(&tasks).Error
+	err := t.DB.Where("work_item_id IN ?", workItemIds).Preload("CreatedUser").Preload("AssignUser").Find(&tasks).Error
 	if err != nil {
 		return nil, err
 	}
