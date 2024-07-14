@@ -13,13 +13,7 @@ enum WorkItemType {
   Bug = 1;
 }
 
-enum WorkItemStatus {
-  New = 0;
-  Approved = 1;
-  Committed = 2;
-  Done = 3;
-  Removed = 4;
-}
+
 
 message WorkItem {
   int64 id = 1;
@@ -29,6 +23,13 @@ message WorkItem {
   string title = 5;
   WorkItemType type = 6;
   string description = 7;
+  enum WorkItemStatus {
+    New = 0;
+    Approved = 1;
+    Committed = 2;
+    Done = 3;
+    Removed = 4;
+  }
   WorkItemStatus status = 8;
   letscrum.api.user.v1.User assign_user = 9;
   letscrum.api.user.v1.User created_user = 10;
@@ -74,13 +75,26 @@ message ListWorkItemResponse {
 }
 
 message UpdateWorkItemRequest {
-  int64 work_item_id = 1;
-  WorkItemStatus status = 3;
+  int64 project_id = 1;
+  int64 work_item_id = 2;
+  WorkItem.WorkItemStatus status = 3;
   string title = 4;
   string description = 5;
   int64 sprint_id = 6;
   int64 feature_id = 7;
   int64 assign_user_id = 8;
+}
+
+message UpdateWorkItemStatusRequest {
+  int64 project_id = 1;
+  int64 work_item_id = 2;
+  WorkItem.WorkItemStatus status = 3;
+}
+
+message AssignWorkItemRequest {
+  int64 project_id = 1;
+  int64 work_item_id = 2;
+  int64 assign_user_id = 3;
 }
 
 message UpdateWorkItemResponse {

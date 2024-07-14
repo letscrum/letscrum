@@ -194,6 +194,27 @@ service WorkItem {
       get: "/api/v1/projects/{project_id}/workitems/{work_item_id}"
     };
   }
+
+  rpc Update(letscrum.api.item.v1.UpdateWorkItemRequest) returns (letscrum.api.item.v1.UpdateWorkItemResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/projects/{project_id}/workitems/{work_item_id}"
+      body: "*"
+    };
+  }
+
+  rpc UpdateStatus(letscrum.api.item.v1.UpdateWorkItemStatusRequest) returns (letscrum.api.item.v1.UpdateWorkItemResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/projects/{project_id}/workitems/{work_item_id}/status"
+      body: "*"
+    };
+  }
+
+  rpc Assign(letscrum.api.item.v1.AssignWorkItemRequest) returns (letscrum.api.item.v1.UpdateWorkItemResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/projects/{project_id}/workitems/{work_item_id}/assign"
+      body: "*"
+    };
+  }
 }
 
 service Task {
@@ -219,6 +240,20 @@ service Task {
   rpc Update(letscrum.api.item.v1.UpdateTaskRequest) returns (letscrum.api.item.v1.UpdateTaskResponse) {
     option (google.api.http) = {
       put: "/api/v1/projects/{project_id}/workitems/{work_item_id}/tasks/{task_id}"
+      body: "*"
+    };
+  }
+
+  rpc UpdateStatus(letscrum.api.item.v1.UpdateTaskStatusRequest) returns (letscrum.api.item.v1.UpdateTaskResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/projects/{project_id}/workitems/{work_item_id}/tasks/{task_id}/status"
+      body: "*"
+    };
+  }
+
+  rpc Assign(letscrum.api.item.v1.AssignTaskRequest) returns (letscrum.api.item.v1.UpdateTaskResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/projects/{project_id}/workitems/{work_item_id}/tasks/{task_id}/assign"
       body: "*"
     };
   }

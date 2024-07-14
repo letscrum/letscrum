@@ -57,7 +57,7 @@ func (s WorkItemService) Create(ctx context.Context, req *itemv1.CreateWorkItemR
 		Title:       req.Title,
 		Type:        req.Type.String(),
 		Description: req.Description,
-		Status:      itemv1.WorkItemStatus_New.String(),
+		Status:      itemv1.WorkItem_New.String(),
 		CreatedBy:   int64(claims.Id),
 	}
 	workItem, err := s.workItemDao.Create(newWorkItem)
@@ -78,7 +78,7 @@ func (s WorkItemService) Create(ctx context.Context, req *itemv1.CreateWorkItemR
 			Title:       workItem.Title,
 			Type:        itemv1.WorkItemType(itemv1.WorkItemType_value[workItem.Type]),
 			Description: workItem.Description,
-			Status:      itemv1.WorkItemStatus(itemv1.WorkItemStatus_value[workItem.Status]),
+			Status:      itemv1.WorkItem_WorkItemStatus(itemv1.WorkItem_WorkItemStatus_value[workItem.Status]),
 			AssignUser: &userv1.User{
 				Id:    0,
 				Name:  "",
@@ -197,7 +197,7 @@ func (s WorkItemService) List(ctx context.Context, req *itemv1.ListWorkItemReque
 			Title:       w.Title,
 			Type:        itemv1.WorkItemType(itemv1.WorkItemType_value[w.Type]),
 			Description: w.Description,
-			Status:      itemv1.WorkItemStatus(itemv1.WorkItemStatus_value[w.Status]),
+			Status:      itemv1.WorkItem_WorkItemStatus(itemv1.WorkItem_WorkItemStatus_value[w.Status]),
 			AssignUser:  assignUser,
 			CreatedUser: createdUser,
 			Tasks:       taskList,

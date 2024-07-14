@@ -74,6 +74,20 @@ message UpdateTaskRequest {
   int64 assign_user_id = 7;
 }
 
+message UpdateTaskStatusRequest {
+  int64 task_id = 1;
+  int64 project_id = 2;
+  int64 work_item_id = 3;
+  Task.TaskStatus status = 4;
+}
+
+message AssignTaskRequest {
+  int64 task_id = 1;
+  int64 project_id = 2;
+  int64 work_item_id = 3;
+  int64 assign_user_id = 4;
+}
+
 message UpdateTaskResponse {
   bool success = 1;
   Task item = 2;
