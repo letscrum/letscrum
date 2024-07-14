@@ -79,7 +79,11 @@ func (s WorkItemService) Create(ctx context.Context, req *itemv1.CreateWorkItemR
 			Type:        itemv1.WorkItemType(itemv1.WorkItemType_value[workItem.Type]),
 			Description: workItem.Description,
 			Status:      itemv1.WorkItemStatus(itemv1.WorkItemStatus_value[workItem.Status]),
-			AssignUser:  nil,
+			AssignUser: &userv1.User{
+				Id:    0,
+				Name:  "",
+				Email: "",
+			},
 			CreatedUser: &userv1.User{
 				Id:    workItem.CreatedUser.Id,
 				Name:  workItem.CreatedUser.Name,
