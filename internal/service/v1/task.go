@@ -81,8 +81,12 @@ func (t TaskService) Create(ctx context.Context, req *itemv1.CreateTaskRequest) 
 			WorkItemId:  task.WorkItemId,
 			Title:       task.Title,
 			Description: task.Description,
-			Status:      itemv1.Task_UNKNOWN,
-			AssignUser:  nil,
+			Status:      itemv1.Task_TaskStatus(itemv1.Task_TaskStatus_value[task.Status]),
+			AssignUser: &userv1.User{
+				Id:    0,
+				Name:  "",
+				Email: "",
+			},
 			CreatedUser: &userv1.User{
 				Id:    task.CreatedUser.Id,
 				Name:  task.CreatedUser.Name,
