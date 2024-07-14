@@ -60,6 +60,7 @@ func (t TaskService) Create(ctx context.Context, req *itemv1.CreateTaskRequest) 
 		SprintId:   req.SprintId,
 		WorkItemId: req.WorkItemId,
 		Title:      req.Title,
+		Status:     itemv1.Task_ToDo.String(),
 		CreatedBy:  int64(claims.Id),
 	}
 	task, err := t.taskDao.Create(newTask)
