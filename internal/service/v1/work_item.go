@@ -167,10 +167,15 @@ func (s WorkItemService) List(ctx context.Context, req *itemv1.ListWorkItemReque
 			Email: w.CreatedUser.Email,
 		}
 		// get tasks by workItemId from tasks
-		var taskList []*itemv1.Task
+		var tasksAll []*itemv1.Task
+		var tasksUNKNOWN []*itemv1.Task
+		var tasksToDo []*itemv1.Task
+		var tasksInProgress []*itemv1.Task
+		var tasksDone []*itemv1.Task
+		var tasksRemoved []*itemv1.Task
 		for _, t := range tasks {
 			if t.WorkItemId == w.Id {
-				taskList = append(taskList, &itemv1.Task{
+				resTask := &itemv1.Task{
 					Id:          t.Id,
 					WorkItemId:  t.WorkItemId,
 					Title:       t.Title,
@@ -186,21 +191,42 @@ func (s WorkItemService) List(ctx context.Context, req *itemv1.ListWorkItemReque
 						Name:  t.CreatedUser.Name,
 						Email: t.CreatedUser.Email,
 					},
-				})
+				}
+				tasksAll = append(tasksAll, resTask)
+				if resTask.Status == itemv1.Task_UNKNOWN {
+					tasksUNKNOWN = append(tasksUNKNOWN, resTask)
+				}
+				if resTask.Status == itemv1.Task_ToDo {
+					tasksToDo = append(tasksToDo, resTask)
+				}
+				if resTask.Status == itemv1.Task_InProgress {
+					tasksInProgress = append(tasksInProgress, resTask)
+				}
+				if resTask.Status == itemv1.Task_Done {
+					tasksDone = append(tasksDone, resTask)
+				}
+				if resTask.Status == itemv1.Task_Removed {
+					tasksRemoved = append(tasksRemoved, resTask)
+				}
 			}
 		}
 		items = append(items, &itemv1.WorkItem{
-			Id:          w.Id,
-			ProjectId:   w.ProjectId,
-			SprintId:    w.SprintId,
-			FeatureId:   w.FeatureId,
-			Title:       w.Title,
-			Type:        itemv1.WorkItemType(itemv1.WorkItemType_value[w.Type]),
-			Description: w.Description,
-			Status:      itemv1.WorkItem_WorkItemStatus(itemv1.WorkItem_WorkItemStatus_value[w.Status]),
-			AssignUser:  assignUser,
-			CreatedUser: createdUser,
-			Tasks:       taskList,
+			Id:              w.Id,
+			ProjectId:       w.ProjectId,
+			SprintId:        w.SprintId,
+			FeatureId:       w.FeatureId,
+			Title:           w.Title,
+			Type:            itemv1.WorkItemType(itemv1.WorkItemType_value[w.Type]),
+			Description:     w.Description,
+			Status:          itemv1.WorkItem_WorkItemStatus(itemv1.WorkItem_WorkItemStatus_value[w.Status]),
+			AssignUser:      assignUser,
+			CreatedUser:     createdUser,
+			TasksAll:        tasksAll,
+			TasksUnknown:    tasksUNKNOWN,
+			TasksToDo:       tasksToDo,
+			TasksInProgress: tasksInProgress,
+			TasksDone:       tasksDone,
+			TasksRemoved:    tasksRemoved,
 		})
 	}
 	return &itemv1.ListWorkItemResponse{

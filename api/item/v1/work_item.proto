@@ -33,9 +33,14 @@ message WorkItem {
   WorkItemStatus status = 8;
   letscrum.api.user.v1.User assign_user = 9;
   letscrum.api.user.v1.User created_user = 10;
-  repeated Task tasks = 11;
-  int64 created_at = 12;
-  int64 updated_at = 13;
+  repeated Task tasks_unknown = 11;
+  repeated Task tasks_to_do = 12;
+  repeated Task tasks_in_progress = 13;
+  repeated Task tasks_done = 14;
+  repeated Task tasks_removed = 15;
+  repeated Task tasks_all = 16;
+  int64 created_at = 17;
+  int64 updated_at = 18;
 }
 
 message CreateWorkItemRequest {
