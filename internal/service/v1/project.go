@@ -275,6 +275,9 @@ func (s *ProjectService) Update(ctx context.Context, req *projectv1.UpdateProjec
 				UserName: m.UserName,
 				IsAdmin:  m.IsAdmin,
 			}
+			if m.UserId == user.Id && user.IsSuperAdmin == true {
+				member.IsAdmin = true
+			}
 			members = append(members, member)
 		}
 	}
