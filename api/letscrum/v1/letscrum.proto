@@ -257,6 +257,13 @@ service Task {
       body: "*"
     };
   }
+
+  rpc Move(letscrum.api.item.v1.MoveTaskRequest) returns (letscrum.api.item.v1.UpdateTaskResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/projects/{project_id}/workitems/{work_item_id}/tasks/{task_id}/move"
+      body: "*"
+    };
+  }
 }
 
 service User {

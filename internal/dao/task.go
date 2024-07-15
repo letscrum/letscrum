@@ -11,5 +11,8 @@ type TaskDao interface {
 	CountByWorkItem(workItemId int64, keyword string) int64
 	Create(task model.Task) (*model.Task, error)
 	Update(task model.Task) (*model.Task, error)
+	UpdateStatus(task model.Task) (*model.Task, error)
+	UpdateAssignUser(task model.Task) (*model.Task, error)
+	Move(task model.Task) (*model.Task, error)
 	Delete(task model.Task) (bool, error)
 }

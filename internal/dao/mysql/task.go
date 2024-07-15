@@ -69,6 +69,27 @@ func (t TaskDao) Update(task model.Task) (*model.Task, error) {
 	return &task, nil
 }
 
+func (t TaskDao) UpdateStatus(task model.Task) (*model.Task, error) {
+	if err := t.DB.Model(&model.Task{}).Where("id = ?", task.Id).Update("status", task.Status).Error; err != nil {
+		return nil, err
+	}
+	return &task, nil
+}
+
+func (t TaskDao) UpdateAssignUser(task model.Task) (*model.Task, error) {
+	if err := t.DB.Model(&model.Task{}).Where("id = ?", task.Id).Update("assign_to", task.AssignTo).Error; err != nil {
+		return nil, err
+	}
+	return &task, nil
+}
+
+func (t TaskDao) Move(task model.Task) (*model.Task, error) {
+	if err := t.DB.Model(&model.Task{}).Where("id = ?", task.Id).Update("status", task.Status).Update("work_item_id", task.WorkItemId).Error; err != nil {
+		return nil, err
+	}
+	return &task, nil
+}
+
 func (t TaskDao) Delete(task model.Task) (bool, error) {
 	if err := t.DB.Where("id = ?", task.Id).Delete(&model.Task{}).Error; err != nil {
 		return false, err
