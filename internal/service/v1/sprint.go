@@ -88,6 +88,70 @@ func (s *SprintService) Create(ctx context.Context, req *projectv1.CreateSprintR
 	}, nil
 }
 
+func (s *SprintService) Get(ctx context.Context, req *projectv1.GetSprintRequest) (*projectv1.GetSprintResponse, error) {
+	claims, err := utils.GetTokenDetails(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	var reqProject model.Project
+	reqProject.Id = req.ProjectId
+	reqProject.CreatedUser.Id = int64(claims.Id)
+	project, err := s.projectDao.Get(reqProject)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	var projectMembers []*projectv1.ProjectMember
+	err = json.Unmarshal([]byte(project.Members), &projectMembers)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	for _, m := range projectMembers {
+		if m.UserId == int64(claims.Id) && m.IsAdmin == false {
+			return nil, status.Error(codes.PermissionDenied, "No permission.")
+		}
+	}
+	var reqSprint model.Sprint
+	reqSprint.Id = req.SprintId
+	sprint, err := s.sprintDao.Get(reqSprint)
+	if err != nil {
+		result := status.Convert(err)
+		if result.Code() == codes.NotFound {
+			return nil, status.Errorf(codes.NotFound, "not found.")
+		}
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	var sprintMembers []*projectv1.SprintMember
+	err = json.Unmarshal([]byte(sprint.Members), &sprintMembers)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	var sprintStatus projectv1.Sprint_SprintStatus
+	switch {
+	case time.Now().After(sprint.StartDate) && time.Now().Before(sprint.EndDate):
+		sprintStatus = projectv1.Sprint_Current
+		break
+	case time.Now().After(sprint.EndDate):
+		sprintStatus = projectv1.Sprint_Past
+		break
+	case time.Now().Before(sprint.StartDate):
+		sprintStatus = projectv1.Sprint_Future
+		break
+	}
+	return &projectv1.GetSprintResponse{
+		Item: &projectv1.Sprint{
+			Id:        sprint.Id,
+			ProjectId: sprint.ProjectId,
+			Name:      sprint.Name,
+			StartDate: sprint.StartDate.Unix(),
+			EndDate:   sprint.EndDate.Unix(),
+			Status:    sprintStatus,
+			CreatedAt: sprint.CreatedAt.Unix(),
+			UpdatedAt: sprint.UpdatedAt.Unix(),
+			Members:   sprintMembers,
+		},
+	}, nil
+}
+
 func (s *SprintService) List(ctx context.Context, req *projectv1.ListSprintRequest) (*projectv1.ListSprintResponse, error) {
 	claims, err := utils.GetTokenDetails(ctx)
 	if err != nil {
