@@ -47,6 +47,13 @@ func (s SprintDao) Update(sprint model.Sprint) (*model.Sprint, error) {
 	return &sprint, nil
 }
 
+func (s SprintDao) UpdateMembers(sprint model.Sprint) (*model.Sprint, error) {
+	if err := s.DB.Model(&model.Sprint{}).Where("id = ?", sprint.Id).Update("members", sprint.Members).Error; err != nil {
+		return nil, err
+	}
+	return &sprint, nil
+}
+
 func (s SprintDao) Delete(sprint model.Sprint) (bool, error) {
 	if err := s.DB.Where("id = ?", sprint.Id).Delete(&model.Sprint{}).Error; err != nil {
 		return false, err

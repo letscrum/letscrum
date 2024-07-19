@@ -84,7 +84,16 @@ func (s *SprintService) Create(ctx context.Context, req *projectv1.CreateSprintR
 	}
 	return &projectv1.CreateSprintResponse{
 		Success: success,
-		Id:      sprint.Id,
+		Item: &projectv1.Sprint{
+			Id:        sprint.Id,
+			ProjectId: sprint.ProjectId,
+			Name:      sprint.Name,
+			StartDate: sprint.StartDate.Unix(),
+			EndDate:   sprint.EndDate.Unix(),
+			CreatedAt: sprint.CreatedAt.Unix(),
+			UpdatedAt: sprint.UpdatedAt.Unix(),
+			Members:   sprintMembers,
+		},
 	}, nil
 }
 
@@ -263,9 +272,80 @@ func (s *SprintService) Update(ctx context.Context, req *projectv1.UpdateSprintR
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
+	var sprintMembers []*projectv1.SprintMember
+	err = json.Unmarshal([]byte(updateSprint.Members), &sprintMembers)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
 	return &projectv1.UpdateSprintResponse{
 		Success: updateSprint != nil,
-		Id:      updateSprint.Id,
+		Item: &projectv1.Sprint{
+			Id:        updateSprint.Id,
+			ProjectId: updateSprint.ProjectId,
+			Name:      updateSprint.Name,
+			StartDate: updateSprint.StartDate.Unix(),
+			EndDate:   updateSprint.EndDate.Unix(),
+			CreatedAt: updateSprint.CreatedAt.Unix(),
+			UpdatedAt: updateSprint.UpdatedAt.Unix(),
+			Members:   sprintMembers,
+		},
+	}, nil
+}
+
+func (s *SprintService) UpdateMembers(ctx context.Context, req *projectv1.UpdateSprintMembersRequest) (*projectv1.UpdateSprintResponse, error) {
+	claims, err := utils.GetTokenDetails(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	var reqProject model.Project
+	reqProject.Id = req.ProjectId
+	reqProject.CreatedUser.Id = int64(claims.Id)
+	project, err := s.projectDao.Get(reqProject)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	var projectMembers []*projectv1.ProjectMember
+	err = json.Unmarshal([]byte(project.Members), &projectMembers)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	for _, m := range projectMembers {
+		if m.UserId == int64(claims.Id) && m.IsAdmin == false {
+			return nil, status.Error(codes.PermissionDenied, "No permission.")
+		}
+	}
+	var sprint model.Sprint
+	sprint.Id = req.SprintId
+	var sprintMembers []*projectv1.SprintMember
+	for _, m := range req.Members {
+		var member = &projectv1.SprintMember{
+			UserId:   m.UserId,
+			UserName: m.UserName,
+			Capacity: m.Capacity,
+		}
+		sprintMembers = append(sprintMembers, member)
+	}
+	members, err := json.Marshal(sprintMembers)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	sprint.Members = string(members)
+	updateSprint, err := s.sprintDao.UpdateMembers(sprint)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	return &projectv1.UpdateSprintResponse{
+		Success: updateSprint != nil,
+		Item: &projectv1.Sprint{
+			Id:        updateSprint.Id,
+			ProjectId: updateSprint.ProjectId,
+			Name:      updateSprint.Name,
+			StartDate: updateSprint.StartDate.Unix(),
+			EndDate:   updateSprint.EndDate.Unix(),
+			CreatedAt: updateSprint.CreatedAt.Unix(),
+			UpdatedAt: updateSprint.UpdatedAt.Unix(),
+			Members:   sprintMembers,
+		},
 	}, nil
 }
 

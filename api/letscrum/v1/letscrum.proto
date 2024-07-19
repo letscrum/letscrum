@@ -98,6 +98,13 @@ service Sprint {
     };
   }
 
+  rpc UpdateMembers(letscrum.api.project.v1.UpdateSprintMembersRequest) returns (letscrum.api.project.v1.UpdateSprintResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/projects/{project_id}/sprints/{sprint_id}/members"
+      body: "*"
+    };
+  }
+
   rpc Delete(letscrum.api.project.v1.DeleteSprintRequest) returns (letscrum.api.project.v1.DeleteSprintResponse) {
     option (google.api.http) = {
       delete: "/api/v1/projects/{project_id}/sprints/{sprint_id}"
@@ -113,40 +120,6 @@ service Sprint {
   rpc Get(letscrum.api.project.v1.GetSprintRequest) returns (letscrum.api.project.v1.GetSprintResponse) {
     option (google.api.http) = {
       get: "/api/v1/projects/{project_id}/sprints/{sprint_id}"
-    };
-  }
-}
-
-service SprintMember {
-  rpc Add(letscrum.api.project.v1.AddSprintMemberRequest) returns (letscrum.api.project.v1.AddSprintMemberResponse) {
-    option (google.api.http) = {
-      post: "/api/v1/projects/{project_id}/sprints/{sprint_id}/members"
-      body: "*"
-    };
-  }
-
-  rpc Update(letscrum.api.project.v1.UpdateSprintMemberRequest) returns (letscrum.api.project.v1.UpdateSprintMemberResponse) {
-    option (google.api.http) = {
-      put: "/api/v1/projects/{project_id}/sprints/{sprint_id}/members"
-      body: "*"
-    };
-  }
-
-  rpc Remove(letscrum.api.project.v1.RemoveSprintMemberRequest) returns (letscrum.api.project.v1.RemoveSprintMemberResponse) {
-    option (google.api.http) = {
-      delete: "/api/v1/projects/{project_id}/sprints/{sprint_id}/members/{user_id}"
-    };
-  }
-
-  rpc HardRemove(letscrum.api.project.v1.RemoveSprintMemberRequest) returns (letscrum.api.project.v1.RemoveSprintMemberResponse) {
-    option (google.api.http) = {
-      delete: "/api/v1/projects/{project_id}/sprints/{sprint_id}/members/{user_id}/remove"
-    };
-  }
-
-  rpc List(letscrum.api.project.v1.ListSprintMemberRequest) returns (letscrum.api.project.v1.ListSprintMemberResponse) {
-    option (google.api.http) = {
-      get: "/api/v1/projects/{project_id}/sprints/{sprint_id}/members"
     };
   }
 }

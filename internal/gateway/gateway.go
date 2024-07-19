@@ -26,7 +26,6 @@ func NewGateway(ctx context.Context, conn *grpc.ClientConn, opts []runtime.Serve
 		v1.RegisterUserHandler,
 		v1.RegisterProjectHandler,
 		v1.RegisterSprintHandler,
-		v1.RegisterSprintMemberHandler,
 		v1.RegisterWorkItemHandler,
 		v1.RegisterTaskHandler,
 	} {

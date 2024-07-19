@@ -40,7 +40,7 @@ message CreateSprintRequest {
 
 message CreateSprintResponse {
   bool success = 1;
-  int64 id = 2;
+  Sprint item = 2;
 }
 
 message UpdateSprintRequest {
@@ -51,9 +51,15 @@ message UpdateSprintRequest {
   int64 end_date = 5;
 }
 
+message UpdateSprintMembersRequest {
+  int64 project_id = 1;
+  int64 sprint_id = 2;
+  repeated SprintMember members = 3;
+}
+
 message UpdateSprintResponse {
   bool success = 1;
-  int64 id = 2;
+  Sprint item = 2;
 }
 
 message DeleteSprintRequest {
@@ -85,62 +91,4 @@ message GetSprintRequest {
 
 message GetSprintResponse {
   Sprint item = 1;
-}
-
-message AddSprintMemberRequest {
-  int64 project_id = 1;
-  int64 sprint_id = 2;
-  int64 user_id = 3;
-  string role = 4;
-  float capacity = 5;
-}
-
-message AddSprintMemberResponse {
-  bool success = 1;
-  int64 id = 2;
-}
-
-message UpdateSprintMemberRequest {
-  int64 project_id = 1;
-  int64 sprint_id = 2;
-  repeated SprintMember members = 3;
-}
-
-message UpdateSprintMemberResponse {
-  bool success = 1;
-  int64 id = 2;
-}
-
-message RemoveSprintMemberRequest {
-  int64 project_id = 1;
-  int64 sprint_id = 2;
-  int64 user_id = 3;
-}
-
-message RemoveSprintMemberResponse {
-  bool success = 1;
-  int64 id = 2;
-}
-
-message ListSprintMemberRequest {
-  int32 page = 1;
-  int32 size = 2;
-  int64 project_id = 3;
-  int64 sprint_id = 4;
-}
-
-message ListSprintMemberResponse {
-  repeated SprintMember items = 1;
-  letscrum.api.general.v1.Pagination pagination = 2;
-}
-
-message ListUserSprintRequest {
-  int32 page = 1;
-  int32 size = 2;
-  int64 user_id = 3;
-}
-
-message ListUserSprintResponse {
-  repeated Sprint items = 1;
-  letscrum.api.general.v1.Pagination pagination = 2;
 }
