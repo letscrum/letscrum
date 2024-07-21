@@ -42,6 +42,9 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
 
+    - name: Docker Hub Login
+      run: docker login registry-1.docker.io -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
+
     - name: Build and push Docker image
       uses: docker/build-push-action@v2
       with:
@@ -49,5 +52,5 @@ jobs:
         file: ./Dockerfile
         platforms: linux/amd64,linux/arm64
         push: true
-        tags: ghcr.io/letscrum/letscrum:latest
+        tags: letscrum/letscrum:latest
 
