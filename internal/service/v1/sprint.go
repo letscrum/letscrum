@@ -121,6 +121,7 @@ func (s *SprintService) Get(ctx context.Context, req *projectv1.GetSprintRequest
 	}
 	var reqSprint model.Sprint
 	reqSprint.Id = req.SprintId
+	reqSprint.ProjectId = req.ProjectId
 	sprint, err := s.sprintDao.Get(reqSprint)
 	if err != nil {
 		result := status.Convert(err)

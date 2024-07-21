@@ -11,7 +11,7 @@ type SprintDao struct {
 
 func (s SprintDao) Get(sprint model.Sprint) (*model.Sprint, error) {
 	var currentSprint *model.Sprint
-	err := s.DB.Where("id = ?", sprint.Id).Find(&currentSprint).Error
+	err := s.DB.Where("project_id", sprint.ProjectId).Where("id = ?", sprint.Id).Find(&currentSprint).Error
 	if err != nil {
 		return nil, err
 	}
