@@ -4,7 +4,7 @@ ENV GO111MODULE=on
 
 WORKDIR /app
 
-COPY * /app/
+COPY . .
 
 # install protoc
 RUN apt-get update && apt-get install -y protobuf-compiler
@@ -16,7 +16,9 @@ RUN make build
 
 FROM alpine:3.20.1
 
-COPY --from=builder /bin/letscrum /bin/
-COPY --from=builder /config /bin/config
+ARG TARGETARCH
+
+COPY --from=builder /app/bin/letscrum /bin/
+COPY --from=builder /app/config /bin/config
 
 EXPOSE 8081
