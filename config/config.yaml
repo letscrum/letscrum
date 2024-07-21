@@ -20,7 +20,7 @@ data:
     port: 3306
     database: letscrum
     user: root
-    password: aaaaaa
+    password: root
     max-idle-connections: 150
     max-open-connections: 150
     max-connection-lifetime: 20
