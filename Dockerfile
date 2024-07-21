@@ -6,6 +6,9 @@ WORKDIR /app
 
 COPY * /app/
 
+# install protoc
+RUN apt-get update && apt-get install -y protobuf-compiler
+
 RUN make api_clean
 RUN make api_dep_install
 RUN make api_gen
