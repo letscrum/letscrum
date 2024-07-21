@@ -1,4 +1,4 @@
-name: Pre-check
+name: main
 
 on:
   push:
