@@ -151,7 +151,9 @@ func (s WorkItemService) List(ctx context.Context, req *itemv1.ListWorkItemReque
 	}
 	// get tasks by workItemIds
 	tasks, err := s.taskDao.ListByWorkItemIds(workItemIds)
-
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
 	var items []*itemv1.WorkItem
 	for _, w := range workItems {
 		// convert w.AssignUser to userv1.User
