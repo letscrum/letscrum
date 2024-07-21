@@ -7,7 +7,7 @@ on:
     branches: [ "*" ]
 
 jobs:
-  lint-and-build:
+  lint:
     runs-on: ubuntu-latest
     steps:
     - name: Set up Go
@@ -34,7 +34,7 @@ jobs:
 
   docker:
     runs-on: ubuntu-latest
-    needs: lint-and-build
+    needs: lint
     steps:
     - name: Checkout Code
       uses: actions/checkout@v3
@@ -49,5 +49,5 @@ jobs:
         file: ./Dockerfile
         platforms: linux/amd64,linux/arm64
         push: true
-        tags: ${{ secrets.DOCKER_REGISTRY }}/${{ github.repository }}:latest
+        tags: ghcr.io/letscrum/letscrum:latest
 
