@@ -19,6 +19,8 @@ FROM alpine:3.20.1
 ARG TARGETARCH
 
 COPY --from=builder /app/bin/letscrum /bin/
-COPY --from=builder /app/config /bin/config
+COPY --from=builder /app/config/config.yaml /etc/letscrum/config.yaml
+
+CMD ["/bin/letscrum", "server", "--config", "/bin/config/config.yaml"]
 
 EXPOSE 8081
