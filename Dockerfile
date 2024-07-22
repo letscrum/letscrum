@@ -21,6 +21,6 @@ ARG TARGETARCH
 COPY --from=builder /app/bin/letscrum /bin/
 COPY --from=builder /app/config/config.yaml /etc/letscrum/config.yaml
 
-CMD ["/bin/letscrum", "server", "--config", "/bin/config/config.yaml"]
+CMD ["/bin/letscrum", "server", "--config", "/etc/letscrum/config.yaml"]
 
 EXPOSE 8081
