@@ -23,4 +23,4 @@ COPY --from=builder /app/config/config.yaml /etc/letscrum/config.yaml
 
 CMD ["/bin/letscrum", "server", "--config", "/etc/letscrum/config.yaml"]
 
-EXPOSE 8081
+EXPOSE 8081 9091
