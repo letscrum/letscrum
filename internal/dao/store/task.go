@@ -1,4 +1,4 @@
-package mysql
+package store
 
 import (
 	"github.com/letscrum/letscrum/internal/model"

@@ -14,8 +14,7 @@ server:
 
 data:
   database:
-    driver: mysql
-    # dev mysql address
+    driver: mysql # mysql and postgres supported
     host: 127.0.0.1
     port: 3306
     database: letscrum

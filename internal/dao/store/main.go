@@ -1,4 +1,4 @@
-package mysql
+package store
 
 import (
 	"fmt"
@@ -54,6 +54,7 @@ func GetDao(opts *db.Options) (dao.Interface, error) {
 	var dbIns *gorm.DB
 	once.Do(func() {
 		options := &db.Options{
+			Driver:                opts.Driver,
 			Host:                  opts.Host,
 			Port:                  opts.Port,
 			Username:              opts.Username,
@@ -67,7 +68,7 @@ func GetDao(opts *db.Options) (dao.Interface, error) {
 		dbIns, err = db.NewGORM(options)
 	})
 
-	initErr := dbIns.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
+	initErr := dbIns.AutoMigrate(
 		&model.User{},
 		&model.Project{},
 		&model.Sprint{},

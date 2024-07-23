@@ -78,6 +78,7 @@ func runHealthCheck() http.Handler {
 		},
 	)
 	options := db.Options{
+		Driver:                viper.GetString("data.database.driver"),
 		Host:                  viper.GetString("data.database.host"),
 		Port:                  viper.GetString("data.database.port"),
 		Username:              viper.GetString("data.database.user"),

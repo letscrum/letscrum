@@ -11,7 +11,7 @@ import (
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/selector"
 	v1 "github.com/letscrum/letscrum/api/letscrum/v1"
 	"github.com/letscrum/letscrum/internal/dao"
-	"github.com/letscrum/letscrum/internal/dao/mysql"
+	"github.com/letscrum/letscrum/internal/dao/store"
 	"github.com/letscrum/letscrum/internal/mid"
 	servicev1 "github.com/letscrum/letscrum/internal/service/v1"
 	"github.com/letscrum/letscrum/pkg/db"
@@ -93,6 +93,7 @@ func initDao() (dao.Interface, error) {
 		},
 	)
 	options := db.Options{
+		Driver:                viper.GetString("data.database.driver"),
 		Host:                  viper.GetString("data.database.host"),
 		Port:                  viper.GetString("data.database.port"),
 		Username:              viper.GetString("data.database.user"),
@@ -104,7 +105,7 @@ func initDao() (dao.Interface, error) {
 		MaxConnectionLifeTime: time.Duration(viper.GetInt("data.database.max-connection-lifetime")) * time.Second,
 		Logger:                newLogger,
 	}
-	letscrumDao, err := mysql.GetDao(&options)
+	letscrumDao, err := store.GetDao(&options)
 	if err != nil {
 		return nil, err
 	}
