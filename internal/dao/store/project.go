@@ -1,6 +1,8 @@
 package store
 
 import (
+	"strconv"
+
 	"github.com/letscrum/letscrum/internal/model"
 	"gorm.io/gorm"
 )
@@ -49,6 +51,23 @@ func (d ProjectDao) List(page, size int32, keyword string) ([]*model.Project, er
 	err := d.DB.Where("name LIKE ?", "%"+keyword+"%").Or("display_name LIKE ?", "%"+keyword+"%").Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Order("updated_at desc").Find(&projects).Error
 	if err != nil {
 		return nil, err
+	}
+	return projects, nil
+}
+
+func (d ProjectDao) ListVisibleProject(page, size int32, keyword string, user model.User) ([]*model.Project, error) {
+	var projects []*model.Project
+	if user.IsSuperAdmin {
+		err := d.DB.Where("name LIKE ?", "%"+keyword+"%").Or("display_name LIKE ?", "%"+keyword+"%").Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Order("updated_at desc").Find(&projects).Error
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		// get user's projects
+		err := d.DB.Where("members LIKE ?", "%"+`"user_id"%`+strconv.FormatInt(user.Id, 10)+`%`).Where("name LIKE ?", "%"+keyword+"%").Or("display_name LIKE ?", "%"+keyword+"%").Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Order("updated_at desc").Find(&projects).Error
+		if err != nil {
+			return nil, err
+		}
 	}
 	return projects, nil
 }

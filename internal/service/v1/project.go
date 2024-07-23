@@ -12,6 +12,7 @@ import (
 	"github.com/letscrum/letscrum/internal/dao"
 	"github.com/letscrum/letscrum/internal/model"
 	"github.com/letscrum/letscrum/pkg/utils"
+	"github.com/letscrum/letscrum/pkg/validator"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -32,26 +33,26 @@ func NewProjectService(dao dao.Interface) *ProjectService {
 }
 
 func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectRequest) (*projectv1.GetProjectResponse, error) {
+	claims, err := utils.GetTokenDetails(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
 	var reqProject model.Project
 	reqProject.Id = req.ProjectId
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
-		result := status.Convert(err)
-		if result.Code() == codes.NotFound {
-			return nil, status.Errorf(codes.NotFound, "get book err: %d not found", req.ProjectId)
-		}
-		return nil, status.Error(codes.Unknown, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 	if project.Id == 0 {
 		return nil, status.Error(codes.NotFound, "project not fount.")
 	}
+	isMember := validator.IsProjectMember(*project, int64(claims.Id), claims.IsSuperAdmin)
+	if isMember == false {
+		return nil, status.Error(codes.PermissionDenied, "You are not a member of this project")
+	}
 	sprints, err := s.sprintDao.ListByProject(reqProject, 1, 999, "")
 	if err != nil {
-		result := status.Convert(err)
-		if result.Code() == codes.NotFound {
-			return nil, status.Errorf(codes.NotFound, "not found.")
-		}
-		return nil, status.Error(codes.Unknown, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 	sprint := projectv1.Sprint{}
 	for i, s := range sprints {
@@ -86,7 +87,7 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 	var members []*projectv1.ProjectMember
 	err = json.Unmarshal([]byte(project.Members), &members)
 	if err != nil {
-		return nil, status.Error(codes.Unknown, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 	return &projectv1.GetProjectResponse{
 		Item: &projectv1.Project{
@@ -108,14 +109,17 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 }
 
 func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectRequest) (*projectv1.ListProjectResponse, error) {
-	req.Page, req.Size = utils.Pagination(req.Page, req.Size)
-	projects, err := s.projectDao.List(req.Page, req.Size, req.Keyword)
+	claims, err := utils.GetTokenDetails(ctx)
 	if err != nil {
-		result := status.Convert(err)
-		if result.Code() == codes.NotFound {
-			return nil, status.Errorf(codes.NotFound, "not found.")
-		}
-		return nil, status.Error(codes.Unknown, err.Error())
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	req.Page, req.Size = utils.Pagination(req.Page, req.Size)
+	var user model.User
+	user.Id = int64(claims.Id)
+	user.IsSuperAdmin = claims.IsSuperAdmin
+	projects, err := s.projectDao.ListVisibleProject(req.Page, req.Size, req.Keyword, user)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 	var list []*projectv1.Project
 	for _, p := range projects {
