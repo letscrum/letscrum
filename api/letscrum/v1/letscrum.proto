@@ -240,15 +240,37 @@ service Task {
 }
 
 service User {
-  rpc List(letscrum.api.user.v1.ListUserRequest) returns (letscrum.api.user.v1.ListUserResponse) {
+  rpc Create(letscrum.api.user.v1.CreateUserRequest) returns (letscrum.api.user.v1.CreateUserResponse) {
     option (google.api.http) = {
-      get: "/api/v1/users"
+      post: "/api/v1/users"
+      body: "*"
     };
   }
 
-  rpc ListUserProject(letscrum.api.project.v1.ListUserProjectRequest) returns (letscrum.api.project.v1.ListUserProjectResponse) {
+  rpc SetSuperAdmin(letscrum.api.user.v1.SetSuperAdminRequest) returns (letscrum.api.user.v1.UpdateUserResponse) {
     option (google.api.http) = {
-      get: "/api/v1/users/{user_id}/projects"
+      put: "/api/v1/users/{user_id}/super_admin/{is_super_admin}"
+      body: "*"
+    };
+  }
+
+  rpc UpdatePassword(letscrum.api.user.v1.UpdatePasswordRequest) returns (letscrum.api.user.v1.UpdateUserResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/users/{user_id}/password"
+      body: "*"
+    };
+  }
+
+  rpc ResetPassword(letscrum.api.user.v1.ResetPasswordRequest) returns (letscrum.api.user.v1.UpdateUserResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/users/{user_id}/reset_password"
+      body: "*"
+    };
+  }
+
+  rpc List(letscrum.api.user.v1.ListUserRequest) returns (letscrum.api.user.v1.ListUserResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/users"
     };
   }
 

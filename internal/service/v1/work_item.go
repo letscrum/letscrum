@@ -2,16 +2,15 @@ package v1
 
 import (
 	"context"
-	"encoding/json"
 
 	generalv1 "github.com/letscrum/letscrum/api/general/v1"
 	itemv1 "github.com/letscrum/letscrum/api/item/v1"
 	v1 "github.com/letscrum/letscrum/api/letscrum/v1"
-	projectv1 "github.com/letscrum/letscrum/api/project/v1"
 	userv1 "github.com/letscrum/letscrum/api/user/v1"
 	"github.com/letscrum/letscrum/internal/dao"
 	"github.com/letscrum/letscrum/internal/model"
 	"github.com/letscrum/letscrum/pkg/utils"
+	"github.com/letscrum/letscrum/pkg/validator"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -28,26 +27,16 @@ func (s WorkItemService) Create(ctx context.Context, req *itemv1.CreateWorkItemR
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
+	var user model.User
+	user.Id = int64(claims.Id)
+	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
 	reqProject.Id = req.ProjectId
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
-		return nil, status.Error(codes.NotFound, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
-	var projectMembers []*projectv1.ProjectMember
-	err = json.Unmarshal([]byte(project.Members), &projectMembers)
-	if err != nil {
-		return nil, status.Error(codes.Unknown, err.Error())
-	}
-	// check claims.UserId in projectMembers
-	var isMember bool
-	for _, m := range projectMembers {
-		if m.UserId == int64(claims.Id) {
-			isMember = true
-			break
-		}
-	}
-	if !isMember {
+	if validator.IsProjectMember(*project, user) == false {
 		return nil, status.Error(codes.PermissionDenied, "You are not a member of this project")
 	}
 	newWorkItem := model.WorkItem{
@@ -62,15 +51,11 @@ func (s WorkItemService) Create(ctx context.Context, req *itemv1.CreateWorkItemR
 	}
 	workItem, err := s.workItemDao.Create(newWorkItem)
 	if err != nil {
-		return nil, status.Error(codes.Unknown, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
-
-	var resWorkItem itemv1.WorkItem
-
-	success := false
-	if workItem.Id > 0 {
-		success = true
-		resWorkItem = itemv1.WorkItem{
+	return &itemv1.CreateWorkItemResponse{
+		Success: workItem.Id > 0,
+		Item: &itemv1.WorkItem{
 			Id:          workItem.Id,
 			ProjectId:   workItem.ProjectId,
 			SprintId:    workItem.SprintId,
@@ -91,11 +76,7 @@ func (s WorkItemService) Create(ctx context.Context, req *itemv1.CreateWorkItemR
 			},
 			CreatedAt: workItem.CreatedAt.Unix(),
 			UpdatedAt: workItem.UpdatedAt.Unix(),
-		}
-	}
-	return &itemv1.CreateWorkItemResponse{
-		Success: success,
-		Item:    &resWorkItem,
+		},
 	}, nil
 }
 
@@ -104,26 +85,16 @@ func (s WorkItemService) List(ctx context.Context, req *itemv1.ListWorkItemReque
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
+	var user model.User
+	user.Id = int64(claims.Id)
+	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
 	reqProject.Id = req.ProjectId
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
-	var projectMembers []*projectv1.ProjectMember
-	err = json.Unmarshal([]byte(project.Members), &projectMembers)
-	if err != nil {
-		return nil, status.Error(codes.Unknown, err.Error())
-	}
-	// check claims.UserId in projectMembers
-	var isMember bool
-	for _, m := range projectMembers {
-		if m.UserId == int64(claims.Id) {
-			isMember = true
-			break
-		}
-	}
-	if !isMember {
+	if validator.IsProjectMember(*project, user) == false {
 		return nil, status.Error(codes.PermissionDenied, "You are not a member of this project")
 	}
 	req.Page, req.Size = utils.Pagination(req.Page, req.Size)
@@ -133,13 +104,13 @@ func (s WorkItemService) List(ctx context.Context, req *itemv1.ListWorkItemReque
 		if req.SprintId > 0 {
 			workItems, err = s.workItemDao.ListBySprint(req.SprintId, req.Page, req.Size, req.Keyword)
 			if err != nil {
-				return nil, status.Error(codes.Unknown, err.Error())
+				return nil, status.Error(codes.Internal, err.Error())
 			}
 			count = s.workItemDao.CountBySprint(req.SprintId, req.Keyword)
 		} else {
 			workItems, err = s.workItemDao.ListByProject(req.ProjectId, req.Page, req.Size, req.Keyword)
 			if err != nil {
-				return nil, status.Error(codes.Unknown, err.Error())
+				return nil, status.Error(codes.Internal, err.Error())
 			}
 			count = s.workItemDao.CountByProject(req.ProjectId, req.Keyword)
 		}

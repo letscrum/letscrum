@@ -37,6 +37,9 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
+	var user model.User
+	user.Id = int64(claims.Id)
+	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
 	reqProject.Id = req.ProjectId
 	project, err := s.projectDao.Get(reqProject)
@@ -46,8 +49,7 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 	if project.Id == 0 {
 		return nil, status.Error(codes.NotFound, "project not fount.")
 	}
-	isMember := validator.IsProjectMember(*project, int64(claims.Id), claims.IsSuperAdmin)
-	if isMember == false {
+	if validator.IsProjectMember(*project, user) == false {
 		return nil, status.Error(codes.PermissionDenied, "You are not a member of this project")
 	}
 	sprints, err := s.sprintDao.ListByProject(reqProject, 1, 999, "")
@@ -110,13 +112,13 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 
 func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectRequest) (*projectv1.ListProjectResponse, error) {
 	claims, err := utils.GetTokenDetails(ctx)
+	var user model.User
+	user.Id = int64(claims.Id)
+	user.IsSuperAdmin = claims.IsSuperAdmin
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 	req.Page, req.Size = utils.Pagination(req.Page, req.Size)
-	var user model.User
-	user.Id = int64(claims.Id)
-	user.IsSuperAdmin = claims.IsSuperAdmin
 	projects, err := s.projectDao.ListVisibleProject(req.Page, req.Size, req.Keyword, user)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -164,7 +166,7 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 	}
 	user, err := s.userDao.Get(int64(claims.Id))
 	if err != nil {
-		return nil, status.Error(codes.NotFound, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 	if !user.IsSuperAdmin {
 		return nil, status.Error(codes.PermissionDenied, "No permission.")
@@ -243,31 +245,21 @@ func (s *ProjectService) Update(ctx context.Context, req *projectv1.UpdateProjec
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
-	user, err := s.userDao.Get(int64(claims.Id))
-	if err != nil {
-		return nil, status.Error(codes.NotFound, err.Error())
-	}
+	var user model.User
+	user.Id = int64(claims.Id)
+	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
 	reqProject.Id = req.ProjectId
 	reqProject.CreatedUser.Id = user.Id
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
-		return nil, status.Error(codes.NotFound, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 	if project.Id == 0 {
 		return nil, status.Error(codes.NotFound, "project not fount.")
 	}
-	var projectMembers []*projectv1.ProjectMember
-	err = json.Unmarshal([]byte(project.Members), &projectMembers)
-	if err != nil {
-		return nil, status.Error(codes.Unknown, err.Error())
-	}
-	for _, m := range projectMembers {
-		if m.UserId == user.Id && m.IsAdmin == false {
-			if user.IsSuperAdmin == false {
-				return nil, status.Error(codes.PermissionDenied, "No permission.")
-			}
-		}
+	if validator.IsProjectAdmin(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, "You are not a admin of this project")
 	}
 	project.DisplayName = req.DisplayName
 	project.Description = req.Description
@@ -307,22 +299,28 @@ func (s *ProjectService) Delete(ctx context.Context, req *projectv1.DeleteProjec
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
-	user, err := s.userDao.Get(int64(claims.Id))
-	if err != nil {
-		return nil, status.Error(codes.NotFound, err.Error())
-	}
-	if !user.IsSuperAdmin {
-		return nil, status.Error(codes.PermissionDenied, "No permission.")
-	}
+	var user model.User
+	user.Id = int64(claims.Id)
+	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
 	reqProject.Id = req.ProjectId
-	deletedProject, err := s.projectDao.Delete(reqProject)
+	project, err := s.projectDao.Get(reqProject)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if project.Id == 0 {
+		return nil, status.Error(codes.NotFound, "project not fount.")
+	}
+	if validator.IsProjectAdmin(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, "You are not a admin of this project")
+	}
+	deletedProject, err := s.projectDao.Delete(*project)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
 	return &projectv1.DeleteProjectResponse{
 		Success: deletedProject,
-		Id:      reqProject.Id,
+		Id:      project.Id,
 	}, nil
 }
 

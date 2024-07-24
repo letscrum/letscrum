@@ -30,7 +30,8 @@ message CreateUserRequest {
 }
 
 message CreateUserResponse {
-  int64 id = 1;
+  bool success = 1;
+  User item = 2;
 }
 
 message SignInRequest {
@@ -59,4 +60,25 @@ message GetUserRequest {
 
 message GetUserResponse {
   User item = 1;
+}
+
+message SetSuperAdminRequest {
+  int64 user_id = 1;
+  bool is_super_admin = 2;
+}
+
+message UpdatePasswordRequest {
+  int64 user_id = 1;
+  string old_password = 2;
+  string new_password = 3;
+}
+
+message ResetPasswordRequest {
+  int64 user_id = 1;
+  string new_password = 2;
+}
+
+message UpdateUserResponse {
+  bool success = 1;
+  User item = 2;
 }

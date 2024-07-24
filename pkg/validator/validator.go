@@ -8,6 +8,9 @@ import (
 )
 
 func IsProjectAdmin(project model.Project, user model.User) bool {
+	if user.IsSuperAdmin {
+		return true
+	}
 	var projectMembers []*projectv1.ProjectMember
 	err := json.Unmarshal([]byte(project.Members), &projectMembers)
 	if err != nil {
@@ -23,8 +26,8 @@ func IsProjectAdmin(project model.Project, user model.User) bool {
 	return true
 }
 
-func IsProjectMember(project model.Project, userId int64, isSuperAdmin bool) bool {
-	if isSuperAdmin {
+func IsProjectMember(project model.Project, user model.User) bool {
+	if user.IsSuperAdmin {
 		return true
 	}
 	var projectMembers []*projectv1.ProjectMember
@@ -34,7 +37,7 @@ func IsProjectMember(project model.Project, userId int64, isSuperAdmin bool) boo
 	}
 	// check claims.UserId in projectMembers
 	for _, m := range projectMembers {
-		if m.UserId == userId {
+		if m.UserId == user.Id {
 			return true
 		}
 	}

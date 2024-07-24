@@ -50,6 +50,40 @@ func (d *UserDao) Count(keyword string) int64 {
 	return count
 }
 
+func (d *UserDao) Create(name, email, password string, isSuperAdmin bool) (*model.User, error) {
+	user := &model.User{
+		Name:         name,
+		Email:        email,
+		Password:     password,
+		IsSuperAdmin: isSuperAdmin,
+	}
+	if err := d.DB.Create(user).Error; err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+func (d *UserDao) SetSuperAdmin(id int64, isAdmin bool) (*model.User, error) {
+	if err := d.DB.Model(&model.User{}).Where("id = ?", id).Update("is_super_admin", isAdmin).Error; err != nil {
+		return nil, err
+	}
+	return d.Get(id)
+}
+
+func (d *UserDao) UpdatePassword(id int64, oldPassword, newPassword string) (*model.User, error) {
+	if err := d.DB.Model(&model.User{}).Where("id = ?", id).Where("password = ?", oldPassword).Update("password", newPassword).Error; err != nil {
+		return nil, err
+	}
+	return d.Get(id)
+}
+
+func (d *UserDao) ResetPassword(id int64, newPassword string) (*model.User, error) {
+	if err := d.DB.Model(&model.User{}).Where("id = ?", id).Update("password", newPassword).Error; err != nil {
+		return nil, err
+	}
+	return d.Get(id)
+}
+
 func NewUserDao(d *gorm.DB) *UserDao {
 	return &UserDao{d}
 }

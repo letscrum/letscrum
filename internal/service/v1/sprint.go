@@ -11,6 +11,7 @@ import (
 	"github.com/letscrum/letscrum/internal/dao"
 	"github.com/letscrum/letscrum/internal/model"
 	"github.com/letscrum/letscrum/pkg/utils"
+	"github.com/letscrum/letscrum/pkg/validator"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -33,24 +34,23 @@ func (s *SprintService) Create(ctx context.Context, req *projectv1.CreateSprintR
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
+	var user model.User
+	user.Id = int64(claims.Id)
+	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
 	reqProject.Id = req.ProjectId
-	reqProject.CreatedUser.Id = int64(claims.Id)
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
-		return nil, status.Error(codes.Unknown, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if validator.IsProjectAdmin(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, "No permission.")
 	}
 	var projectMembers []*projectv1.ProjectMember
 	err = json.Unmarshal([]byte(project.Members), &projectMembers)
 	if err != nil {
-		return nil, status.Error(codes.Unknown, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
-	for _, m := range projectMembers {
-		if m.UserId == int64(claims.Id) && m.IsAdmin == false {
-			return nil, status.Error(codes.PermissionDenied, "No permission.")
-		}
-	}
-
 	// add sprint members from project members
 	var sprintMembers []*projectv1.SprintMember
 	for _, m := range projectMembers {
@@ -63,7 +63,7 @@ func (s *SprintService) Create(ctx context.Context, req *projectv1.CreateSprintR
 	}
 	members, err := json.Marshal(sprintMembers)
 	if err != nil {
-		return nil, status.Error(codes.Unknown, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	newSprint := model.Sprint{
@@ -76,14 +76,10 @@ func (s *SprintService) Create(ctx context.Context, req *projectv1.CreateSprintR
 
 	sprint, err := s.sprintDao.Create(newSprint)
 	if err != nil {
-		return nil, status.Error(codes.Unknown, err.Error())
-	}
-	success := false
-	if sprint.Id > 0 {
-		success = true
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 	return &projectv1.CreateSprintResponse{
-		Success: success,
+		Success: sprint.Id > 0,
 		Item: &projectv1.Sprint{
 			Id:        sprint.Id,
 			ProjectId: sprint.ProjectId,
@@ -102,33 +98,24 @@ func (s *SprintService) Get(ctx context.Context, req *projectv1.GetSprintRequest
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
+	var user model.User
+	user.Id = int64(claims.Id)
+	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
 	reqProject.Id = req.ProjectId
-	reqProject.CreatedUser.Id = int64(claims.Id)
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
-		return nil, status.Error(codes.Unknown, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
-	var projectMembers []*projectv1.ProjectMember
-	err = json.Unmarshal([]byte(project.Members), &projectMembers)
-	if err != nil {
-		return nil, status.Error(codes.Unknown, err.Error())
-	}
-	for _, m := range projectMembers {
-		if m.UserId == int64(claims.Id) && m.IsAdmin == false {
-			return nil, status.Error(codes.PermissionDenied, "No permission.")
-		}
+	if validator.IsProjectMember(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, "You are not a member of this project.")
 	}
 	var reqSprint model.Sprint
 	reqSprint.Id = req.SprintId
 	reqSprint.ProjectId = req.ProjectId
 	sprint, err := s.sprintDao.Get(reqSprint)
 	if err != nil {
-		result := status.Convert(err)
-		if result.Code() == codes.NotFound {
-			return nil, status.Errorf(codes.NotFound, "not found.")
-		}
-		return nil, status.Error(codes.Unknown, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 	var sprintMembers []*projectv1.SprintMember
 	err = json.Unmarshal([]byte(sprint.Members), &sprintMembers)
@@ -167,30 +154,21 @@ func (s *SprintService) List(ctx context.Context, req *projectv1.ListSprintReque
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
+	var user model.User
+	user.Id = int64(claims.Id)
+	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
 	reqProject.Id = req.ProjectId
-	reqProject.CreatedUser.Id = int64(claims.Id)
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
-		return nil, status.Error(codes.Unknown, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
-	var projectMembers []*projectv1.ProjectMember
-	err = json.Unmarshal([]byte(project.Members), &projectMembers)
-	if err != nil {
-		return nil, status.Error(codes.Unknown, err.Error())
-	}
-	for _, m := range projectMembers {
-		if m.UserId == int64(claims.Id) && m.IsAdmin == false {
-			return nil, status.Error(codes.PermissionDenied, "No permission.")
-		}
+	if validator.IsProjectMember(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, "You are not a member of this project.")
 	}
 	sprints, err := s.sprintDao.ListByProject(reqProject, req.Page, req.Size, req.Keyword)
 	if err != nil {
-		result := status.Convert(err)
-		if result.Code() == codes.NotFound {
-			return nil, status.Errorf(codes.NotFound, "not found.")
-		}
-		return nil, status.Error(codes.Unknown, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 	var list []*projectv1.Sprint
 	hasCurrent := false
@@ -246,22 +224,17 @@ func (s *SprintService) Update(ctx context.Context, req *projectv1.UpdateSprintR
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
+	var user model.User
+	user.Id = int64(claims.Id)
+	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
 	reqProject.Id = req.ProjectId
-	reqProject.CreatedUser.Id = int64(claims.Id)
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
-		return nil, status.Error(codes.Unknown, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
-	var projectMembers []*projectv1.ProjectMember
-	err = json.Unmarshal([]byte(project.Members), &projectMembers)
-	if err != nil {
-		return nil, status.Error(codes.Unknown, err.Error())
-	}
-	for _, m := range projectMembers {
-		if m.UserId == int64(claims.Id) && m.IsAdmin == false {
-			return nil, status.Error(codes.PermissionDenied, "No permission.")
-		}
+	if validator.IsProjectAdmin(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, "You are not an admin of this project.")
 	}
 	var sprint model.Sprint
 	sprint.Id = req.SprintId
@@ -271,15 +244,15 @@ func (s *SprintService) Update(ctx context.Context, req *projectv1.UpdateSprintR
 	sprint.EndDate = time.Unix(req.EndDate, 0)
 	updateSprint, err := s.sprintDao.Update(sprint)
 	if err != nil {
-		return nil, status.Error(codes.Unknown, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 	var sprintMembers []*projectv1.SprintMember
 	err = json.Unmarshal([]byte(updateSprint.Members), &sprintMembers)
 	if err != nil {
-		return nil, status.Error(codes.Unknown, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 	return &projectv1.UpdateSprintResponse{
-		Success: updateSprint != nil,
+		Success: updateSprint.Id > 0,
 		Item: &projectv1.Sprint{
 			Id:        updateSprint.Id,
 			ProjectId: updateSprint.ProjectId,
@@ -298,22 +271,17 @@ func (s *SprintService) UpdateMembers(ctx context.Context, req *projectv1.Update
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
+	var user model.User
+	user.Id = int64(claims.Id)
+	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
 	reqProject.Id = req.ProjectId
-	reqProject.CreatedUser.Id = int64(claims.Id)
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
-		return nil, status.Error(codes.Unknown, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
-	var projectMembers []*projectv1.ProjectMember
-	err = json.Unmarshal([]byte(project.Members), &projectMembers)
-	if err != nil {
-		return nil, status.Error(codes.Unknown, err.Error())
-	}
-	for _, m := range projectMembers {
-		if m.UserId == int64(claims.Id) && m.IsAdmin == false {
-			return nil, status.Error(codes.PermissionDenied, "No permission.")
-		}
+	if validator.IsProjectAdmin(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, "You are not an admin of this project.")
 	}
 	var sprint model.Sprint
 	sprint.Id = req.SprintId
@@ -328,15 +296,15 @@ func (s *SprintService) UpdateMembers(ctx context.Context, req *projectv1.Update
 	}
 	members, err := json.Marshal(sprintMembers)
 	if err != nil {
-		return nil, status.Error(codes.Unknown, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 	sprint.Members = string(members)
 	updateSprint, err := s.sprintDao.UpdateMembers(sprint)
 	if err != nil {
-		return nil, status.Error(codes.Unknown, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 	return &projectv1.UpdateSprintResponse{
-		Success: updateSprint != nil,
+		Success: updateSprint.Id > 0,
 		Item: &projectv1.Sprint{
 			Id:        updateSprint.Id,
 			ProjectId: updateSprint.ProjectId,
@@ -355,22 +323,17 @@ func (s *SprintService) Delete(ctx context.Context, req *projectv1.DeleteSprintR
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
+	var user model.User
+	user.Id = int64(claims.Id)
+	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
 	reqProject.Id = req.ProjectId
-	reqProject.CreatedUser.Id = int64(claims.Id)
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
-		return nil, status.Error(codes.Unknown, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
-	var projectMembers []*projectv1.ProjectMember
-	err = json.Unmarshal([]byte(project.Members), &projectMembers)
-	if err != nil {
-		return nil, status.Error(codes.Unknown, err.Error())
-	}
-	for _, m := range projectMembers {
-		if m.UserId == int64(claims.Id) && m.IsAdmin == false {
-			return nil, status.Error(codes.PermissionDenied, "No permission.")
-		}
+	if validator.IsProjectAdmin(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, "You are not an admin of this project.")
 	}
 	var sprint model.Sprint
 	sprint.Id = req.SprintId
