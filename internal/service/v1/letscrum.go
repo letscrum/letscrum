@@ -38,11 +38,7 @@ func (s *LetscrumService) GetVersion(context.Context, *emptypb.Empty) (*generalv
 func (s *LetscrumService) SignIn(ctx context.Context, req *userv1.SignInRequest) (*userv1.SignInResponse, error) {
 	user, err := s.userDao.SignIn(req.Name, req.Password)
 	if err != nil {
-		result := status.Convert(err)
-		if result.Code() == codes.NotFound {
-			return nil, status.Errorf(codes.NotFound, "get book err: %s not found", req.Name)
-		}
-		return nil, status.Error(codes.Unknown, err.Error())
+		return nil, status.Error(codes.Internal, "failed to sign in")
 	}
 	if user.Id == 0 {
 		return nil, status.Error(codes.NotFound, "user not fount.")
@@ -63,6 +59,23 @@ func (s *LetscrumService) SignIn(ctx context.Context, req *userv1.SignInRequest)
 				AccessToken:  accessToken,
 				RefreshToken: refreshToken,
 			},
+		},
+	}, nil
+}
+
+func (s *LetscrumService) RefreshToken(ctx context.Context, req *userv1.RefreshTokenRequest) (*userv1.RefreshTokenResponse, error) {
+	token, err := utils.ParseToken(req.RefreshToken)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid token")
+	}
+	accessToken, refreshToken, err := utils.GenerateTokens(token["iss"].(float64), token["aud"].(bool))
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to generate token")
+	}
+	return &userv1.RefreshTokenResponse{
+		Item: &userv1.Token{
+			AccessToken:  accessToken,
+			RefreshToken: refreshToken,
 		},
 	}, nil
 }

@@ -47,6 +47,12 @@ service Letscrum {
       body: "*"
     };
   }
+
+  rpc RefreshToken(letscrum.api.user.v1.RefreshTokenRequest) returns (letscrum.api.user.v1.RefreshTokenResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/refresh/{refresh_token}"
+    };
+  }
 }
 
 service Project {
