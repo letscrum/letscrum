@@ -70,6 +70,14 @@ func (d *UserDao) SetSuperAdmin(id int64, isAdmin bool) (*model.User, error) {
 	return d.Get(id)
 }
 
+func (d *UserDao) ListSuperAdmins() ([]*model.User, error) {
+	var admins []*model.User
+	if err := d.DB.Where("is_super_admin = ?", true).Find(&admins).Error; err != nil {
+		return nil, err
+	}
+	return admins, nil
+}
+
 func (d *UserDao) UpdatePassword(id int64, oldPassword, newPassword string) (*model.User, error) {
 	if err := d.DB.Model(&model.User{}).Where("id = ?", id).Where("password = ?", oldPassword).Update("password", newPassword).Error; err != nil {
 		return nil, err

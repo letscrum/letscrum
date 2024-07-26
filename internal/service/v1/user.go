@@ -93,7 +93,15 @@ func (s *UserService) SetSuperAdmin(ctx context.Context, req *userv1.SetSuperAdm
 	if user.IsSuperAdmin == false {
 		return nil, status.Error(codes.PermissionDenied, "You are not a super admin")
 	}
-	updatedUser, err := s.userDao.SetSuperAdmin(user.Id, user.IsSuperAdmin)
+	// if current user is only super admin can't set to false
+	admins, err := s.userDao.ListSuperAdmins()
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if len(admins) == 1 && admins[0].Id == req.UserId && req.IsSuperAdmin == false {
+		return nil, status.Error(codes.PermissionDenied, "Can't set the only super admin to false")
+	}
+	updatedUser, err := s.userDao.SetSuperAdmin(req.UserId, req.IsSuperAdmin)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
