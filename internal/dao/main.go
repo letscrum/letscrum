@@ -4,6 +4,7 @@ package dao
 type Interface interface {
 	LetscrumDao() LetscrumDao
 	UserDao() UserDao
+	OrgDao() OrgDao
 	ProjectDao() ProjectDao
 	SprintDao() SprintDao
 	WorkItemDao() WorkItemDao

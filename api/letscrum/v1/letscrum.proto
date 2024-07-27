@@ -3,6 +3,7 @@ syntax = "proto3";
 import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
 import "api/general/v1/letscrum.proto";
+import "api/org/v1/org.proto";
 import "api/project/v1/project.proto";
 import "api/project/v1/sprint.proto";
 import "api/item/v1/item.proto";
@@ -51,6 +52,15 @@ service Letscrum {
   rpc RefreshToken(letscrum.api.user.v1.RefreshTokenRequest) returns (letscrum.api.user.v1.RefreshTokenResponse) {
     option (google.api.http) = {
       get: "/api/v1/refresh/{refresh_token}"
+    };
+  }
+}
+
+service Org {
+  rpc Create(letscrum.api.org.v1.CreateOrgRequest) returns (letscrum.api.org.v1.CreateOrgResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/orgs"
+      body: "*"
     };
   }
 }

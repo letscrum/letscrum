@@ -42,7 +42,11 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
-	reqProject.Id = uuid.MustParse(req.ProjectId)
+	pId, err := uuid.Parse(req.ProjectId)
+	if err != nil {
+		return nil, err
+	}
+	reqProject.Id = pId
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -189,7 +193,11 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 		var userIds []uuid.UUID
 		for _, m := range req.Members {
 			if m.UserId != user.Id.String() {
-				userIds = append(userIds, uuid.MustParse(m.UserId))
+				uid, err := uuid.Parse(m.UserId)
+				if err != nil {
+					return nil, status.Error(codes.Internal, err.Error())
+				}
+				userIds = append(userIds, uid)
 			}
 		}
 		users, err := s.userDao.ListByIds(1, 999, userIds)
@@ -249,7 +257,11 @@ func (s *ProjectService) Update(ctx context.Context, req *projectv1.UpdateProjec
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
-	reqProject.Id = uuid.MustParse(req.ProjectId)
+	pId, err := uuid.Parse(req.ProjectId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqProject.Id = pId
 	reqProject.CreatedUser.Id = user.Id
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
@@ -303,7 +315,11 @@ func (s *ProjectService) Delete(ctx context.Context, req *projectv1.DeleteProjec
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
-	reqProject.Id = uuid.MustParse(req.ProjectId)
+	pId, err := uuid.Parse(req.ProjectId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqProject.Id = pId
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())

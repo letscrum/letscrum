@@ -34,6 +34,10 @@ func (d *Dao) ProjectDao() dao.ProjectDao {
 	return NewProjectDao(d.DB)
 }
 
+func (d *Dao) OrgDao() dao.OrgDao {
+	return NewOrgDao(d.DB)
+}
+
 func (d *Dao) SprintDao() dao.SprintDao {
 	return NewSprintDao(d.DB)
 }
@@ -70,6 +74,7 @@ func GetDao(opts *db.Options) (dao.Interface, error) {
 
 	initErr := dbIns.AutoMigrate(
 		&model.User{},
+		&model.Org{},
 		&model.Project{},
 		&model.Sprint{},
 		&model.Epic{},

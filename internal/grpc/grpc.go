@@ -56,6 +56,7 @@ func Run(ctx context.Context, opts utils.Options) error {
 
 	letscrumService := servicev1.NewLetscrumService(daoInterface)
 	userService := servicev1.NewUserService(daoInterface)
+	orgService := servicev1.NewOrgService(daoInterface)
 	projectService := servicev1.NewProjectService(daoInterface)
 	sprintService := servicev1.NewSprintService(daoInterface)
 	workItemService := servicev1.NewWorkItemService(daoInterface)
@@ -63,6 +64,7 @@ func Run(ctx context.Context, opts utils.Options) error {
 
 	v1.RegisterLetscrumServer(s, letscrumService)
 	v1.RegisterUserServer(s, userService)
+	v1.RegisterOrgServer(s, orgService)
 	v1.RegisterProjectServer(s, projectService)
 	v1.RegisterSprintServer(s, sprintService)
 	v1.RegisterWorkItemServer(s, workItemService)
@@ -114,10 +116,9 @@ func initDao() (dao.Interface, error) {
 
 	if options.AutoCreateAdmin == true {
 		// get create user or not config from config.yaml
-		adminUser := model.User{
+		admin, err := letscrumDao.UserDao().GetByName(model.User{
 			Name: "admin",
-		}
-		admin, err := letscrumDao.UserDao().GetByName(adminUser)
+		})
 		if err != nil {
 			return nil, err
 		}

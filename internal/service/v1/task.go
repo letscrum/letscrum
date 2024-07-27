@@ -37,7 +37,11 @@ func (t TaskService) Create(ctx context.Context, req *itemv1.CreateTaskRequest) 
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
-	reqProject.Id = uuid.MustParse(req.ProjectId)
+	pId, err := uuid.Parse(req.ProjectId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqProject.Id = pId
 	project, err := t.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -45,9 +49,13 @@ func (t TaskService) Create(ctx context.Context, req *itemv1.CreateTaskRequest) 
 	if validator.IsProjectMember(*project, user) == false {
 		return nil, status.Error(codes.PermissionDenied, "You are not a member of this project")
 	}
+	sId, err := uuid.Parse(req.SprintId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 	newTask := model.Task{
 		ProjectId:  project.Id,
-		SprintId:   uuid.MustParse(req.SprintId),
+		SprintId:   sId,
 		WorkItemId: req.WorkItemId,
 		Title:      req.Title,
 		Status:     itemv1.Task_ToDo.String(),
@@ -116,7 +124,11 @@ func (t TaskService) UpdateStatus(ctx context.Context, req *itemv1.UpdateTaskSta
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
-	reqProject.Id = uuid.MustParse(req.ProjectId)
+	pId, err := uuid.Parse(req.ProjectId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqProject.Id = pId
 	project, err := t.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -166,7 +178,11 @@ func (t TaskService) Assign(ctx context.Context, req *itemv1.AssignTaskRequest) 
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
-	reqProject.Id = uuid.MustParse(req.ProjectId)
+	pId, err := uuid.Parse(req.ProjectId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqProject.Id = pId
 	project, err := t.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -176,7 +192,11 @@ func (t TaskService) Assign(ctx context.Context, req *itemv1.AssignTaskRequest) 
 	}
 	var task model.Task
 	task.Id = req.TaskId
-	task.AssignTo = uuid.MustParse(req.AssignUserId)
+	auId, err := uuid.Parse(req.AssignUserId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	task.AssignTo = auId
 	updateTask, err := t.taskDao.UpdateAssignUser(task)
 	if err != nil {
 		return nil, status.Error(codes.NotFound, err.Error())
@@ -216,7 +236,11 @@ func (t TaskService) Move(ctx context.Context, req *itemv1.MoveTaskRequest) (*it
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
-	reqProject.Id = uuid.MustParse(req.ProjectId)
+	pId, err := uuid.Parse(req.ProjectId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqProject.Id = pId
 	project, err := t.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())

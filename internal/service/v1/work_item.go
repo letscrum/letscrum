@@ -32,7 +32,11 @@ func (s WorkItemService) Create(ctx context.Context, req *itemv1.CreateWorkItemR
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
-	reqProject.Id = uuid.MustParse(req.ProjectId)
+	pId, err := uuid.Parse(req.ProjectId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqProject.Id = pId
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -40,9 +44,13 @@ func (s WorkItemService) Create(ctx context.Context, req *itemv1.CreateWorkItemR
 	if validator.IsProjectMember(*project, user) == false {
 		return nil, status.Error(codes.PermissionDenied, "You are not a member of this project")
 	}
+	sId, err := uuid.Parse(req.SprintId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 	newWorkItem := model.WorkItem{
 		ProjectId:   reqProject.Id,
-		SprintId:    uuid.MustParse(req.SprintId),
+		SprintId:    sId,
 		FeatureId:   req.FeatureId,
 		Title:       req.Title,
 		Type:        req.Type.String(),
@@ -90,7 +98,11 @@ func (s WorkItemService) List(ctx context.Context, req *itemv1.ListWorkItemReque
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
-	reqProject.Id = uuid.MustParse(req.ProjectId)
+	pId, err := uuid.Parse(req.ProjectId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqProject.Id = pId
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.NotFound, err.Error())
@@ -104,11 +116,15 @@ func (s WorkItemService) List(ctx context.Context, req *itemv1.ListWorkItemReque
 	// if req.ProjectId is not empty uuid string "00000000-0000-0000-0000-000000000000"
 	if req.ProjectId != uuid.Nil.String() {
 		if req.SprintId != uuid.Nil.String() {
-			workItems, err = s.workItemDao.ListBySprint(uuid.MustParse(req.SprintId), req.Page, req.Size, req.Keyword)
+			sId, err := uuid.Parse(req.SprintId)
 			if err != nil {
 				return nil, status.Error(codes.Internal, err.Error())
 			}
-			count = s.workItemDao.CountBySprint(uuid.MustParse(req.SprintId), req.Keyword)
+			workItems, err = s.workItemDao.ListBySprint(sId, req.Page, req.Size, req.Keyword)
+			if err != nil {
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+			count = s.workItemDao.CountBySprint(sId, req.Keyword)
 		} else {
 			workItems, err = s.workItemDao.ListByProject(project.Id, req.Page, req.Size, req.Keyword)
 			if err != nil {

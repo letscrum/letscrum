@@ -44,6 +44,7 @@ api_gen:
 		api/general/v1/common.proto \
 		api/general/v1/letscrum.proto \
 		api/letscrum/v1/letscrum.proto \
+		api/org/v1/org.proto \
 		api/project/v1/project.proto \
 		api/project/v1/sprint.proto \
 		api/item/v1/item.proto \

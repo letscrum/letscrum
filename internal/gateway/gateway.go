@@ -24,6 +24,7 @@ func NewGateway(ctx context.Context, conn *grpc.ClientConn, opts []runtime.Serve
 	for _, f := range []func(context.Context, *runtime.ServeMux, *grpc.ClientConn) error{
 		v1.RegisterLetscrumHandler,
 		v1.RegisterUserHandler,
+		v1.RegisterOrgHandler,
 		v1.RegisterProjectHandler,
 		v1.RegisterSprintHandler,
 		v1.RegisterWorkItemHandler,

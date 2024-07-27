@@ -39,7 +39,11 @@ func (s *SprintService) Create(ctx context.Context, req *projectv1.CreateSprintR
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
-	reqProject.Id = uuid.MustParse(req.ProjectId)
+	pId, err := uuid.Parse(req.ProjectId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqProject.Id = pId
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -103,7 +107,11 @@ func (s *SprintService) Get(ctx context.Context, req *projectv1.GetSprintRequest
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
-	reqProject.Id = uuid.MustParse(req.ProjectId)
+	pId, err := uuid.Parse(req.ProjectId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqProject.Id = pId
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -112,8 +120,12 @@ func (s *SprintService) Get(ctx context.Context, req *projectv1.GetSprintRequest
 		return nil, status.Error(codes.PermissionDenied, "You are not a member of this project.")
 	}
 	var reqSprint model.Sprint
-	reqSprint.Id = uuid.MustParse(req.SprintId)
 	reqSprint.ProjectId = project.Id
+	sId, err := uuid.Parse(req.SprintId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqSprint.Id = sId
 	sprint, err := s.sprintDao.Get(reqSprint)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -159,7 +171,11 @@ func (s *SprintService) List(ctx context.Context, req *projectv1.ListSprintReque
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
-	reqProject.Id = uuid.MustParse(req.ProjectId)
+	pId, err := uuid.Parse(req.ProjectId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqProject.Id = pId
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -229,7 +245,11 @@ func (s *SprintService) Update(ctx context.Context, req *projectv1.UpdateSprintR
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
-	reqProject.Id = uuid.MustParse(req.ProjectId)
+	pId, err := uuid.Parse(req.ProjectId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqProject.Id = pId
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -238,7 +258,11 @@ func (s *SprintService) Update(ctx context.Context, req *projectv1.UpdateSprintR
 		return nil, status.Error(codes.PermissionDenied, "You are not an admin of this project.")
 	}
 	var sprint model.Sprint
-	sprint.Id = uuid.MustParse(req.SprintId)
+	sId, err := uuid.Parse(req.SprintId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	sprint.Id = sId
 	sprint.ProjectId = project.Id
 	sprint.Name = req.Name
 	sprint.StartDate = time.Unix(req.StartDate, 0)
@@ -276,7 +300,11 @@ func (s *SprintService) UpdateMembers(ctx context.Context, req *projectv1.Update
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
-	reqProject.Id = uuid.MustParse(req.ProjectId)
+	pId, err := uuid.Parse(req.ProjectId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqProject.Id = pId
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -285,7 +313,11 @@ func (s *SprintService) UpdateMembers(ctx context.Context, req *projectv1.Update
 		return nil, status.Error(codes.PermissionDenied, "You are not an admin of this project.")
 	}
 	var sprint model.Sprint
-	sprint.Id = uuid.MustParse(req.SprintId)
+	sId, err := uuid.Parse(req.SprintId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	sprint.Id = sId
 	var sprintMembers []*projectv1.SprintMember
 	for _, m := range req.Members {
 		var member = &projectv1.SprintMember{
@@ -328,7 +360,11 @@ func (s *SprintService) Delete(ctx context.Context, req *projectv1.DeleteSprintR
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
-	reqProject.Id = uuid.MustParse(req.ProjectId)
+	pId, err := uuid.Parse(req.ProjectId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqProject.Id = pId
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -337,7 +373,11 @@ func (s *SprintService) Delete(ctx context.Context, req *projectv1.DeleteSprintR
 		return nil, status.Error(codes.PermissionDenied, "You are not an admin of this project.")
 	}
 	var sprint model.Sprint
-	sprint.Id = uuid.MustParse(req.SprintId)
+	sId, err := uuid.Parse(req.SprintId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	sprint.Id = sId
 	deleteSprint, err := s.sprintDao.Delete(sprint)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
