@@ -79,20 +79,7 @@ func GetDao(opts *db.Options) (dao.Interface, error) {
 		&model.Task{},
 		&model.TaskLog{},
 	)
-	// get create user or not config from config.yaml
-	if opts.AutoCreateAdmin {
-		// if user table has no admin user, then insert a default admin user
-		var user model.User
-		dbIns.First(&user, "name = ?", "admin")
-		if user.Id == 0 {
-			dbIns.Create(&model.User{
-				Name:         "admin",
-				Email:        "admin@letscrum.io",
-				Password:     "admin",
-				IsSuperAdmin: true,
-			})
-		}
-	}
+
 	if initErr != nil {
 		return nil, fmt.Errorf("failed to init mysql letscrum database: %w", err)
 	}

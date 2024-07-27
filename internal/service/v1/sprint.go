@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/google/uuid"
 	generalv1 "github.com/letscrum/letscrum/api/general/v1"
 	v1 "github.com/letscrum/letscrum/api/letscrum/v1"
 	projectv1 "github.com/letscrum/letscrum/api/project/v1"
@@ -35,10 +36,10 @@ func (s *SprintService) Create(ctx context.Context, req *projectv1.CreateSprintR
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 	var user model.User
-	user.Id = int64(claims.Id)
+	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
-	reqProject.Id = req.ProjectId
+	reqProject.Id = uuid.MustParse(req.ProjectId)
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -66,23 +67,23 @@ func (s *SprintService) Create(ctx context.Context, req *projectv1.CreateSprintR
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	newSprint := model.Sprint{
-		ProjectId: req.ProjectId,
-		Name:      req.Name,
-		Members:   string(members),
-		StartDate: time.Unix(req.StartDate, 0),
-		EndDate:   time.Unix(req.EndDate, 0),
-	}
+	var newSprint model.Sprint
+	newSprint.Id = uuid.New()
+	newSprint.ProjectId = project.Id
+	newSprint.Name = req.Name
+	newSprint.Members = string(members)
+	newSprint.StartDate = time.Unix(req.StartDate, 0)
+	newSprint.EndDate = time.Unix(req.EndDate, 0)
 
 	sprint, err := s.sprintDao.Create(newSprint)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	return &projectv1.CreateSprintResponse{
-		Success: sprint.Id > 0,
+		Success: sprint.Id != uuid.Nil,
 		Item: &projectv1.Sprint{
-			Id:        sprint.Id,
-			ProjectId: sprint.ProjectId,
+			Id:        sprint.Id.String(),
+			ProjectId: sprint.ProjectId.String(),
 			Name:      sprint.Name,
 			StartDate: sprint.StartDate.Unix(),
 			EndDate:   sprint.EndDate.Unix(),
@@ -99,10 +100,10 @@ func (s *SprintService) Get(ctx context.Context, req *projectv1.GetSprintRequest
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 	var user model.User
-	user.Id = int64(claims.Id)
+	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
-	reqProject.Id = req.ProjectId
+	reqProject.Id = uuid.MustParse(req.ProjectId)
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -111,8 +112,8 @@ func (s *SprintService) Get(ctx context.Context, req *projectv1.GetSprintRequest
 		return nil, status.Error(codes.PermissionDenied, "You are not a member of this project.")
 	}
 	var reqSprint model.Sprint
-	reqSprint.Id = req.SprintId
-	reqSprint.ProjectId = req.ProjectId
+	reqSprint.Id = uuid.MustParse(req.SprintId)
+	reqSprint.ProjectId = project.Id
 	sprint, err := s.sprintDao.Get(reqSprint)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -136,8 +137,8 @@ func (s *SprintService) Get(ctx context.Context, req *projectv1.GetSprintRequest
 	}
 	return &projectv1.GetSprintResponse{
 		Item: &projectv1.Sprint{
-			Id:        sprint.Id,
-			ProjectId: sprint.ProjectId,
+			Id:        sprint.Id.String(),
+			ProjectId: sprint.ProjectId.String(),
 			Name:      sprint.Name,
 			StartDate: sprint.StartDate.Unix(),
 			EndDate:   sprint.EndDate.Unix(),
@@ -155,10 +156,10 @@ func (s *SprintService) List(ctx context.Context, req *projectv1.ListSprintReque
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 	var user model.User
-	user.Id = int64(claims.Id)
+	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
-	reqProject.Id = req.ProjectId
+	reqProject.Id = uuid.MustParse(req.ProjectId)
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -196,8 +197,8 @@ func (s *SprintService) List(ctx context.Context, req *projectv1.ListSprintReque
 			return nil, status.Error(codes.Unknown, err.Error())
 		}
 		var currentSprint = &projectv1.Sprint{
-			Id:        sprint.Id,
-			ProjectId: sprint.ProjectId,
+			Id:        sprint.Id.String(),
+			ProjectId: sprint.ProjectId.String(),
 			Name:      sprint.Name,
 			StartDate: sprint.StartDate.Unix(),
 			EndDate:   sprint.EndDate.Unix(),
@@ -225,10 +226,10 @@ func (s *SprintService) Update(ctx context.Context, req *projectv1.UpdateSprintR
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 	var user model.User
-	user.Id = int64(claims.Id)
+	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
-	reqProject.Id = req.ProjectId
+	reqProject.Id = uuid.MustParse(req.ProjectId)
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -237,8 +238,8 @@ func (s *SprintService) Update(ctx context.Context, req *projectv1.UpdateSprintR
 		return nil, status.Error(codes.PermissionDenied, "You are not an admin of this project.")
 	}
 	var sprint model.Sprint
-	sprint.Id = req.SprintId
-	sprint.ProjectId = req.ProjectId
+	sprint.Id = uuid.MustParse(req.SprintId)
+	sprint.ProjectId = project.Id
 	sprint.Name = req.Name
 	sprint.StartDate = time.Unix(req.StartDate, 0)
 	sprint.EndDate = time.Unix(req.EndDate, 0)
@@ -252,10 +253,10 @@ func (s *SprintService) Update(ctx context.Context, req *projectv1.UpdateSprintR
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	return &projectv1.UpdateSprintResponse{
-		Success: updateSprint.Id > 0,
+		Success: updateSprint.Id != uuid.Nil,
 		Item: &projectv1.Sprint{
-			Id:        updateSprint.Id,
-			ProjectId: updateSprint.ProjectId,
+			Id:        updateSprint.Id.String(),
+			ProjectId: updateSprint.ProjectId.String(),
 			Name:      updateSprint.Name,
 			StartDate: updateSprint.StartDate.Unix(),
 			EndDate:   updateSprint.EndDate.Unix(),
@@ -272,10 +273,10 @@ func (s *SprintService) UpdateMembers(ctx context.Context, req *projectv1.Update
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 	var user model.User
-	user.Id = int64(claims.Id)
+	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
-	reqProject.Id = req.ProjectId
+	reqProject.Id = uuid.MustParse(req.ProjectId)
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -284,7 +285,7 @@ func (s *SprintService) UpdateMembers(ctx context.Context, req *projectv1.Update
 		return nil, status.Error(codes.PermissionDenied, "You are not an admin of this project.")
 	}
 	var sprint model.Sprint
-	sprint.Id = req.SprintId
+	sprint.Id = uuid.MustParse(req.SprintId)
 	var sprintMembers []*projectv1.SprintMember
 	for _, m := range req.Members {
 		var member = &projectv1.SprintMember{
@@ -304,10 +305,10 @@ func (s *SprintService) UpdateMembers(ctx context.Context, req *projectv1.Update
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	return &projectv1.UpdateSprintResponse{
-		Success: updateSprint.Id > 0,
+		Success: updateSprint.Id != uuid.Nil,
 		Item: &projectv1.Sprint{
-			Id:        updateSprint.Id,
-			ProjectId: updateSprint.ProjectId,
+			Id:        updateSprint.Id.String(),
+			ProjectId: updateSprint.ProjectId.String(),
 			Name:      updateSprint.Name,
 			StartDate: updateSprint.StartDate.Unix(),
 			EndDate:   updateSprint.EndDate.Unix(),
@@ -324,10 +325,10 @@ func (s *SprintService) Delete(ctx context.Context, req *projectv1.DeleteSprintR
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 	var user model.User
-	user.Id = int64(claims.Id)
+	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
-	reqProject.Id = req.ProjectId
+	reqProject.Id = uuid.MustParse(req.ProjectId)
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -336,7 +337,7 @@ func (s *SprintService) Delete(ctx context.Context, req *projectv1.DeleteSprintR
 		return nil, status.Error(codes.PermissionDenied, "You are not an admin of this project.")
 	}
 	var sprint model.Sprint
-	sprint.Id = req.SprintId
+	sprint.Id = uuid.MustParse(req.SprintId)
 	deleteSprint, err := s.sprintDao.Delete(sprint)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
@@ -346,92 +347,3 @@ func (s *SprintService) Delete(ctx context.Context, req *projectv1.DeleteSprintR
 	}, nil
 
 }
-
-//
-//func Create(projectId int64, name string, startDate time.Time, endDate time.Time) (int64, error) {
-//    sprintId, err := sprintmodel.CreateSprint(projectId, name, startDate, endDate)
-//    if err != nil {
-//        return 0, err
-//    }
-//    projectMembers, errGetMembers := models2.ListProjectMemberByProject(projectId, 1, 999)
-//    if errGetMembers != nil {
-//        errDeleteSprint := sprintmodel.HardDeleteSprint(sprintId)
-//        if errDeleteSprint != nil {
-//            return 0, errDeleteSprint
-//        }
-//        return 0, err
-//    }
-//    var userIds []int64
-//    for _, projectMember := range projectMembers {
-//        userIds = append(userIds, projectMember.UserId)
-//    }
-//    _, errCreateSprintMembers := sprintmembermodel.CreateSprintMembers(sprintId, userIds)
-//    if errCreateSprintMembers != nil {
-//        errDeleteSprint := sprintmodel.HardDeleteSprint(sprintId)
-//        if errDeleteSprint != nil {
-//            return 0, errDeleteSprint
-//        }
-//        return 0, err
-//    }
-//    return sprintId, nil
-//}
-//
-//func List(projectId int64, page int32, pageSize int32) ([]*projectV1.Sprint, int64, error) {
-//    sprints, err := sprintmodel.ListSprintByProject(projectId, page, pageSize)
-//    if err != nil {
-//        return nil, 0, err
-//    }
-//    var list []*projectV1.Sprint
-//    for _, p := range sprints {
-//        list = append(list, &projectV1.Sprint{
-//            Id:        p.Id,
-//            Name:      p.Name,
-//            StartDate: p.StartDate.Unix(),
-//            EndDate:   p.EndDate.Unix(),
-//            CreatedAt: p.CreatedAt.Unix(),
-//            UpdatedAt: p.UpdatedAt.Unix(),
-//        })
-//    }
-//    count := sprintmodel.CountSprintByProject(projectId)
-//    return list, count, nil
-//}
-//
-//func Update(id int64, name string, startDate time.Time, endDate time.Time) error {
-//    if err := sprintmodel.UpdateSprint(id, name, startDate, endDate); err != nil {
-//        return err
-//    }
-//    return nil
-//}
-//
-//func Delete(id int64) error {
-//    if err := sprintmodel.DeleteSprint(id); err != nil {
-//        return err
-//    }
-//    return nil
-//}
-//
-//func HardDelete(id int64) error {
-//    if err := sprintmembermodel.HardDeleteSprintMemberBySprint(id); err != nil {
-//        return err
-//    }
-//    if err := sprintmodel.HardDeleteSprint(id); err != nil {
-//        return err
-//    }
-//    return nil
-//}
-//
-//func Get(id int64) (*projectV1.Sprint, error) {
-//    s, err := sprintmodel.GetSprint(id)
-//    if err != nil {
-//        return nil, err
-//    }
-//    sprint := &projectV1.Sprint{
-//        Id:        s.Id,
-//        Name:      s.Name,
-//        StartDate: s.StartDate.Unix(),
-//        EndDate:   s.EndDate.Unix(),
-//        CreatedAt: s.CreatedAt.Unix(),
-//        UpdatedAt: s.UpdatedAt.Unix(),
-//    }
-//    return sprint, nil
-//}

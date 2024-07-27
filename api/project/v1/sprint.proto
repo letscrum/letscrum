@@ -7,8 +7,8 @@ package letscrum.api.project.v1;
 option go_package = "github.com/letscrum/letscrum/api/project/v1";
 
 message Sprint {
-  int64 id = 1;
-  int64 project_id = 2;
+  string id = 1;
+  string project_id = 2;
   string name = 3;
   int64 start_date = 4;
   int64 end_date = 5;
@@ -25,14 +25,14 @@ message Sprint {
 }
 
 message SprintMember {
-  int64 user_id = 1;
+  string user_id = 1;
   string user_name = 2;
   string role = 3;
   float capacity = 4;
 }
 
 message CreateSprintRequest {
-  int64 project_id = 1;
+  string project_id = 1;
   string name = 2;
   int64 start_date = 3;
   int64 end_date = 4;
@@ -44,16 +44,16 @@ message CreateSprintResponse {
 }
 
 message UpdateSprintRequest {
-  int64 project_id = 1;
-  int64 sprint_id = 2;
+  string project_id = 1;
+  string sprint_id = 2;
   string name = 3;
   int64 start_date = 4;
   int64 end_date = 5;
 }
 
 message UpdateSprintMembersRequest {
-  int64 project_id = 1;
-  int64 sprint_id = 2;
+  string project_id = 1;
+  string sprint_id = 2;
   repeated SprintMember members = 3;
 }
 
@@ -63,17 +63,17 @@ message UpdateSprintResponse {
 }
 
 message DeleteSprintRequest {
-  int64 project_id = 1;
-  int64 sprint_id = 2;
+  string project_id = 1;
+  string sprint_id = 2;
 }
 
 message DeleteSprintResponse {
   bool success = 1;
-  int64 id = 2;
+  string id = 2;
 }
 
 message ListSprintRequest {
-  int64 project_id = 1;
+  string project_id = 1;
   int32 page = 2;
   int32 size = 3;
   string keyword = 4;
@@ -85,8 +85,8 @@ message ListSprintResponse {
 }
 
 message GetSprintRequest {
-  int64 project_id = 1;
-  int64 sprint_id = 2;
+  string project_id = 1;
+  string sprint_id = 2;
 }
 
 message GetSprintResponse {

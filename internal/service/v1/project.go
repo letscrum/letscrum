@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/google/uuid"
 	generalv1 "github.com/letscrum/letscrum/api/general/v1"
 	v1 "github.com/letscrum/letscrum/api/letscrum/v1"
 	projectv1 "github.com/letscrum/letscrum/api/project/v1"
@@ -38,15 +39,15 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 	var user model.User
-	user.Id = int64(claims.Id)
+	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
-	reqProject.Id = req.ProjectId
+	reqProject.Id = uuid.MustParse(req.ProjectId)
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	if project.Id == 0 {
+	if project.Id == uuid.Nil {
 		return nil, status.Error(codes.NotFound, "project not fount.")
 	}
 	if validator.IsProjectMember(*project, user) == false {
@@ -61,8 +62,8 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 		// Set the 1st Sprint as default
 		if i == 0 {
 			sprint = projectv1.Sprint{
-				Id:        s.Id,
-				ProjectId: s.ProjectId,
+				Id:        s.Id.String(),
+				ProjectId: s.ProjectId.String(),
 				Name:      s.Name,
 				StartDate: s.StartDate.Unix(),
 				EndDate:   s.EndDate.Unix(),
@@ -74,8 +75,8 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 		// Set the real current sprint
 		if time.Now().After(s.StartDate) && time.Now().Before(s.EndDate) {
 			sprint = projectv1.Sprint{
-				Id:        s.Id,
-				ProjectId: s.ProjectId,
+				Id:        s.Id.String(),
+				ProjectId: s.ProjectId.String(),
 				Name:      s.Name,
 				StartDate: s.StartDate.Unix(),
 				EndDate:   s.EndDate.Unix(),
@@ -93,12 +94,12 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 	}
 	return &projectv1.GetProjectResponse{
 		Item: &projectv1.Project{
-			Id:          project.Id,
+			Id:          project.Id.String(),
 			Name:        project.Name,
 			DisplayName: project.DisplayName,
 			Description: project.Description,
 			CreatedUser: &userv1.User{
-				Id:           project.CreatedUser.Id,
+				Id:           project.CreatedUser.Id.String(),
 				Name:         project.CreatedUser.Name,
 				IsSuperAdmin: project.CreatedUser.IsSuperAdmin,
 			},
@@ -112,12 +113,12 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 
 func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectRequest) (*projectv1.ListProjectResponse, error) {
 	claims, err := utils.GetTokenDetails(ctx)
-	var user model.User
-	user.Id = int64(claims.Id)
-	user.IsSuperAdmin = claims.IsSuperAdmin
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
+	var user model.User
+	user.Id = claims.Id
+	user.IsSuperAdmin = claims.IsSuperAdmin
 	req.Page, req.Size = utils.Pagination(req.Page, req.Size)
 	projects, err := s.projectDao.ListVisibleProject(req.Page, req.Size, req.Keyword, user)
 	if err != nil {
@@ -133,13 +134,13 @@ func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectReq
 			}
 		}
 		var project = &projectv1.Project{
-			Id:          p.Id,
+			Id:          p.Id.String(),
 			Name:        p.Name,
 			DisplayName: p.DisplayName,
 			Description: p.Description,
 			Members:     members,
 			CreatedUser: &userv1.User{
-				Id:           p.CreatedUser.Id,
+				Id:           p.CreatedUser.Id.String(),
 				Name:         p.CreatedUser.Name,
 				IsSuperAdmin: p.CreatedUser.IsSuperAdmin,
 			},
@@ -164,7 +165,9 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
-	user, err := s.userDao.Get(int64(claims.Id))
+	var authUser model.User
+	authUser.Id = claims.Id
+	user, err := s.userDao.Get(authUser)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -177,16 +180,16 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 	var members []*projectv1.ProjectMember
 	// add current user as project admin
 	members = append(members, &projectv1.ProjectMember{
-		UserId:   user.Id,
+		UserId:   user.Id.String(),
 		UserName: user.Name,
 		IsAdmin:  user.IsSuperAdmin,
 	})
 	if req.Members != nil && len(req.Members) > 0 {
 		// convert req.Members to id list
-		var userIds []int64
+		var userIds []uuid.UUID
 		for _, m := range req.Members {
-			if m.UserId != user.Id {
-				userIds = append(userIds, m.UserId)
+			if m.UserId != user.Id.String() {
+				userIds = append(userIds, uuid.MustParse(m.UserId))
 			}
 		}
 		users, err := s.userDao.ListByIds(1, 999, userIds)
@@ -200,14 +203,14 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 				isAdmin = true
 			} else {
 				for _, m := range req.Members {
-					if m.UserId == u.Id {
+					if m.UserId == u.Id.String() {
 						isAdmin = m.IsAdmin
 						break
 					}
 				}
 			}
 			member := &projectv1.ProjectMember{
-				UserId:   u.Id,
+				UserId:   u.Id.String(),
 				UserName: u.Name,
 				IsAdmin:  isAdmin,
 			}
@@ -219,24 +222,21 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
-	newProject := model.Project{
-		Name:        req.DisplayName,
-		DisplayName: req.DisplayName,
-		Description: req.Description,
-		Members:     string(membersJson),
-		CreatedBy:   user.Id,
-	}
+	var newProject model.Project
+	newProject.Id = uuid.New()
+	newProject.Name = req.DisplayName
+	newProject.DisplayName = req.DisplayName
+	newProject.Description = req.Description
+	newProject.Members = string(membersJson)
+	newProject.CreatedBy = user.Id
+
 	project, err := s.projectDao.Create(newProject)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
-	success := false
-	if project.Id > 0 {
-		success = true
-	}
 	return &projectv1.CreateProjectResponse{
-		Success: success,
-		Id:      project.Id,
+		Success: project.Id != uuid.Nil,
+		Id:      project.Id.String(),
 	}, nil
 }
 
@@ -246,16 +246,16 @@ func (s *ProjectService) Update(ctx context.Context, req *projectv1.UpdateProjec
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 	var user model.User
-	user.Id = int64(claims.Id)
+	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
-	reqProject.Id = req.ProjectId
+	reqProject.Id = uuid.MustParse(req.ProjectId)
 	reqProject.CreatedUser.Id = user.Id
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	if project.Id == 0 {
+	if project.Id == uuid.Nil {
 		return nil, status.Error(codes.NotFound, "project not fount.")
 	}
 	if validator.IsProjectAdmin(*project, user) == false {
@@ -271,7 +271,7 @@ func (s *ProjectService) Update(ctx context.Context, req *projectv1.UpdateProjec
 				UserName: m.UserName,
 				IsAdmin:  m.IsAdmin,
 			}
-			if m.UserId == user.Id && user.IsSuperAdmin == true {
+			if m.UserId == user.Id.String() && user.IsSuperAdmin == true {
 				member.IsAdmin = true
 			}
 			members = append(members, member)
@@ -290,7 +290,7 @@ func (s *ProjectService) Update(ctx context.Context, req *projectv1.UpdateProjec
 
 	return &projectv1.UpdateProjectResponse{
 		Success: updatedProject != nil,
-		Id:      updatedProject.Id,
+		Id:      updatedProject.Id.String(),
 	}, nil
 }
 
@@ -300,15 +300,15 @@ func (s *ProjectService) Delete(ctx context.Context, req *projectv1.DeleteProjec
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 	var user model.User
-	user.Id = int64(claims.Id)
+	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
-	reqProject.Id = req.ProjectId
+	reqProject.Id = uuid.MustParse(req.ProjectId)
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	if project.Id == 0 {
+	if project.Id == uuid.Nil {
 		return nil, status.Error(codes.NotFound, "project not fount.")
 	}
 	if validator.IsProjectAdmin(*project, user) == false {
@@ -320,70 +320,6 @@ func (s *ProjectService) Delete(ctx context.Context, req *projectv1.DeleteProjec
 	}
 	return &projectv1.DeleteProjectResponse{
 		Success: deletedProject,
-		Id:      project.Id,
+		Id:      project.Id.String(),
 	}, nil
 }
-
-//
-//func Create1(name string, displayName string, createdUserId int64) (int64, error) {
-//    projectId, err := model.CreateProject(name, displayName, createdUserId)
-//    if err != nil {
-//        return 0, err
-//    }
-//    _, errCreateMember := models2.CreateProjectMember(projectId, createdUserId, true)
-//    if errCreateMember != nil {
-//        errDeleteProject := model.DeleteProject(projectId)
-//        if errDeleteProject != nil {
-//            return 0, errDeleteProject
-//        }
-//        return 0, errCreateMember
-//    }
-//    return projectId, nil
-//}
-//
-//func List1(page int32, pageSize int32) ([]*projectv1.Project, int64, error) {
-//    projects, err := model.ListProject(page, pageSize)
-//    if err != nil {
-//        return nil, 0, err
-//    }
-//    var list []*projectv1.Project
-//    for _, p := range projects {
-//        list = append(list, &projectv1.Project{
-//            Id:          p.Id,
-//            Name:        p.Name,
-//            DisplayName: p.DisplayName,
-//            CreatedUser: &userv1.User{
-//                Id:   p.CreatedUser.Id,
-//                Name: p.CreatedUser.Name,
-//            },
-//            CreatedAt: p.CreatedAt.Unix(),
-//            UpdatedAt: p.UpdatedAt.Unix(),
-//        })
-//    }
-//    count := model.CountProject()
-//    return list, count, nil
-//}
-//
-//func Update1(id int64, displayName string) error {
-//    if err := model.UpdateProject(id, displayName); err != nil {
-//        return err
-//    }
-//    return nil
-//}
-//
-//func Delete1(id int64) error {
-//    if err := model.DeleteProject(id); err != nil {
-//        return err
-//    }
-//    return nil
-//}
-//
-//func HardDelete1(id int64) error {
-//    if err := models2.HardDeleteProjectMemberByProject(id); err != nil {
-//        return err
-//    }
-//    if err := model.HardDeleteProject(id); err != nil {
-//        return err
-//    }
-//    return nil
-//}

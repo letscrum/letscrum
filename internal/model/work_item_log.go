@@ -1,7 +1,7 @@
 package model
 
 type WorkItemLog struct {
-	Model
+	BaseUUID
 
 	WorkItemId   int64    `gorm:"column:work_item_id" json:"work_item_id,omitempty"`
 	Log          string   `gorm:"column:log;size:1000" json:"log,omitempty"`

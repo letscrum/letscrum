@@ -3,6 +3,7 @@ package v1
 import (
 	"context"
 
+	"github.com/google/uuid"
 	generalv1 "github.com/letscrum/letscrum/api/general/v1"
 	itemv1 "github.com/letscrum/letscrum/api/item/v1"
 	v1 "github.com/letscrum/letscrum/api/letscrum/v1"
@@ -28,10 +29,10 @@ func (s WorkItemService) Create(ctx context.Context, req *itemv1.CreateWorkItemR
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 	var user model.User
-	user.Id = int64(claims.Id)
+	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
-	reqProject.Id = req.ProjectId
+	reqProject.Id = uuid.MustParse(req.ProjectId)
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -40,14 +41,14 @@ func (s WorkItemService) Create(ctx context.Context, req *itemv1.CreateWorkItemR
 		return nil, status.Error(codes.PermissionDenied, "You are not a member of this project")
 	}
 	newWorkItem := model.WorkItem{
-		ProjectId:   req.ProjectId,
-		SprintId:    req.SprintId,
+		ProjectId:   reqProject.Id,
+		SprintId:    uuid.MustParse(req.SprintId),
 		FeatureId:   req.FeatureId,
 		Title:       req.Title,
 		Type:        req.Type.String(),
 		Description: req.Description,
 		Status:      itemv1.WorkItem_New.String(),
-		CreatedBy:   int64(claims.Id),
+		CreatedBy:   claims.Id,
 	}
 	workItem, err := s.workItemDao.Create(newWorkItem)
 	if err != nil {
@@ -57,20 +58,20 @@ func (s WorkItemService) Create(ctx context.Context, req *itemv1.CreateWorkItemR
 		Success: workItem.Id > 0,
 		Item: &itemv1.WorkItem{
 			Id:          workItem.Id,
-			ProjectId:   workItem.ProjectId,
-			SprintId:    workItem.SprintId,
+			ProjectId:   workItem.ProjectId.String(),
+			SprintId:    workItem.SprintId.String(),
 			FeatureId:   workItem.FeatureId,
 			Title:       workItem.Title,
 			Type:        itemv1.WorkItemType(itemv1.WorkItemType_value[workItem.Type]),
 			Description: workItem.Description,
 			Status:      itemv1.WorkItem_WorkItemStatus(itemv1.WorkItem_WorkItemStatus_value[workItem.Status]),
 			AssignUser: &userv1.User{
-				Id:    0,
+				Id:    uuid.Nil.String(),
 				Name:  "",
 				Email: "",
 			},
 			CreatedUser: &userv1.User{
-				Id:    workItem.CreatedUser.Id,
+				Id:    workItem.CreatedUser.Id.String(),
 				Name:  workItem.CreatedUser.Name,
 				Email: workItem.CreatedUser.Email,
 			},
@@ -86,10 +87,10 @@ func (s WorkItemService) List(ctx context.Context, req *itemv1.ListWorkItemReque
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 	var user model.User
-	user.Id = int64(claims.Id)
+	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
-	reqProject.Id = req.ProjectId
+	reqProject.Id = uuid.MustParse(req.ProjectId)
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.NotFound, err.Error())
@@ -100,19 +101,20 @@ func (s WorkItemService) List(ctx context.Context, req *itemv1.ListWorkItemReque
 	req.Page, req.Size = utils.Pagination(req.Page, req.Size)
 	var workItems []*model.WorkItem
 	count := int64(0)
-	if req.ProjectId > 0 {
-		if req.SprintId > 0 {
-			workItems, err = s.workItemDao.ListBySprint(req.SprintId, req.Page, req.Size, req.Keyword)
+	// if req.ProjectId is not empty uuid string "00000000-0000-0000-0000-000000000000"
+	if req.ProjectId != uuid.Nil.String() {
+		if req.SprintId != uuid.Nil.String() {
+			workItems, err = s.workItemDao.ListBySprint(uuid.MustParse(req.SprintId), req.Page, req.Size, req.Keyword)
 			if err != nil {
 				return nil, status.Error(codes.Internal, err.Error())
 			}
-			count = s.workItemDao.CountBySprint(req.SprintId, req.Keyword)
+			count = s.workItemDao.CountBySprint(uuid.MustParse(req.SprintId), req.Keyword)
 		} else {
-			workItems, err = s.workItemDao.ListByProject(req.ProjectId, req.Page, req.Size, req.Keyword)
+			workItems, err = s.workItemDao.ListByProject(project.Id, req.Page, req.Size, req.Keyword)
 			if err != nil {
 				return nil, status.Error(codes.Internal, err.Error())
 			}
-			count = s.workItemDao.CountByProject(req.ProjectId, req.Keyword)
+			count = s.workItemDao.CountByProject(project.Id, req.Keyword)
 		}
 	}
 	// get workitemIds list by workItems
@@ -129,13 +131,13 @@ func (s WorkItemService) List(ctx context.Context, req *itemv1.ListWorkItemReque
 	for _, w := range workItems {
 		// convert w.AssignUser to userv1.User
 		assignUser := &userv1.User{
-			Id:    w.AssignUser.Id,
+			Id:    w.AssignUser.Id.String(),
 			Name:  w.AssignUser.Name,
 			Email: w.AssignUser.Email,
 		}
 		// convert w.CreatedUser to userv1.User
 		createdUser := &userv1.User{
-			Id:    w.CreatedUser.Id,
+			Id:    w.CreatedUser.Id.String(),
 			Name:  w.CreatedUser.Name,
 			Email: w.CreatedUser.Email,
 		}
@@ -155,12 +157,12 @@ func (s WorkItemService) List(ctx context.Context, req *itemv1.ListWorkItemReque
 					Description: t.Description,
 					Status:      itemv1.Task_TaskStatus(itemv1.Task_TaskStatus_value[t.Status]),
 					AssignUser: &userv1.User{
-						Id:    t.AssignUser.Id,
+						Id:    t.AssignUser.Id.String(),
 						Name:  t.AssignUser.Name,
 						Email: t.AssignUser.Email,
 					},
 					CreatedUser: &userv1.User{
-						Id:    t.CreatedUser.Id,
+						Id:    t.CreatedUser.Id.String(),
 						Name:  t.CreatedUser.Name,
 						Email: t.CreatedUser.Email,
 					},
@@ -185,8 +187,8 @@ func (s WorkItemService) List(ctx context.Context, req *itemv1.ListWorkItemReque
 		}
 		items = append(items, &itemv1.WorkItem{
 			Id:              w.Id,
-			ProjectId:       w.ProjectId,
-			SprintId:        w.SprintId,
+			ProjectId:       w.ProjectId.String(),
+			SprintId:        w.SprintId.String(),
 			FeatureId:       w.FeatureId,
 			Title:           w.Title,
 			Type:            itemv1.WorkItemType(itemv1.WorkItemType_value[w.Type]),

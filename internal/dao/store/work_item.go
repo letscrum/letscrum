@@ -1,6 +1,7 @@
 package store
 
 import (
+	"github.com/google/uuid"
 	"github.com/letscrum/letscrum/internal/model"
 	"gorm.io/gorm"
 )
@@ -17,7 +18,7 @@ func (w WorkItemDao) Get(workItem model.WorkItem) (*model.WorkItem, error) {
 	return &workItem, nil
 }
 
-func (w WorkItemDao) ListByProject(projectId int64, page, size int32, keyword string) ([]*model.WorkItem, error) {
+func (w WorkItemDao) ListByProject(projectId uuid.UUID, page, size int32, keyword string) ([]*model.WorkItem, error) {
 	// get workitems from database
 	var workItems []*model.WorkItem
 	err := w.DB.Where("project_id = ?", projectId).Where("title LIKE ?", "%"+keyword+"%").Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Preload("AssignUser").Order("created_at").Find(&workItems).Error
@@ -27,7 +28,7 @@ func (w WorkItemDao) ListByProject(projectId int64, page, size int32, keyword st
 	return workItems, nil
 }
 
-func (w WorkItemDao) ListBySprint(sprintId int64, page, size int32, keyword string) ([]*model.WorkItem, error) {
+func (w WorkItemDao) ListBySprint(sprintId uuid.UUID, page, size int32, keyword string) ([]*model.WorkItem, error) {
 	// get workitems from database
 	var workItems []*model.WorkItem
 	err := w.DB.Where("sprint_id = ?", sprintId).Where("title LIKE ?", "%"+keyword+"%").Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Preload("AssignUser").Order("created_at").Find(&workItems).Error
@@ -37,13 +38,13 @@ func (w WorkItemDao) ListBySprint(sprintId int64, page, size int32, keyword stri
 	return workItems, nil
 }
 
-func (w WorkItemDao) CountByProject(projectId int64, keyword string) int64 {
+func (w WorkItemDao) CountByProject(projectId uuid.UUID, keyword string) int64 {
 	count := int64(0)
 	w.DB.Where("project_id = ?", projectId).Where("title LIKE ?", "%"+keyword+"%").Model(&model.WorkItem{}).Count(&count)
 	return count
 }
 
-func (w WorkItemDao) CountBySprint(sprintId int64, keyword string) int64 {
+func (w WorkItemDao) CountBySprint(sprintId uuid.UUID, keyword string) int64 {
 	count := int64(0)
 	w.DB.Where("sprint_id = ?", sprintId).Where("title LIKE ?", "%"+keyword+"%").Model(&model.WorkItem{}).Count(&count)
 	return count

@@ -3,6 +3,7 @@ package v1
 import (
 	"context"
 
+	"github.com/google/uuid"
 	itemv1 "github.com/letscrum/letscrum/api/item/v1"
 	v1 "github.com/letscrum/letscrum/api/letscrum/v1"
 	userv1 "github.com/letscrum/letscrum/api/user/v1"
@@ -33,10 +34,10 @@ func (t TaskService) Create(ctx context.Context, req *itemv1.CreateTaskRequest) 
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 	var user model.User
-	user.Id = int64(claims.Id)
+	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
-	reqProject.Id = req.ProjectId
+	reqProject.Id = uuid.MustParse(req.ProjectId)
 	project, err := t.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -45,12 +46,12 @@ func (t TaskService) Create(ctx context.Context, req *itemv1.CreateTaskRequest) 
 		return nil, status.Error(codes.PermissionDenied, "You are not a member of this project")
 	}
 	newTask := model.Task{
-		ProjectId:  req.ProjectId,
-		SprintId:   req.SprintId,
+		ProjectId:  project.Id,
+		SprintId:   uuid.MustParse(req.SprintId),
 		WorkItemId: req.WorkItemId,
 		Title:      req.Title,
 		Status:     itemv1.Task_ToDo.String(),
-		CreatedBy:  int64(claims.Id),
+		CreatedBy:  claims.Id,
 	}
 	task, err := t.taskDao.Create(newTask)
 	if err != nil {
@@ -65,19 +66,19 @@ func (t TaskService) Create(ctx context.Context, req *itemv1.CreateTaskRequest) 
 		success = true
 		resTask = itemv1.Task{
 			Id:          task.Id,
-			ProjectId:   task.ProjectId,
-			SprintId:    task.SprintId,
+			ProjectId:   task.ProjectId.String(),
+			SprintId:    task.SprintId.String(),
 			WorkItemId:  task.WorkItemId,
 			Title:       task.Title,
 			Description: task.Description,
 			Status:      itemv1.Task_TaskStatus(itemv1.Task_TaskStatus_value[task.Status]),
 			AssignUser: &userv1.User{
-				Id:    0,
+				Id:    uuid.Nil.String(),
 				Name:  "",
 				Email: "",
 			},
 			CreatedUser: &userv1.User{
-				Id:    task.CreatedUser.Id,
+				Id:    task.CreatedUser.Id.String(),
 				Name:  task.CreatedUser.Name,
 				Email: task.CreatedUser.Email,
 			},
@@ -112,10 +113,10 @@ func (t TaskService) UpdateStatus(ctx context.Context, req *itemv1.UpdateTaskSta
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 	var user model.User
-	user.Id = int64(claims.Id)
+	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
-	reqProject.Id = req.ProjectId
+	reqProject.Id = uuid.MustParse(req.ProjectId)
 	project, err := t.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -134,19 +135,19 @@ func (t TaskService) UpdateStatus(ctx context.Context, req *itemv1.UpdateTaskSta
 		Success: true,
 		Item: &itemv1.Task{
 			Id:          updateTask.Id,
-			ProjectId:   updateTask.ProjectId,
-			SprintId:    updateTask.SprintId,
+			ProjectId:   updateTask.ProjectId.String(),
+			SprintId:    updateTask.SprintId.String(),
 			WorkItemId:  updateTask.WorkItemId,
 			Title:       updateTask.Title,
 			Description: updateTask.Description,
 			Status:      itemv1.Task_TaskStatus(itemv1.Task_TaskStatus_value[updateTask.Status]),
 			AssignUser: &userv1.User{
-				Id:    updateTask.AssignUser.Id,
+				Id:    updateTask.AssignUser.Id.String(),
 				Name:  updateTask.AssignUser.Name,
 				Email: updateTask.AssignUser.Email,
 			},
 			CreatedUser: &userv1.User{
-				Id:    updateTask.CreatedUser.Id,
+				Id:    updateTask.CreatedUser.Id.String(),
 				Name:  updateTask.CreatedUser.Name,
 				Email: updateTask.CreatedUser.Email,
 			},
@@ -162,10 +163,10 @@ func (t TaskService) Assign(ctx context.Context, req *itemv1.AssignTaskRequest) 
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 	var user model.User
-	user.Id = int64(claims.Id)
+	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
-	reqProject.Id = req.ProjectId
+	reqProject.Id = uuid.MustParse(req.ProjectId)
 	project, err := t.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -175,7 +176,7 @@ func (t TaskService) Assign(ctx context.Context, req *itemv1.AssignTaskRequest) 
 	}
 	var task model.Task
 	task.Id = req.TaskId
-	task.AssignTo = req.AssignUserId
+	task.AssignTo = uuid.MustParse(req.AssignUserId)
 	updateTask, err := t.taskDao.UpdateAssignUser(task)
 	if err != nil {
 		return nil, status.Error(codes.NotFound, err.Error())
@@ -184,19 +185,19 @@ func (t TaskService) Assign(ctx context.Context, req *itemv1.AssignTaskRequest) 
 		Success: true,
 		Item: &itemv1.Task{
 			Id:          updateTask.Id,
-			ProjectId:   updateTask.ProjectId,
-			SprintId:    updateTask.SprintId,
+			ProjectId:   updateTask.ProjectId.String(),
+			SprintId:    updateTask.SprintId.String(),
 			WorkItemId:  updateTask.WorkItemId,
 			Title:       updateTask.Title,
 			Description: updateTask.Description,
 			Status:      itemv1.Task_TaskStatus(itemv1.Task_TaskStatus_value[updateTask.Status]),
 			AssignUser: &userv1.User{
-				Id:    updateTask.AssignUser.Id,
+				Id:    updateTask.AssignUser.Id.String(),
 				Name:  updateTask.AssignUser.Name,
 				Email: updateTask.AssignUser.Email,
 			},
 			CreatedUser: &userv1.User{
-				Id:    updateTask.CreatedUser.Id,
+				Id:    updateTask.CreatedUser.Id.String(),
 				Name:  updateTask.CreatedUser.Name,
 				Email: updateTask.CreatedUser.Email,
 			},
@@ -212,10 +213,10 @@ func (t TaskService) Move(ctx context.Context, req *itemv1.MoveTaskRequest) (*it
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 	var user model.User
-	user.Id = int64(claims.Id)
+	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
-	reqProject.Id = req.ProjectId
+	reqProject.Id = uuid.MustParse(req.ProjectId)
 	project, err := t.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -235,19 +236,19 @@ func (t TaskService) Move(ctx context.Context, req *itemv1.MoveTaskRequest) (*it
 		Success: true,
 		Item: &itemv1.Task{
 			Id:          updateTask.Id,
-			ProjectId:   updateTask.ProjectId,
-			SprintId:    updateTask.SprintId,
+			ProjectId:   updateTask.ProjectId.String(),
+			SprintId:    updateTask.SprintId.String(),
 			WorkItemId:  updateTask.WorkItemId,
 			Title:       updateTask.Title,
 			Description: updateTask.Description,
 			Status:      itemv1.Task_TaskStatus(itemv1.Task_TaskStatus_value[updateTask.Status]),
 			AssignUser: &userv1.User{
-				Id:    updateTask.AssignUser.Id,
+				Id:    updateTask.AssignUser.Id.String(),
 				Name:  updateTask.AssignUser.Name,
 				Email: updateTask.AssignUser.Email,
 			},
 			CreatedUser: &userv1.User{
-				Id:    updateTask.CreatedUser.Id,
+				Id:    updateTask.CreatedUser.Id.String(),
 				Name:  updateTask.CreatedUser.Name,
 				Email: updateTask.CreatedUser.Email,
 			},

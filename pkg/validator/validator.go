@@ -17,7 +17,7 @@ func IsProjectAdmin(project model.Project, user model.User) bool {
 		return false
 	}
 	for _, m := range projectMembers {
-		if m.UserId == user.Id && m.IsAdmin == false {
+		if m.UserId == user.Id.String() && m.IsAdmin == false {
 			if user.IsSuperAdmin == false {
 				return false
 			}
@@ -37,7 +37,7 @@ func IsProjectMember(project model.Project, user model.User) bool {
 	}
 	// check claims.UserId in projectMembers
 	for _, m := range projectMembers {
-		if m.UserId == user.Id {
+		if m.UserId == user.Id.String() {
 			return true
 		}
 	}

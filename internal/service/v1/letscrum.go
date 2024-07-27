@@ -3,6 +3,7 @@ package v1
 import (
 	"context"
 
+	"github.com/google/uuid"
 	generalv1 "github.com/letscrum/letscrum/api/general/v1"
 	letscrumv1 "github.com/letscrum/letscrum/api/letscrum/v1"
 	userv1 "github.com/letscrum/letscrum/api/user/v1"
@@ -40,16 +41,16 @@ func (s *LetscrumService) SignIn(ctx context.Context, req *userv1.SignInRequest)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "failed to sign in")
 	}
-	if user.Id == 0 {
-		return nil, status.Error(codes.NotFound, "user not fount.")
+	if user.Id == uuid.Nil {
+		return nil, status.Error(codes.NotFound, "user not found")
 	}
-	accessToken, refreshToken, errGenTokens := utils.GenerateTokens(float64(user.Id), user.IsSuperAdmin)
+	accessToken, refreshToken, errGenTokens := utils.GenerateTokens(user.Id, user.IsSuperAdmin)
 	if errGenTokens != nil {
 		return nil, errGenTokens
 	}
 	return &userv1.SignInResponse{
 		Item: &userv1.User{
-			Id:           user.Id,
+			Id:           user.Id.String(),
 			Name:         user.Name,
 			Email:        user.Email,
 			IsSuperAdmin: user.IsSuperAdmin,
@@ -68,7 +69,7 @@ func (s *LetscrumService) RefreshToken(ctx context.Context, req *userv1.RefreshT
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid token")
 	}
-	accessToken, refreshToken, err := utils.GenerateTokens(token["iss"].(float64), token["aud"].(bool))
+	accessToken, refreshToken, err := utils.GenerateTokens(token["iss"].(uuid.UUID), token["aud"].(bool))
 	if err != nil {
 		return nil, status.Error(codes.Internal, "failed to generate token")
 	}

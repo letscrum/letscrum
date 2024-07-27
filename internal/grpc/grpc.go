@@ -7,12 +7,14 @@ import (
 	"os"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/auth"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/selector"
 	v1 "github.com/letscrum/letscrum/api/letscrum/v1"
 	"github.com/letscrum/letscrum/internal/dao"
 	"github.com/letscrum/letscrum/internal/dao/store"
 	"github.com/letscrum/letscrum/internal/mid"
+	"github.com/letscrum/letscrum/internal/model"
 	servicev1 "github.com/letscrum/letscrum/internal/service/v1"
 	"github.com/letscrum/letscrum/pkg/db"
 	"github.com/letscrum/letscrum/pkg/log"
@@ -109,5 +111,29 @@ func initDao() (dao.Interface, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	if options.AutoCreateAdmin == true {
+		// get create user or not config from config.yaml
+		adminUser := model.User{
+			Name: "admin",
+		}
+		admin, err := letscrumDao.UserDao().GetByName(adminUser)
+		if err != nil {
+			return nil, err
+		}
+		if admin.Id == uuid.Nil {
+			var newAdmin model.User
+			newAdmin.Id = uuid.New()
+			newAdmin.Name = "admin"
+			newAdmin.Email = "admin@letscrum.io"
+			newAdmin.Password = "admin"
+			newAdmin.IsSuperAdmin = true
+			_, err = letscrumDao.UserDao().Create(newAdmin)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
 	return letscrumDao, nil
 }

@@ -7,11 +7,12 @@ import (
 	"time"
 
 	jwt "github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 type key string
 
-func GenerateTokens(userId float64, isSuperAdmin bool) (string, string, error) {
+func GenerateTokens(userId uuid.UUID, isSuperAdmin bool) (string, string, error) {
 	nowTime := time.Now()
 	accessTokenExpireTime := nowTime.Add(time.Hour * 720)
 	accessTokenClaims := jwt.MapClaims{
@@ -55,7 +56,7 @@ func ParseToken(token string) (jwt.MapClaims, error) {
 }
 
 type UserClaims struct {
-	Id             float64   `json:"id"`
+	Id             uuid.UUID `json:"id"`
 	IsSuperAdmin   bool      `json:"is_super_admin"`
 	ExpirationTime time.Time `json:"exp"`
 }
@@ -66,7 +67,7 @@ func GetTokenDetails(ctx context.Context) (UserClaims, error) {
 		return UserClaims{}, errors.New("token claims not found")
 	}
 	user := UserClaims{
-		Id:             claims["iss"].(float64),
+		Id:             uuid.MustParse(claims["iss"].(string)),
 		IsSuperAdmin:   claims["aud"].(bool),
 		ExpirationTime: time.Unix(int64(claims["exp"].(float64)), 0),
 	}

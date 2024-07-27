@@ -17,8 +17,8 @@ enum WorkItemType {
 
 message WorkItem {
   int64 id = 1;
-  int64 project_id = 2;
-  int64 sprint_id = 3;
+  string project_id = 2;
+  string sprint_id = 3;
   int64 feature_id = 4;
   string title = 5;
   WorkItemType type = 6;
@@ -44,10 +44,10 @@ message WorkItem {
 }
 
 message CreateWorkItemRequest {
-  int64 project_id = 1;
+  string project_id = 1;
   WorkItemType type = 2;
   string title = 3;
-  int64 sprint_id = 4;
+  string sprint_id = 4;
   int64 feature_id = 5;
   string description = 6;
 }
@@ -58,7 +58,7 @@ message CreateWorkItemResponse {
 }
 
 message GetWorkItemRequest {
-  int64 project_id = 1;
+  string project_id = 1;
   int64 work_item_id = 2;
 }
 
@@ -67,11 +67,11 @@ message GetWorkItemResponse {
 }
 
 message ListWorkItemRequest {
-  int64 project_id = 1;
+  string project_id = 1;
   int32 page = 2;
   int32 size = 3;
   string keyword = 4;
-  int64 sprint_id = 5;
+  string sprint_id = 5;
 }
 
 message ListWorkItemResponse {
@@ -80,26 +80,26 @@ message ListWorkItemResponse {
 }
 
 message UpdateWorkItemRequest {
-  int64 project_id = 1;
+  string project_id = 1;
   int64 work_item_id = 2;
   WorkItem.WorkItemStatus status = 3;
   string title = 4;
   string description = 5;
-  int64 sprint_id = 6;
+  string sprint_id = 6;
   int64 feature_id = 7;
-  int64 assign_user_id = 8;
+  string assign_user_id = 8;
 }
 
 message UpdateWorkItemStatusRequest {
-  int64 project_id = 1;
+  string project_id = 1;
   int64 work_item_id = 2;
   WorkItem.WorkItemStatus status = 3;
 }
 
 message AssignWorkItemRequest {
-  int64 project_id = 1;
+  string project_id = 1;
   int64 work_item_id = 2;
-  int64 assign_user_id = 3;
+  string assign_user_id = 3;
 }
 
 message UpdateWorkItemResponse {

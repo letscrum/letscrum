@@ -2,12 +2,14 @@ package model
 
 import (
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Sprint struct {
-	Model
+	BaseUUID
 
-	ProjectId   int64     `gorm:"column:project_id" json:"project_id,omitempty"`
+	ProjectId   uuid.UUID `gorm:"column:project_id;varchar(191);default:null" json:"project_id,omitempty"`
 	Name        string    `gorm:"column:name;size:255" json:"name,omitempty"`
 	Members     string    `gorm:"column:members;size:5000" json:"members,omitempty"`
 	StartDate   time.Time `gorm:"column:start_date" json:"start_date,omitempty"`
