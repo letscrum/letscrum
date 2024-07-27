@@ -63,8 +63,8 @@ func (d ProjectDao) ListVisibleProject(page, size int32, keyword string, user mo
 			return nil, err
 		}
 	} else {
-		// get user's projects
-		err := d.DB.Where("members LIKE ?", "%"+`"user_id"%`+strconv.FormatInt(user.Id, 10)+`%`).Where("name LIKE ?", "%"+keyword+"%").Or("display_name LIKE ?", "%"+keyword+"%").Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Order("updated_at desc").Find(&projects).Error
+		// select project where members include user.Id
+		err := d.DB.Where("members LIKE ?", "%"+`{"user_id":`+strconv.FormatInt(user.Id, 10)+",%").Where("name LIKE ?", "%"+keyword+"%").Or("display_name LIKE ?", "%"+keyword+"%").Where("members LIKE ?", "%"+`{"user_id":`+strconv.FormatInt(user.Id, 10)+",%").Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Order("updated_at desc").Find(&projects).Error
 		if err != nil {
 			return nil, err
 		}
