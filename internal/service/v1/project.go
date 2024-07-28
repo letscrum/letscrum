@@ -114,6 +114,11 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	members = append(members, &projectv1.ProjectMember{
+		UserId:   project.CreatedUser.Id.String(),
+		UserName: project.CreatedUser.Name,
+		IsAdmin:  true,
+	})
 	return &projectv1.GetProjectResponse{
 		Item: &projectv1.Project{
 			Id:          project.Id.String(),
@@ -161,6 +166,11 @@ func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectReq
 				return nil, status.Error(codes.Unknown, err.Error())
 			}
 		}
+		members = append(members, &projectv1.ProjectMember{
+			UserId:   p.CreatedUser.Id.String(),
+			UserName: p.CreatedUser.Name,
+			IsAdmin:  true,
+		})
 		var project = &projectv1.Project{
 			Id:          p.Id.String(),
 			Name:        p.Name,
@@ -228,12 +238,6 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 		return nil, status.Error(codes.InvalidArgument, "project display name can't be empty.")
 	}
 	var members []*projectv1.ProjectMember
-	// add current user as project admin
-	members = append(members, &projectv1.ProjectMember{
-		UserId:   user.Id.String(),
-		UserName: user.Name,
-		IsAdmin:  user.IsSuperAdmin,
-	})
 	if req.Members != nil && len(req.Members) > 0 {
 		// convert req.Members to id list
 		var userIds []uuid.UUID
@@ -248,27 +252,21 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 		}
 		users, err := s.userDao.ListByIds(1, 999, userIds)
 		if err != nil {
-			return nil, status.Error(codes.Unknown, err.Error())
+			return nil, status.Error(codes.Internal, err.Error())
 		}
 		// add members to project members
 		for _, u := range users {
-			isAdmin := false
-			if u.IsSuperAdmin == true {
-				isAdmin = true
-			} else {
-				for _, m := range req.Members {
-					if m.UserId == u.Id.String() {
-						isAdmin = m.IsAdmin
-						break
+			for _, rm := range req.Members {
+				if u.Id.String() == rm.UserId {
+					member := &projectv1.ProjectMember{
+						UserId:   u.Id.String(),
+						UserName: u.Name,
+						IsAdmin:  rm.IsAdmin,
 					}
+					members = append(members, member)
+					continue
 				}
 			}
-			member := &projectv1.ProjectMember{
-				UserId:   u.Id.String(),
-				UserName: u.Name,
-				IsAdmin:  isAdmin,
-			}
-			members = append(members, member)
 		}
 	}
 	// convert members to json string
@@ -339,15 +337,14 @@ func (s *ProjectService) Update(ctx context.Context, req *projectv1.UpdateProjec
 	var members []*projectv1.ProjectMember
 	if req.Members != nil && len(req.Members) > 0 {
 		for _, m := range req.Members {
-			member := &projectv1.ProjectMember{
-				UserId:   m.UserId,
-				UserName: m.UserName,
-				IsAdmin:  m.IsAdmin,
+			if project.CreatedUser.Id.String() != m.UserId {
+				member := &projectv1.ProjectMember{
+					UserId:   m.UserId,
+					UserName: m.UserName,
+					IsAdmin:  m.IsAdmin,
+				}
+				members = append(members, member)
 			}
-			if m.UserId == user.Id.String() && user.IsSuperAdmin == true {
-				member.IsAdmin = true
-			}
-			members = append(members, member)
 		}
 	}
 	membersJson, err := json.Marshal(members)
