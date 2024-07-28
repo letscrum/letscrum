@@ -39,10 +39,15 @@ func (s *SprintService) Create(ctx context.Context, req *projectv1.CreateSprintR
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 	pId, err := uuid.Parse(req.ProjectId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	reqProject.OrgId = oId
 	reqProject.Id = pId
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
@@ -107,10 +112,15 @@ func (s *SprintService) Get(ctx context.Context, req *projectv1.GetSprintRequest
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 	pId, err := uuid.Parse(req.ProjectId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	reqProject.OrgId = oId
 	reqProject.Id = pId
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
@@ -171,10 +181,15 @@ func (s *SprintService) List(ctx context.Context, req *projectv1.ListSprintReque
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 	pId, err := uuid.Parse(req.ProjectId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	reqProject.OrgId = oId
 	reqProject.Id = pId
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {

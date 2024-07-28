@@ -36,7 +36,7 @@ func (s *LetscrumService) GetVersion(context.Context, *emptypb.Empty) (*generalv
 	}, nil
 }
 
-func (s *LetscrumService) SignIn(ctx context.Context, req *userv1.SignInRequest) (*userv1.SignInResponse, error) {
+func (s *LetscrumService) SignIn(_ context.Context, req *userv1.SignInRequest) (*userv1.SignInResponse, error) {
 	user, err := s.userDao.SignIn(req.Name, req.Password)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "failed to sign in")

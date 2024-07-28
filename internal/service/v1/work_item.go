@@ -32,10 +32,15 @@ func (s WorkItemService) Create(ctx context.Context, req *itemv1.CreateWorkItemR
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 	pId, err := uuid.Parse(req.ProjectId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	reqProject.OrgId = oId
 	reqProject.Id = pId
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
@@ -98,10 +103,15 @@ func (s WorkItemService) List(ctx context.Context, req *itemv1.ListWorkItemReque
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 	pId, err := uuid.Parse(req.ProjectId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	reqProject.OrgId = oId
 	reqProject.Id = pId
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {

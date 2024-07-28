@@ -75,6 +75,7 @@ func GetDao(opts *db.Options) (dao.Interface, error) {
 	initErr := dbIns.AutoMigrate(
 		&model.User{},
 		&model.Org{},
+		&model.OrgUser{},
 		&model.Project{},
 		&model.Sprint{},
 		&model.Epic{},

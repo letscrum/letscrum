@@ -23,6 +23,7 @@ type ProjectService struct {
 	projectDao dao.ProjectDao
 	userDao    dao.UserDao
 	sprintDao  dao.SprintDao
+	orgDao     dao.OrgDao
 }
 
 func NewProjectService(dao dao.Interface) *ProjectService {
@@ -30,6 +31,7 @@ func NewProjectService(dao dao.Interface) *ProjectService {
 		projectDao: dao.ProjectDao(),
 		userDao:    dao.UserDao(),
 		sprintDao:  dao.SprintDao(),
+		orgDao:     dao.OrgDao(),
 	}
 }
 
@@ -41,11 +43,27 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 	var user model.User
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
+	var reqOrg model.Org
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqOrg.Id = oId
+	orgUsers, err := s.orgDao.ListMember(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if validator.IsOrgMember(orgUsers, user) == false {
+		return nil, status.Error(codes.PermissionDenied, "You are not a member of this organization")
+	}
+
 	var reqProject model.Project
 	pId, err := uuid.Parse(req.ProjectId)
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.Internal, err.Error())
 	}
+
+	reqProject.OrgId = oId
 	reqProject.Id = pId
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
@@ -124,7 +142,13 @@ func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectReq
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	req.Page, req.Size = utils.Pagination(req.Page, req.Size)
-	projects, err := s.projectDao.ListVisibleProject(req.Page, req.Size, req.Keyword, user)
+	var reqOrg model.Org
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqOrg.Id = oId
+	projects, err := s.projectDao.ListVisibleProject(reqOrg, req.Page, req.Size, req.Keyword, user)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -153,7 +177,7 @@ func (s *ProjectService) List(ctx context.Context, req *projectv1.ListProjectReq
 		}
 		list = append(list, project)
 	}
-	count := s.projectDao.Count(req.Keyword)
+	count := s.projectDao.CountVisibleProject(reqOrg, req.Keyword, user)
 	return &projectv1.ListProjectResponse{
 		Items: list,
 		Pagination: &generalv1.Pagination{
@@ -169,15 +193,37 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
-	var authUser model.User
-	authUser.Id = claims.Id
-	user, err := s.userDao.Get(authUser)
+	var reqUser model.User
+	reqUser.Id = claims.Id
+	user, err := s.userDao.Get(reqUser)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	if !user.IsSuperAdmin {
-		return nil, status.Error(codes.PermissionDenied, "No permission.")
+	var reqOrg model.Org
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
 	}
+	reqOrg.Id = oId
+	org, err := s.orgDao.Get(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	projectCount := s.projectDao.CountByOrg(org)
+	if projectCount >= org.ProjectLimitation {
+		return nil, status.Error(codes.PermissionDenied, "You have reached the maximum number of projects.")
+	}
+
+	if org.CreatedBy != user.Id {
+		orgUsers, err := s.orgDao.ListMember(reqOrg)
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		if validator.IsOrgMember(orgUsers, *user) == false {
+			return nil, status.Error(codes.PermissionDenied, "You are not a member of this organization")
+		}
+	}
+
 	if req.DisplayName == "" {
 		return nil, status.Error(codes.InvalidArgument, "project display name can't be empty.")
 	}
@@ -231,6 +277,7 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
 	var newProject model.Project
+	newProject.OrgId = oId
 	newProject.Id = uuid.New()
 	newProject.Name = req.DisplayName
 	newProject.DisplayName = req.DisplayName
@@ -256,11 +303,25 @@ func (s *ProjectService) Update(ctx context.Context, req *projectv1.UpdateProjec
 	var user model.User
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
+	var reqOrg model.Org
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqOrg.Id = oId
+	orgUsers, err := s.orgDao.ListMember(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if validator.IsOrgMember(orgUsers, user) == false {
+		return nil, status.Error(codes.PermissionDenied, "You are not a member of this organization")
+	}
 	var reqProject model.Project
 	pId, err := uuid.Parse(req.ProjectId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	reqProject.OrgId = oId
 	reqProject.Id = pId
 	reqProject.CreatedUser.Id = user.Id
 	project, err := s.projectDao.Get(reqProject)
@@ -314,11 +375,25 @@ func (s *ProjectService) Delete(ctx context.Context, req *projectv1.DeleteProjec
 	var user model.User
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
+	var reqOrg model.Org
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqOrg.Id = oId
+	orgUsers, err := s.orgDao.ListMember(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if validator.IsOrgMember(orgUsers, user) == false {
+		return nil, status.Error(codes.PermissionDenied, "You are not a member of this organization")
+	}
 	var reqProject model.Project
 	pId, err := uuid.Parse(req.ProjectId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	reqProject.OrgId = oId
 	reqProject.Id = pId
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {

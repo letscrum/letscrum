@@ -37,10 +37,15 @@ func (t TaskService) Create(ctx context.Context, req *itemv1.CreateTaskRequest) 
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 	pId, err := uuid.Parse(req.ProjectId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	reqProject.OrgId = oId
 	reqProject.Id = pId
 	project, err := t.projectDao.Get(reqProject)
 	if err != nil {
@@ -124,10 +129,15 @@ func (t TaskService) UpdateStatus(ctx context.Context, req *itemv1.UpdateTaskSta
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 	pId, err := uuid.Parse(req.ProjectId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	reqProject.OrgId = oId
 	reqProject.Id = pId
 	project, err := t.projectDao.Get(reqProject)
 	if err != nil {
@@ -178,10 +188,15 @@ func (t TaskService) Assign(ctx context.Context, req *itemv1.AssignTaskRequest) 
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 	pId, err := uuid.Parse(req.ProjectId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	reqProject.OrgId = oId
 	reqProject.Id = pId
 	project, err := t.projectDao.Get(reqProject)
 	if err != nil {
@@ -236,10 +251,15 @@ func (t TaskService) Move(ctx context.Context, req *itemv1.MoveTaskRequest) (*it
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 	pId, err := uuid.Parse(req.ProjectId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	reqProject.OrgId = oId
 	reqProject.Id = pId
 	project, err := t.projectDao.Get(reqProject)
 	if err != nil {
