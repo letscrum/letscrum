@@ -16,6 +16,11 @@ message Org {
   int64 updated_at = 6;
 }
 
+message OrgUser {
+  string user_id = 1;
+  bool is_admin = 2;
+}
+
 message OrgMember {
   letscrum.api.user.v1.User member = 1;
   bool is_admin = 2;
@@ -66,7 +71,7 @@ message DeleteOrgResponse {
 
 message AddMembersRequest {
   string org_id = 1;
-  repeated OrgMember members = 2;
+  repeated OrgUser members = 2;
 }
 
 message RemoveMemberRequest {
@@ -78,10 +83,6 @@ message SetAdminRequest {
   string org_id = 1;
   string user_id = 2;
   bool is_admin = 3;
-}
-
-message MemberResponse {
-  bool success = 1;
 }
 
 message ListMemberRequest {

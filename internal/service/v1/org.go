@@ -7,6 +7,7 @@ import (
 	generalv1 "github.com/letscrum/letscrum/api/general/v1"
 	v1 "github.com/letscrum/letscrum/api/letscrum/v1"
 	orgv1 "github.com/letscrum/letscrum/api/org/v1"
+	userv1 "github.com/letscrum/letscrum/api/user/v1"
 	"github.com/letscrum/letscrum/internal/dao"
 	"github.com/letscrum/letscrum/internal/model"
 	"github.com/letscrum/letscrum/pkg/utils"
@@ -135,22 +136,227 @@ func (s OrgService) List(ctx context.Context, req *orgv1.ListOrgRequest) (*orgv1
 	}, nil
 }
 
-func (s OrgService) AddMembers(ctx context.Context, req *orgv1.AddMembersRequest) (*orgv1.MemberResponse, error) {
-	//TODO implement me
-	panic("implement me")
+func (s OrgService) AddMembers(ctx context.Context, req *orgv1.AddMembersRequest) (*orgv1.ListMemberResponse, error) {
+	claims, err := utils.GetTokenDetails(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	var reqUser model.User
+	reqUser.Id = claims.Id
+	var reqOrg model.Org
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqOrg.Id = oId
+	org, err := s.orgDao.Get(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if org.CreatedBy != reqUser.Id {
+		orgUsers, err := s.orgDao.ListMember(reqOrg)
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		if validator.IsOrgAdmin(orgUsers, reqUser) == false {
+			return nil, status.Error(codes.PermissionDenied, "You are not a admin of this organization")
+		}
+	}
+	var members []model.OrgUser
+	for _, m := range req.Members {
+		if m.UserId != org.CreatedBy.String() {
+			members = append(members, model.OrgUser{
+				OrgId:   org.Id,
+				UserId:  uuid.MustParse(m.UserId),
+				IsAdmin: m.IsAdmin,
+			})
+		}
+	}
+	if len(members) > 0 {
+		_, err := s.orgDao.AddMembers(members)
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	}
+	orgUsers, err := s.orgDao.ListMember(org)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	var memberItems []*orgv1.OrgMember
+	for _, m := range orgUsers {
+		memberItems = append(memberItems, &orgv1.OrgMember{
+			Member: &userv1.User{
+				Id:    m.UserId.String(),
+				Name:  m.Member.Name,
+				Email: m.Member.Email,
+			},
+			IsAdmin: m.IsAdmin,
+		})
+	}
+	return &orgv1.ListMemberResponse{
+		Items: memberItems,
+	}, nil
 }
 
-func (s OrgService) RemoveMember(ctx context.Context, req *orgv1.RemoveMemberRequest) (*orgv1.MemberResponse, error) {
-	//TODO implement me
-	panic("implement me")
+func (s OrgService) RemoveMember(ctx context.Context, req *orgv1.RemoveMemberRequest) (*orgv1.ListMemberResponse, error) {
+	claims, err := utils.GetTokenDetails(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	var reqUser model.User
+	reqUser.Id = claims.Id
+	var reqOrg model.Org
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqOrg.Id = oId
+	org, err := s.orgDao.Get(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if org.CreatedBy != reqUser.Id {
+		orgUsers, err := s.orgDao.ListMember(reqOrg)
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		if validator.IsOrgAdmin(orgUsers, reqUser) == false {
+			return nil, status.Error(codes.PermissionDenied, "You are not a admin of this organization")
+		}
+	}
+	var member model.OrgUser
+	uId, err := uuid.Parse(req.UserId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	member.OrgId = org.Id
+	member.UserId = uId
+	success, err := s.orgDao.RemoveMember(member)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if !success {
+		return nil, status.Error(codes.Internal, "failed to remove member")
+	}
+	orgUsers, err := s.orgDao.ListMember(org)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	var memberItems []*orgv1.OrgMember
+	for _, m := range orgUsers {
+		memberItems = append(memberItems, &orgv1.OrgMember{
+			Member: &userv1.User{
+				Id:    m.UserId.String(),
+				Name:  m.Member.Name,
+				Email: m.Member.Email,
+			},
+			IsAdmin: m.IsAdmin,
+		})
+	}
+	return &orgv1.ListMemberResponse{
+		Items: memberItems,
+	}, nil
 }
 
-func (s OrgService) SetAdmin(ctx context.Context, req *orgv1.SetAdminRequest) (*orgv1.MemberResponse, error) {
-	//TODO implement me
-	panic("implement me")
+func (s OrgService) SetAdmin(ctx context.Context, req *orgv1.SetAdminRequest) (*orgv1.ListMemberResponse, error) {
+	claims, err := utils.GetTokenDetails(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	var reqUser model.User
+	reqUser.Id = claims.Id
+	var reqOrg model.Org
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqOrg.Id = oId
+	org, err := s.orgDao.Get(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if org.CreatedBy != reqUser.Id {
+		orgUsers, err := s.orgDao.ListMember(reqOrg)
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		if validator.IsOrgAdmin(orgUsers, reqUser) == false {
+			return nil, status.Error(codes.PermissionDenied, "You are not a admin of this organization")
+		}
+	}
+	var member model.OrgUser
+	uId, err := uuid.Parse(req.UserId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	member.OrgId = org.Id
+	member.UserId = uId
+	member, err = s.orgDao.SetAdmin(member, req.IsAdmin)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	orgUsers, err := s.orgDao.ListMember(org)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	var memberItems []*orgv1.OrgMember
+	for _, m := range orgUsers {
+		memberItems = append(memberItems, &orgv1.OrgMember{
+			Member: &userv1.User{
+				Id:    m.UserId.String(),
+				Name:  m.Member.Name,
+				Email: m.Member.Email,
+			},
+			IsAdmin: m.IsAdmin,
+		})
+	}
+	return &orgv1.ListMemberResponse{
+		Items: memberItems,
+	}, nil
 }
 
 func (s OrgService) ListMember(ctx context.Context, req *orgv1.ListMemberRequest) (*orgv1.ListMemberResponse, error) {
-	//TODO implement me
-	panic("implement me")
+	claims, err := utils.GetTokenDetails(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	var reqUser model.User
+	reqUser.Id = claims.Id
+	var reqOrg model.Org
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqOrg.Id = oId
+	org, err := s.orgDao.Get(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if org.CreatedBy != reqUser.Id {
+		orgUsers, err := s.orgDao.ListMember(reqOrg)
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		if validator.IsOrgAdmin(orgUsers, reqUser) == false {
+			return nil, status.Error(codes.PermissionDenied, "You are not a admin of this organization")
+		}
+	}
+	orgUsers, err := s.orgDao.ListMember(org)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	var memberItems []*orgv1.OrgMember
+	for _, m := range orgUsers {
+		memberItems = append(memberItems, &orgv1.OrgMember{
+			Member: &userv1.User{
+				Id:    m.UserId.String(),
+				Name:  m.Member.Name,
+				Email: m.Member.Email,
+			},
+			IsAdmin: m.IsAdmin,
+		})
+	}
+	return &orgv1.ListMemberResponse{
+		Items: memberItems,
+	}, nil
 }

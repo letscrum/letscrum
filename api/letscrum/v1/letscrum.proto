@@ -83,20 +83,20 @@ service Org {
     };
   }
 
-  rpc AddMembers(letscrum.api.org.v1.AddMembersRequest) returns (letscrum.api.org.v1.MemberResponse) {
+  rpc AddMembers(letscrum.api.org.v1.AddMembersRequest) returns (letscrum.api.org.v1.ListMemberResponse) {
     option (google.api.http) = {
       post: "/api/v1/orgs/{org_id}/members"
       body: "*"
     };
   }
 
-  rpc RemoveMember(letscrum.api.org.v1.RemoveMemberRequest) returns (letscrum.api.org.v1.MemberResponse) {
+  rpc RemoveMember(letscrum.api.org.v1.RemoveMemberRequest) returns (letscrum.api.org.v1.ListMemberResponse) {
     option (google.api.http) = {
       delete: "/api/v1/orgs/{org_id}/members/{user_id}"
     };
   }
 
-  rpc SetAdmin(letscrum.api.org.v1.SetAdminRequest) returns (letscrum.api.org.v1.MemberResponse) {
+  rpc SetAdmin(letscrum.api.org.v1.SetAdminRequest) returns (letscrum.api.org.v1.ListMemberResponse) {
     option (google.api.http) = {
       get: "/api/v1/orgs/{org_id}/members/{user_id}/admin/{is_admin}"
     };

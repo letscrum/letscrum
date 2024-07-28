@@ -42,7 +42,7 @@ func IsProjectMember(project model.Project, user model.User) bool {
 	return false
 }
 
-func IsOrgAdmin(orgUser []*model.OrgUser, user model.User) bool {
+func IsOrgAdmin(orgUser []model.OrgUser, user model.User) bool {
 	if user.IsSuperAdmin {
 		return true
 	}

@@ -91,12 +91,7 @@ func (d OrgDao) AddMembers(orgUsers []model.OrgUser) ([]model.OrgUser, error) {
 	if err := d.DB.Create(&orgUsers).Error; err != nil {
 		return nil, err
 	}
-	// get orgUsers by org id and preload user
-	var getOrgUsers []model.OrgUser
-	if err := d.DB.Where("org_id = ?", orgUsers[0].OrgId).Preload("ForOrg").Preload("Member").Find(&getOrgUsers).Error; err != nil {
-		return nil, err
-	}
-	return getOrgUsers, nil
+	return orgUsers, nil
 }
 
 func (d OrgDao) RemoveMember(orgUser model.OrgUser) (bool, error) {
