@@ -105,7 +105,7 @@ func (d OrgDao) RemoveMember(orgUser model.OrgUser) (bool, error) {
 func (d OrgDao) ListMember(org model.Org) ([]model.OrgUser, error) {
 	// get orguser by org id and preload user
 	var orgUsers []model.OrgUser
-	if err := d.DB.Where("org_id = ?", org.Id).Preload("Member").Preload("Member").Find(&orgUsers).Error; err != nil {
+	if err := d.DB.Where("org_id = ?", org.Id).Preload("ForOrg").Preload("Member").Find(&orgUsers).Error; err != nil {
 		return nil, err
 	}
 	return orgUsers, nil
