@@ -50,8 +50,8 @@ func GetDao(opts *db.Options) (dao.Interface, error) {
 	var daoInterface dao.Interface
 	var once sync.Once
 
-	if opts == nil && daoInterface == nil {
-		return nil, fmt.Errorf("failed to get mysql letscrum dao")
+	if opts == nil {
+		return nil, fmt.Errorf("failed to get database options")
 	}
 
 	var err error
@@ -87,13 +87,13 @@ func GetDao(opts *db.Options) (dao.Interface, error) {
 	)
 
 	if initErr != nil {
-		return nil, fmt.Errorf("failed to init mysql letscrum database: %w", err)
+		return nil, fmt.Errorf("failed to init letscrum database: %w", err)
 	}
 
 	daoInterface = &Dao{dbIns}
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to get mysql letscrum dao: %+v, error: %w", daoInterface, err)
+		return nil, fmt.Errorf("failed to get letscrum dao: %+v, error: %w", daoInterface, err)
 	}
 
 	return daoInterface, nil
