@@ -254,6 +254,49 @@ func (s WorkItemService) Get(ctx context.Context, req *itemv1.GetWorkItemRequest
 	panic("implement me")
 }
 
+func (s WorkItemService) Assign(ctx context.Context, req *itemv1.AssignWorkItemRequest) (*itemv1.UpdateWorkItemResponse, error) {
+	claims, err := utils.GetTokenDetails(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	var user model.User
+	user.Id = claims.Id
+	user.IsSuperAdmin = claims.IsSuperAdmin
+	var reqProject model.Project
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	pId, err := uuid.Parse(req.ProjectId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqProject.OrgId = oId
+	reqProject.Id = pId
+	project, err := s.projectDao.Get(reqProject)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if validator.IsProjectMember(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, "You are not a member of this project")
+	}
+	uId, err := uuid.Parse(req.AssignUserId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	var workItem model.WorkItem
+	workItem.Id = req.WorkItemId
+	workItem.AssignTo = uId
+	_, err = s.workItemDao.UpdateAssignUser(workItem)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	return &itemv1.UpdateWorkItemResponse{
+		Success: true,
+		Item:    &itemv1.WorkItem{},
+	}, nil
+}
+
 func NewWorkItemService(dao dao.Interface) *WorkItemService {
 	return &WorkItemService{
 		workItemDao: dao.WorkItemDao(),

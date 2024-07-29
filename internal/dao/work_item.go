@@ -13,5 +13,6 @@ type WorkItemDao interface {
 	CountBySprint(sprintId uuid.UUID, keyword string) int64
 	Create(workItem model.WorkItem) (*model.WorkItem, error)
 	Update(workItem model.WorkItem) (*model.WorkItem, error)
+	UpdateAssignUser(workItem model.WorkItem) (*model.WorkItem, error)
 	Delete(workItem model.WorkItem) (bool, error)
 }

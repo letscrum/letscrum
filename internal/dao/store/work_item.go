@@ -1,6 +1,8 @@
 package store
 
 import (
+	"database/sql"
+
 	"github.com/google/uuid"
 	"github.com/letscrum/letscrum/internal/model"
 	"gorm.io/gorm"
@@ -59,8 +61,20 @@ func (w WorkItemDao) Create(workItem model.WorkItem) (*model.WorkItem, error) {
 }
 
 func (w WorkItemDao) Update(workItem model.WorkItem) (*model.WorkItem, error) {
-	// update work item to database
-	if err := w.DB.Model(&model.WorkItem{}).Where("id = ?", workItem.Id).Updates(workItem).Error; err != nil {
+	if err := w.DB.Model(&model.WorkItem{}).Where("id = ?", workItem.Id).Update("assign_to", workItem.AssignTo).Error; err != nil {
+		return nil, err
+	}
+	return &workItem, nil
+}
+
+func (w WorkItemDao) UpdateAssignUser(workItem model.WorkItem) (*model.WorkItem, error) {
+	if workItem.AssignTo == uuid.Nil {
+		if err := w.DB.Model(&model.WorkItem{}).Where("id = ?", workItem.Id).Update("assign_to", sql.NullString{}).Error; err != nil {
+			return nil, err
+		}
+		return &workItem, nil
+	}
+	if err := w.DB.Model(&model.WorkItem{}).Where("id = ?", workItem.Id).Update("assign_to", workItem.AssignTo).Error; err != nil {
 		return nil, err
 	}
 	return &workItem, nil
