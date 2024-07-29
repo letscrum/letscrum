@@ -214,7 +214,7 @@ func (t TaskService) Assign(ctx context.Context, req *itemv1.AssignTaskRequest) 
 	task.AssignTo = auId
 	updateTask, err := t.taskDao.UpdateAssignUser(task)
 	if err != nil {
-		return nil, status.Error(codes.NotFound, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 	return &itemv1.UpdateTaskResponse{
 		Success: true,
@@ -274,7 +274,7 @@ func (t TaskService) Move(ctx context.Context, req *itemv1.MoveTaskRequest) (*it
 	task.WorkItemId = req.ToWorkItemId
 	updateTask, err := t.taskDao.Move(task)
 	if err != nil {
-		return nil, status.Error(codes.NotFound, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 	return &itemv1.UpdateTaskResponse{
 		Success: true,

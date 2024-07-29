@@ -1,6 +1,9 @@
 package store
 
 import (
+	"database/sql"
+
+	"github.com/google/uuid"
 	"github.com/letscrum/letscrum/internal/model"
 	"gorm.io/gorm"
 )
@@ -77,6 +80,13 @@ func (t TaskDao) UpdateStatus(task model.Task) (*model.Task, error) {
 }
 
 func (t TaskDao) UpdateAssignUser(task model.Task) (*model.Task, error) {
+	if task.AssignTo == uuid.Nil {
+		if err := t.DB.Model(&model.Task{}).Where("id = ?", task.Id).Update("assign_to", sql.NullString{}).Error; err != nil {
+			return nil, err
+		}
+		return &task, nil
+	}
+
 	if err := t.DB.Model(&model.Task{}).Where("id = ?", task.Id).Update("assign_to", task.AssignTo).Error; err != nil {
 		return nil, err
 	}
