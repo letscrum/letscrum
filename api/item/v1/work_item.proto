@@ -99,16 +99,14 @@ message UpdateWorkItemStatusRequest {
   string org_id = 1;
   string project_id = 2;
   int64 work_item_id = 3;
-  int64 task_id = 4;
-  WorkItem.WorkItemStatus status = 5;
+  WorkItem.WorkItemStatus status = 4;
 }
 
 message AssignWorkItemRequest {
   string org_id = 1;
   string project_id = 2;
   int64 work_item_id = 3;
-  int64 task_id = 4;
-  string assign_user_id = 5;
+  string assign_user_id = 4;
 }
 
 message UpdateWorkItemResponse {

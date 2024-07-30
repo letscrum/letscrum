@@ -80,6 +80,13 @@ func (w WorkItemDao) UpdateAssignUser(workItem model.WorkItem) (*model.WorkItem,
 	return &workItem, nil
 }
 
+func (w WorkItemDao) UpdateStatus(workItem model.WorkItem) (*model.WorkItem, error) {
+	if err := w.DB.Model(&model.WorkItem{}).Where("id = ?", workItem.Id).Update("status", workItem.Status).Error; err != nil {
+		return nil, err
+	}
+	return &workItem, nil
+}
+
 func (w WorkItemDao) Delete(workItem model.WorkItem) (bool, error) {
 	// delete work item from database
 	if err := w.DB.Where("id = ?", workItem.Id).Delete(&model.WorkItem{}).Error; err != nil {
