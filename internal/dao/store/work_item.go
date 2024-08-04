@@ -87,6 +87,18 @@ func (w WorkItemDao) UpdateStatus(workItem model.WorkItem) (*model.WorkItem, err
 	return &workItem, nil
 }
 
+func (w WorkItemDao) UpdateSprintWithTasks(workItem model.WorkItem) (*model.WorkItem, error) {
+	// update work item to database
+	if err := w.DB.Model(&model.WorkItem{}).Where("id = ?", workItem.Id).Update("sprint_id", workItem.SprintId).Error; err != nil {
+		return nil, err
+	}
+	// update tasks to database
+	if err := w.DB.Model(&model.Task{}).Where("work_item_id = ?", workItem.Id).Update("sprint_id", workItem.SprintId).Error; err != nil {
+		return nil, err
+	}
+	return &workItem, nil
+}
+
 func (w WorkItemDao) Delete(workItem model.WorkItem) (bool, error) {
 	// delete work item from database
 	if err := w.DB.Where("id = ?", workItem.Id).Delete(&model.WorkItem{}).Error; err != nil {

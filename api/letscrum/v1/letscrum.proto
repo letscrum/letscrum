@@ -248,6 +248,13 @@ service WorkItem {
       body: "*"
     };
   }
+
+  rpc Move(letscrum.api.item.v1.MoveWorkItemRequest) returns (letscrum.api.item.v1.UpdateWorkItemResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/orgs/{org_id}/projects/{project_id}/workitems/{work_item_id}/move"
+      body: "*"
+    };
+  }
 }
 
 service Task {

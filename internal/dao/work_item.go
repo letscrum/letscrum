@@ -15,5 +15,6 @@ type WorkItemDao interface {
 	Update(workItem model.WorkItem) (*model.WorkItem, error)
 	UpdateAssignUser(workItem model.WorkItem) (*model.WorkItem, error)
 	UpdateStatus(workItem model.WorkItem) (*model.WorkItem, error)
+	UpdateSprintWithTasks(workItem model.WorkItem) (*model.WorkItem, error)
 	Delete(workItem model.WorkItem) (bool, error)
 }

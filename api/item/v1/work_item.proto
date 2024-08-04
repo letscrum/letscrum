@@ -109,6 +109,13 @@ message AssignWorkItemRequest {
   string assign_user_id = 4;
 }
 
+message MoveWorkItemRequest {
+  string org_id = 1;
+  string project_id = 2;
+  int64 work_item_id = 3;
+  string sprint_id = 4;
+}
+
 message UpdateWorkItemResponse {
   bool success = 1;
   WorkItem item = 2;
