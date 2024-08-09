@@ -49,11 +49,15 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	reqOrg.Id = oId
+	org, err := s.orgDao.Get(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 	orgUsers, err := s.orgDao.ListMember(reqOrg)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	if validator.IsOrgMember(orgUsers, user) == false {
+	if validator.IsOrgMember(org, orgUsers, user) == false {
 		return nil, status.Error(codes.PermissionDenied, "You are not a member of this organization")
 	}
 
@@ -229,7 +233,7 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 		if err != nil {
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-		if validator.IsOrgMember(orgUsers, *user) == false {
+		if validator.IsOrgMember(org, orgUsers, *user) == false {
 			return nil, status.Error(codes.PermissionDenied, "You are not a member of this organization")
 		}
 	}
@@ -307,11 +311,15 @@ func (s *ProjectService) Update(ctx context.Context, req *projectv1.UpdateProjec
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	reqOrg.Id = oId
+	org, err := s.orgDao.Get(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 	orgUsers, err := s.orgDao.ListMember(reqOrg)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	if validator.IsOrgMember(orgUsers, user) == false {
+	if validator.IsOrgMember(org, orgUsers, user) == false {
 		return nil, status.Error(codes.PermissionDenied, "You are not a member of this organization")
 	}
 	var reqProject model.Project
@@ -378,11 +386,15 @@ func (s *ProjectService) Delete(ctx context.Context, req *projectv1.DeleteProjec
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	reqOrg.Id = oId
+	org, err := s.orgDao.Get(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 	orgUsers, err := s.orgDao.ListMember(reqOrg)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	if validator.IsOrgMember(orgUsers, user) == false {
+	if validator.IsOrgMember(org, orgUsers, user) == false {
 		return nil, status.Error(codes.PermissionDenied, "You are not a member of this organization")
 	}
 	var reqProject model.Project

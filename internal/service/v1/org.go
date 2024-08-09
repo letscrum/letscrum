@@ -87,15 +87,17 @@ func (s OrgService) Get(ctx context.Context, req *orgv1.GetOrgRequest) (*orgv1.O
 		if err != nil {
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-		if validator.IsOrgMember(orgUsers, reqUser) == false {
+		if validator.IsOrgMember(org, orgUsers, reqUser) == false {
 			return nil, status.Error(codes.PermissionDenied, "You are not a member of this organization")
 		}
 	}
 
 	return &orgv1.OrgResponse{
 		Item: &orgv1.Org{
-			Id:   org.Id.String(),
-			Name: org.Name,
+			Id:          org.Id.String(),
+			Name:        org.Name,
+			CreatedBy:   org.CreatedUser.Name,
+			MemberCount: 0,
 		},
 	}, nil
 }
@@ -121,8 +123,10 @@ func (s OrgService) List(ctx context.Context, req *orgv1.ListOrgRequest) (*orgv1
 	var orgItems []*orgv1.Org
 	for _, org := range orgs {
 		orgItems = append(orgItems, &orgv1.Org{
-			Id:   org.Id.String(),
-			Name: org.Name,
+			Id:          org.Id.String(),
+			Name:        org.Name,
+			CreatedBy:   org.CreatedUser.Name,
+			MemberCount: 0,
 		})
 	}
 	count := s.orgDao.CountVisibleOrg(req.Keyword, reqUser)

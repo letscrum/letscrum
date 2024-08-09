@@ -15,7 +15,7 @@ func NewOrgDao(d *gorm.DB) *OrgDao {
 
 func (d OrgDao) Get(org model.Org) (model.Org, error) {
 	var o model.Org
-	rows := d.DB.Where("id = ?", org.Id).Find(&o).RowsAffected
+	rows := d.DB.Where("id = ?", org.Id).Preload("CreatedUser").Find(&o).RowsAffected
 	if rows == 0 {
 		return model.Org{}, gorm.ErrRecordNotFound
 	}
@@ -39,7 +39,7 @@ func (d OrgDao) Count(keyword string) int64 {
 func (d OrgDao) ListVisibleOrg(page, size int32, keyword string, user model.User) ([]model.Org, error) {
 	// get orgs that user is member or createdby is user
 	var orgs []model.Org
-	if err := d.DB.Where("id IN (SELECT org_id FROM org_user WHERE user_id = ?) OR created_by = ?", user.Id, user.Id).Where("name LIKE ? Or display_name LIKE ?", "%"+keyword+"%", "%"+keyword+"%").Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Order("updated_at desc").Find(&orgs).Error; err != nil {
+	if err := d.DB.Where("id IN (SELECT org_id FROM org_user WHERE user_id = ?) OR created_by = ?", user.Id, user.Id).Where("name LIKE ? OR display_name LIKE ?", "%"+keyword+"%", "%"+keyword+"%").Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Order("updated_at desc").Find(&orgs).Error; err != nil {
 		return nil, err
 	}
 	return orgs, nil
@@ -47,7 +47,7 @@ func (d OrgDao) ListVisibleOrg(page, size int32, keyword string, user model.User
 
 func (d OrgDao) CountVisibleOrg(keyword string, user model.User) int64 {
 	count := int64(0)
-	d.DB.Where("id IN (SELECT org_id FROM org_user WHERE user_id = ?) OR created_by = ?", user.Id, user.Id).Where("name LIKE ? Or display_name LIKE ?", "%"+keyword+"%", "%"+keyword+"%").Model(&model.Org{}).Count(&count)
+	d.DB.Where("id IN (SELECT org_id FROM org_user WHERE user_id = ?) OR created_by = ?", user.Id, user.Id).Where("name LIKE ? OR display_name LIKE ?", "%"+keyword+"%", "%"+keyword+"%").Model(&model.Org{}).Count(&count)
 	return count
 }
 

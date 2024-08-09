@@ -28,6 +28,9 @@ func IsProjectMember(project model.Project, user model.User) bool {
 	if user.IsSuperAdmin {
 		return true
 	}
+	if project.CreatedBy == user.Id {
+		return true
+	}
 	var projectMembers []*projectv1.ProjectMember
 	err := json.Unmarshal([]byte(project.Members), &projectMembers)
 	if err != nil {
@@ -57,14 +60,14 @@ func IsOrgAdmin(orgUser []model.OrgUser, user model.User) bool {
 	return false
 }
 
-func IsOrgMember(orgUser []model.OrgUser, user model.User) bool {
+func IsOrgMember(org model.Org, orgUser []model.OrgUser, user model.User) bool {
 	if user.IsSuperAdmin {
 		return true
 	}
+	if org.CreatedBy == user.Id {
+		return true
+	}
 	for _, m := range orgUser {
-		if m.ForOrg.CreatedBy == user.Id {
-			return true
-		}
 		if m.UserId == user.Id {
 			return true
 		}

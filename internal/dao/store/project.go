@@ -56,13 +56,13 @@ func (d ProjectDao) List(org model.Org, page, size int32, keyword string) ([]*mo
 func (d ProjectDao) ListVisibleProject(org model.Org, page, size int32, keyword string, user model.User) ([]*model.Project, error) {
 	var projects []*model.Project
 	if user.IsSuperAdmin {
-		err := d.DB.Where("org_id = ?", org.Id).Where("name LIKE ? Or display_name LIKE ?", "%"+keyword+"%", "%"+keyword+"%").Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Order("updated_at desc").Find(&projects).Error
+		err := d.DB.Where("org_id = ?", org.Id).Where("name LIKE ? OR display_name LIKE ?", "%"+keyword+"%", "%"+keyword+"%").Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Order("updated_at desc").Find(&projects).Error
 		if err != nil {
 			return nil, err
 		}
 	} else {
 		// select project where members include user.Id
-		err := d.DB.Where("org_id = ?", org.Id).Where("name LIKE ? Or display_name LIKE ?", "%"+keyword+"%", "%"+keyword+"%").Where("members LIKE ?", "%"+`{"user_id":"`+user.Id.String()+`"`+",%").Or("created_by = ?", user.Id.String()).Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Order("updated_at desc").Find(&projects).Error
+		err := d.DB.Where("org_id = ? AND (members LIKE ? OR created_by = ?)", org.Id, "%"+`{"user_id":"`+user.Id.String()+`"`+",%", user.Id.String()).Where("(name LIKE ? Or display_name LIKE ?)", "%"+keyword+"%", "%"+keyword+"%").Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Order("updated_at desc").Find(&projects).Error
 		if err != nil {
 			return nil, err
 		}
@@ -73,10 +73,10 @@ func (d ProjectDao) ListVisibleProject(org model.Org, page, size int32, keyword 
 func (d ProjectDao) CountVisibleProject(org model.Org, keyword string, user model.User) int64 {
 	count := int64(0)
 	if user.IsSuperAdmin {
-		d.DB.Where("org_id = ?", org.Id).Where("name LIKE ? Or display_name LIKE ?", "%"+keyword+"%", "%"+keyword+"%").Model(&model.Project{}).Count(&count)
+		d.DB.Where("org_id = ?", org.Id).Where("name LIKE ? OR display_name LIKE ?", "%"+keyword+"%", "%"+keyword+"%").Model(&model.Project{}).Count(&count)
 	} else {
 		// select project where members include user.Id
-		d.DB.Where("org_id = ?", org.Id).Where("name LIKE ? Or display_name LIKE ?", "%"+keyword+"%", "%"+keyword+"%").Where("members LIKE ?", "%"+`{"user_id":"`+user.Id.String()+`"`+",%").Model(&model.Project{}).Count(&count)
+		d.DB.Where("org_id = ? AND (members LIKE ? OR created_by = ?)", org.Id, "%"+`{"user_id":"`+user.Id.String()+`"`+",%", user.Id.String()).Where("(name LIKE ? Or display_name LIKE ?)", "%"+keyword+"%", "%"+keyword+"%").Model(&model.Project{}).Count(&count)
 	}
 	return count
 }
