@@ -92,12 +92,29 @@ func (s OrgService) Get(ctx context.Context, req *orgv1.GetOrgRequest) (*orgv1.O
 		}
 	}
 
+	members, err := s.orgDao.ListMember(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	var memberItems []*orgv1.OrgMember
+	for _, m := range members {
+		memberItems = append(memberItems, &orgv1.OrgMember{
+			Member: &userv1.User{
+				Id:    m.UserId.String(),
+				Name:  m.Member.Name,
+				Email: m.Member.Email,
+			},
+			IsAdmin: m.IsAdmin,
+		})
+	}
+
 	return &orgv1.OrgResponse{
 		Item: &orgv1.Org{
 			Id:          org.Id.String(),
 			Name:        org.Name,
 			CreatedBy:   org.CreatedUser.Name,
-			MemberCount: 0,
+			MemberCount: int32(len(memberItems)),
+			Members:     memberItems,
 		},
 	}, nil
 }
@@ -127,6 +144,7 @@ func (s OrgService) List(ctx context.Context, req *orgv1.ListOrgRequest) (*orgv1
 			Name:        org.Name,
 			CreatedBy:   org.CreatedUser.Name,
 			MemberCount: 0,
+			Members:     nil,
 		})
 	}
 	count := s.orgDao.CountVisibleOrg(req.Keyword, reqUser)
@@ -341,8 +359,8 @@ func (s OrgService) ListMember(ctx context.Context, req *orgv1.ListMemberRequest
 		if err != nil {
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-		if validator.IsOrgAdmin(orgUsers, reqUser) == false {
-			return nil, status.Error(codes.PermissionDenied, "You are not a admin of this organization")
+		if validator.IsOrgMember(org, orgUsers, reqUser) == false {
+			return nil, status.Error(codes.PermissionDenied, "You are not a member of this organization")
 		}
 	}
 	orgUsers, err := s.orgDao.ListMember(org)
