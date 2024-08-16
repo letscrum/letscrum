@@ -233,8 +233,8 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 		if err != nil {
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-		if validator.IsOrgMember(org, orgUsers, *user) == false {
-			return nil, status.Error(codes.PermissionDenied, "You are not a member of this organization")
+		if validator.IsOrgAdmin(org, orgUsers, *user) == false {
+			return nil, status.Error(codes.PermissionDenied, "You are not a admin of this organization")
 		}
 	}
 
@@ -394,8 +394,8 @@ func (s *ProjectService) Delete(ctx context.Context, req *projectv1.DeleteProjec
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	if validator.IsOrgMember(org, orgUsers, user) == false {
-		return nil, status.Error(codes.PermissionDenied, "You are not a member of this organization")
+	if validator.IsOrgAdmin(org, orgUsers, user) == false {
+		return nil, status.Error(codes.PermissionDenied, "You are not a admin of this organization")
 	}
 	var reqProject model.Project
 	pId, err := uuid.Parse(req.ProjectId)

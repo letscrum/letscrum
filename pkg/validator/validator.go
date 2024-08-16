@@ -8,7 +8,7 @@ import (
 )
 
 func IsProjectAdmin(project model.Project, user model.User) bool {
-	if user.IsSuperAdmin {
+	if project.CreatedBy == user.Id {
 		return true
 	}
 	var projectMembers []*projectv1.ProjectMember
@@ -25,9 +25,6 @@ func IsProjectAdmin(project model.Project, user model.User) bool {
 }
 
 func IsProjectMember(project model.Project, user model.User) bool {
-	if user.IsSuperAdmin {
-		return true
-	}
 	if project.CreatedBy == user.Id {
 		return true
 	}
@@ -45,14 +42,11 @@ func IsProjectMember(project model.Project, user model.User) bool {
 	return false
 }
 
-func IsOrgAdmin(orgUser []model.OrgUser, user model.User) bool {
-	if user.IsSuperAdmin {
+func IsOrgAdmin(org model.Org, orgUser []model.OrgUser, user model.User) bool {
+	if org.CreatedBy == user.Id {
 		return true
 	}
 	for _, m := range orgUser {
-		if m.ForOrg.CreatedBy == user.Id {
-			return true
-		}
 		if m.UserId == user.Id && m.IsAdmin == true {
 			return true
 		}
@@ -61,9 +55,6 @@ func IsOrgAdmin(orgUser []model.OrgUser, user model.User) bool {
 }
 
 func IsOrgMember(org model.Org, orgUser []model.OrgUser, user model.User) bool {
-	if user.IsSuperAdmin {
-		return true
-	}
 	if org.CreatedBy == user.Id {
 		return true
 	}

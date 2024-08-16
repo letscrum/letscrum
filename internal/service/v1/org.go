@@ -124,6 +124,42 @@ func (s OrgService) Update(ctx context.Context, req *orgv1.UpdateOrgRequest) (*o
 	panic("implement me")
 }
 
+func (s OrgService) Delete(ctx context.Context, req *orgv1.DeleteOrgRequest) (*orgv1.DeleteOrgResponse, error) {
+	claims, err := utils.GetTokenDetails(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	var reqUser model.User
+	reqUser.Id = claims.Id
+	var reqOrg model.Org
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqOrg.Id = oId
+	org, err := s.orgDao.Get(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if org.CreatedBy != reqUser.Id {
+		orgUsers, err := s.orgDao.ListMember(reqOrg)
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		if validator.IsOrgAdmin(org, orgUsers, reqUser) == false {
+			return nil, status.Error(codes.PermissionDenied, "You are not a admin of this organization")
+		}
+	}
+
+	success, err := s.orgDao.Delete(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	return &orgv1.DeleteOrgResponse{
+		Success: success,
+	}, nil
+}
+
 func (s OrgService) List(ctx context.Context, req *orgv1.ListOrgRequest) (*orgv1.ListOrgResponse, error) {
 	claims, err := utils.GetTokenDetails(ctx)
 	if err != nil {
@@ -180,7 +216,7 @@ func (s OrgService) AddMembers(ctx context.Context, req *orgv1.AddMembersRequest
 		if err != nil {
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-		if validator.IsOrgAdmin(orgUsers, reqUser) == false {
+		if validator.IsOrgAdmin(org, orgUsers, reqUser) == false {
 			return nil, status.Error(codes.PermissionDenied, "You are not a admin of this organization")
 		}
 	}
@@ -242,7 +278,7 @@ func (s OrgService) RemoveMember(ctx context.Context, req *orgv1.RemoveMemberReq
 		if err != nil {
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-		if validator.IsOrgAdmin(orgUsers, reqUser) == false {
+		if validator.IsOrgAdmin(org, orgUsers, reqUser) == false {
 			return nil, status.Error(codes.PermissionDenied, "You are not a admin of this organization")
 		}
 	}
@@ -302,7 +338,7 @@ func (s OrgService) SetAdmin(ctx context.Context, req *orgv1.SetAdminRequest) (*
 		if err != nil {
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-		if validator.IsOrgAdmin(orgUsers, reqUser) == false {
+		if validator.IsOrgAdmin(org, orgUsers, reqUser) == false {
 			return nil, status.Error(codes.PermissionDenied, "You are not a admin of this organization")
 		}
 	}
@@ -368,6 +404,14 @@ func (s OrgService) ListMember(ctx context.Context, req *orgv1.ListMemberRequest
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	var memberItems []*orgv1.OrgMember
+	memberItems = append(memberItems, &orgv1.OrgMember{
+		Member: &userv1.User{
+			Id:    org.CreatedBy.String(),
+			Name:  org.CreatedUser.Name,
+			Email: org.CreatedUser.Email,
+		},
+		IsAdmin: true,
+	})
 	for _, m := range orgUsers {
 		memberItems = append(memberItems, &orgv1.OrgMember{
 			Member: &userv1.User{

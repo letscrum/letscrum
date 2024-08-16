@@ -77,6 +77,12 @@ service Org {
     };
   }
 
+  rpc Delete(letscrum.api.org.v1.DeleteOrgRequest) returns (letscrum.api.org.v1.DeleteOrgResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/orgs/{org_id}"
+    };
+  }
+
   rpc List(letscrum.api.org.v1.ListOrgRequest) returns (letscrum.api.org.v1.ListOrgResponse) {
     option (google.api.http) = {
       get: "/api/v1/orgs"

@@ -72,6 +72,9 @@ func (d OrgDao) Update(org model.Org) (model.Org, error) {
 }
 
 func (d OrgDao) Delete(org model.Org) (bool, error) {
+	if err := d.DB.Where("org_id = ?", org.Id).Delete(&model.OrgUser{}).Error; err != nil {
+		return false, err
+	}
 	if err := d.DB.Where("id = ?", org.Id).Delete(&model.Org{}).Error; err != nil {
 		return false, err
 	}
