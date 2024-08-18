@@ -10,7 +10,6 @@ import (
 	"github.com/letscrum/letscrum/internal/dao"
 	"github.com/letscrum/letscrum/internal/model"
 	"github.com/letscrum/letscrum/pkg/utils"
-	"github.com/letscrum/letscrum/pkg/validator"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -51,8 +50,8 @@ func (t TaskService) Create(ctx context.Context, req *itemv1.CreateTaskRequest) 
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	if validator.IsProjectMember(*project, user) == false {
-		return nil, status.Error(codes.PermissionDenied, "You are not a member of this project")
+	if utils.IsProjectMember(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectMember)
 	}
 	sId, err := uuid.Parse(req.SprintId)
 	if err != nil {
@@ -143,8 +142,8 @@ func (t TaskService) UpdateStatus(ctx context.Context, req *itemv1.UpdateTaskSta
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	if validator.IsProjectMember(*project, user) == false {
-		return nil, status.Error(codes.PermissionDenied, "You are not a member of this project")
+	if utils.IsProjectMember(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectMember)
 	}
 	var task model.Task
 	task.Id = req.TaskId
@@ -202,8 +201,8 @@ func (t TaskService) Assign(ctx context.Context, req *itemv1.AssignTaskRequest) 
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	if validator.IsProjectMember(*project, user) == false {
-		return nil, status.Error(codes.PermissionDenied, "You are not a member of this project")
+	if utils.IsProjectMember(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectMember)
 	}
 	var task model.Task
 	task.Id = req.TaskId
@@ -265,8 +264,8 @@ func (t TaskService) Move(ctx context.Context, req *itemv1.MoveTaskRequest) (*it
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	if validator.IsProjectMember(*project, user) == false {
-		return nil, status.Error(codes.PermissionDenied, "You are not a member of this project")
+	if utils.IsProjectMember(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectMember)
 	}
 	var task model.Task
 	task.Id = req.TaskId

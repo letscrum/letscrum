@@ -11,7 +11,6 @@ import (
 	"github.com/letscrum/letscrum/internal/dao"
 	"github.com/letscrum/letscrum/internal/model"
 	"github.com/letscrum/letscrum/pkg/utils"
-	"github.com/letscrum/letscrum/pkg/validator"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -42,7 +41,7 @@ func (s OrgService) Create(ctx context.Context, req *orgv1.CreateOrgRequest) (*o
 	}
 	orgCount := s.orgDao.CountByUser(*user)
 	if orgCount >= user.OrgLimitation {
-		return nil, status.Error(codes.PermissionDenied, "You have reached the maximum number of organizations.")
+		return nil, status.Error(codes.PermissionDenied, utils.ErrReachOrgLimit)
 	}
 
 	if req.Name == "" {
@@ -83,8 +82,8 @@ func (s OrgService) Get(ctx context.Context, req *orgv1.GetOrgRequest) (*orgv1.O
 	}
 	members, err := s.orgDao.ListMember(reqOrg)
 	if org.CreatedBy != reqUser.Id {
-		if validator.IsOrgMember(org, members, reqUser) == false {
-			return nil, status.Error(codes.PermissionDenied, "You are not a member of this organization")
+		if utils.IsOrgMember(org, members, reqUser) == false {
+			return nil, status.Error(codes.PermissionDenied, utils.ErrNotOrgMember)
 		}
 	}
 
@@ -142,8 +141,8 @@ func (s OrgService) Delete(ctx context.Context, req *orgv1.DeleteOrgRequest) (*o
 		if err != nil {
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-		if validator.IsOrgAdmin(org, orgUsers, reqUser) == false {
-			return nil, status.Error(codes.PermissionDenied, "You are not a admin of this organization")
+		if utils.IsOrgAdmin(org, orgUsers, reqUser) == false {
+			return nil, status.Error(codes.PermissionDenied, utils.ErrNotOrgAdmin)
 		}
 	}
 
@@ -212,8 +211,8 @@ func (s OrgService) AddMembers(ctx context.Context, req *orgv1.AddMembersRequest
 		if err != nil {
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-		if validator.IsOrgAdmin(org, orgUsers, reqUser) == false {
-			return nil, status.Error(codes.PermissionDenied, "You are not a admin of this organization")
+		if utils.IsOrgAdmin(org, orgUsers, reqUser) == false {
+			return nil, status.Error(codes.PermissionDenied, utils.ErrNotOrgAdmin)
 		}
 	}
 	var members []model.OrgUser
@@ -274,8 +273,8 @@ func (s OrgService) RemoveMember(ctx context.Context, req *orgv1.RemoveMemberReq
 		if err != nil {
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-		if validator.IsOrgAdmin(org, orgUsers, reqUser) == false {
-			return nil, status.Error(codes.PermissionDenied, "You are not a admin of this organization")
+		if utils.IsOrgAdmin(org, orgUsers, reqUser) == false {
+			return nil, status.Error(codes.PermissionDenied, utils.ErrNotOrgAdmin)
 		}
 	}
 	var member model.OrgUser
@@ -334,8 +333,8 @@ func (s OrgService) SetAdmin(ctx context.Context, req *orgv1.SetAdminRequest) (*
 		if err != nil {
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-		if validator.IsOrgAdmin(org, orgUsers, reqUser) == false {
-			return nil, status.Error(codes.PermissionDenied, "You are not a admin of this organization")
+		if utils.IsOrgAdmin(org, orgUsers, reqUser) == false {
+			return nil, status.Error(codes.PermissionDenied, utils.ErrNotOrgAdmin)
 		}
 	}
 	var member model.OrgUser
@@ -391,8 +390,8 @@ func (s OrgService) ListMember(ctx context.Context, req *orgv1.ListMemberRequest
 		if err != nil {
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-		if validator.IsOrgMember(org, orgUsers, reqUser) == false {
-			return nil, status.Error(codes.PermissionDenied, "You are not a member of this organization")
+		if utils.IsOrgMember(org, orgUsers, reqUser) == false {
+			return nil, status.Error(codes.PermissionDenied, utils.ErrNotOrgMember)
 		}
 	}
 	orgUsers, err := s.orgDao.ListMember(org)

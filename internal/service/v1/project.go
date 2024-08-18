@@ -13,7 +13,6 @@ import (
 	"github.com/letscrum/letscrum/internal/dao"
 	"github.com/letscrum/letscrum/internal/model"
 	"github.com/letscrum/letscrum/pkg/utils"
-	"github.com/letscrum/letscrum/pkg/validator"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -57,8 +56,8 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	if validator.IsOrgMember(org, orgUsers, user) == false {
-		return nil, status.Error(codes.PermissionDenied, "You are not a member of this organization")
+	if utils.IsOrgMember(org, orgUsers, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotOrgMember)
 	}
 
 	var reqProject model.Project
@@ -76,8 +75,8 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 	if project.Id == uuid.Nil {
 		return nil, status.Error(codes.NotFound, "project not fount.")
 	}
-	if validator.IsProjectMember(*project, user) == false {
-		return nil, status.Error(codes.PermissionDenied, "You are not a member of this project")
+	if utils.IsProjectMember(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectMember)
 	}
 	sprints, err := s.sprintDao.ListByProject(reqProject, 1, 999, "")
 	if err != nil {
@@ -226,7 +225,7 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 	}
 	projectCount := s.projectDao.CountByOrg(org)
 	if projectCount >= org.ProjectLimitation {
-		return nil, status.Error(codes.PermissionDenied, "You have reached the maximum number of projects.")
+		return nil, status.Error(codes.PermissionDenied, utils.ErrReachProjectLimit)
 	}
 
 	if org.CreatedBy != user.Id {
@@ -234,8 +233,8 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 		if err != nil {
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-		if validator.IsOrgAdmin(org, orgUsers, *user) == false {
-			return nil, status.Error(codes.PermissionDenied, "You are not a admin of this organization")
+		if utils.IsOrgAdmin(org, orgUsers, *user) == false {
+			return nil, status.Error(codes.PermissionDenied, utils.ErrNotOrgAdmin)
 		}
 	}
 
@@ -320,8 +319,8 @@ func (s *ProjectService) Update(ctx context.Context, req *projectv1.UpdateProjec
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	if validator.IsOrgMember(org, orgUsers, user) == false {
-		return nil, status.Error(codes.PermissionDenied, "You are not a member of this organization")
+	if utils.IsOrgMember(org, orgUsers, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotOrgMember)
 	}
 	var reqProject model.Project
 	pId, err := uuid.Parse(req.ProjectId)
@@ -338,8 +337,8 @@ func (s *ProjectService) Update(ctx context.Context, req *projectv1.UpdateProjec
 	if project.Id == uuid.Nil {
 		return nil, status.Error(codes.NotFound, "project not fount.")
 	}
-	if validator.IsProjectAdmin(*project, user) == false {
-		return nil, status.Error(codes.PermissionDenied, "You are not a admin of this project")
+	if utils.IsProjectAdmin(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectAdmin)
 	}
 	project.DisplayName = req.DisplayName
 	project.Description = req.Description
@@ -395,8 +394,8 @@ func (s *ProjectService) Delete(ctx context.Context, req *projectv1.DeleteProjec
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	if validator.IsOrgAdmin(org, orgUsers, user) == false {
-		return nil, status.Error(codes.PermissionDenied, "You are not a admin of this organization")
+	if utils.IsOrgAdmin(org, orgUsers, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotOrgAdmin)
 	}
 	var reqProject model.Project
 	pId, err := uuid.Parse(req.ProjectId)
@@ -412,8 +411,8 @@ func (s *ProjectService) Delete(ctx context.Context, req *projectv1.DeleteProjec
 	if project.Id == uuid.Nil {
 		return nil, status.Error(codes.NotFound, "project not fount.")
 	}
-	if validator.IsProjectAdmin(*project, user) == false {
-		return nil, status.Error(codes.PermissionDenied, "You are not a admin of this project")
+	if utils.IsProjectAdmin(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectAdmin)
 	}
 	deletedProject, err := s.projectDao.Delete(*project)
 	if err != nil {

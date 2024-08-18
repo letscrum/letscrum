@@ -12,7 +12,6 @@ import (
 	"github.com/letscrum/letscrum/internal/dao"
 	"github.com/letscrum/letscrum/internal/model"
 	"github.com/letscrum/letscrum/pkg/utils"
-	"github.com/letscrum/letscrum/pkg/validator"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -53,8 +52,8 @@ func (s *SprintService) Create(ctx context.Context, req *projectv1.CreateSprintR
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	if validator.IsProjectAdmin(*project, user) == false {
-		return nil, status.Error(codes.PermissionDenied, "No permission.")
+	if utils.IsProjectAdmin(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectAdmin)
 	}
 	var projectMembers []*projectv1.ProjectMember
 	err = json.Unmarshal([]byte(project.Members), &projectMembers)
@@ -126,8 +125,8 @@ func (s *SprintService) Get(ctx context.Context, req *projectv1.GetSprintRequest
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	if validator.IsProjectMember(*project, user) == false {
-		return nil, status.Error(codes.PermissionDenied, "You are not a member of this project.")
+	if utils.IsProjectMember(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectMember)
 	}
 	var reqSprint model.Sprint
 	reqSprint.ProjectId = project.Id
@@ -195,8 +194,8 @@ func (s *SprintService) List(ctx context.Context, req *projectv1.ListSprintReque
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	if validator.IsProjectMember(*project, user) == false {
-		return nil, status.Error(codes.PermissionDenied, "You are not a member of this project.")
+	if utils.IsProjectMember(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectMember)
 	}
 	sprints, err := s.sprintDao.ListByProject(reqProject, req.Page, req.Size, req.Keyword)
 	if err != nil {
@@ -269,8 +268,8 @@ func (s *SprintService) Update(ctx context.Context, req *projectv1.UpdateSprintR
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	if validator.IsProjectAdmin(*project, user) == false {
-		return nil, status.Error(codes.PermissionDenied, "You are not an admin of this project.")
+	if utils.IsProjectAdmin(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectAdmin)
 	}
 	var sprint model.Sprint
 	sId, err := uuid.Parse(req.SprintId)
@@ -324,8 +323,8 @@ func (s *SprintService) UpdateMembers(ctx context.Context, req *projectv1.Update
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	if validator.IsProjectAdmin(*project, user) == false {
-		return nil, status.Error(codes.PermissionDenied, "You are not an admin of this project.")
+	if utils.IsProjectAdmin(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectAdmin)
 	}
 	var sprint model.Sprint
 	sId, err := uuid.Parse(req.SprintId)
@@ -384,8 +383,8 @@ func (s *SprintService) Delete(ctx context.Context, req *projectv1.DeleteSprintR
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	if validator.IsProjectAdmin(*project, user) == false {
-		return nil, status.Error(codes.PermissionDenied, "You are not an admin of this project.")
+	if utils.IsProjectAdmin(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectAdmin)
 	}
 	var sprint model.Sprint
 	sId, err := uuid.Parse(req.SprintId)

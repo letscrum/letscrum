@@ -10,8 +10,6 @@ import (
 	"github.com/google/uuid"
 )
 
-type key string
-
 func GenerateTokens(userId uuid.UUID, isSuperAdmin bool) (string, string, error) {
 	nowTime := time.Now()
 	accessTokenExpireTime := nowTime.Add(time.Hour * 720)
