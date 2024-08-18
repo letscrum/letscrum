@@ -17,3 +17,10 @@ message Pagination {
   int32 page = 2;
   int32 size = 3;
 }
+
+enum Role {
+  NONE = 0;
+  MEMBER = 1;
+  ADMIN = 2;
+  OWNER = 3;
+}

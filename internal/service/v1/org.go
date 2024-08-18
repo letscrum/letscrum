@@ -81,18 +81,13 @@ func (s OrgService) Get(ctx context.Context, req *orgv1.GetOrgRequest) (*orgv1.O
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-
+	members, err := s.orgDao.ListMember(reqOrg)
 	if org.CreatedBy != reqUser.Id {
-		orgUsers, err := s.orgDao.ListMember(reqOrg)
-		if err != nil {
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-		if validator.IsOrgMember(org, orgUsers, reqUser) == false {
+		if validator.IsOrgMember(org, members, reqUser) == false {
 			return nil, status.Error(codes.PermissionDenied, "You are not a member of this organization")
 		}
 	}
 
-	members, err := s.orgDao.ListMember(reqOrg)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -115,6 +110,7 @@ func (s OrgService) Get(ctx context.Context, req *orgv1.GetOrgRequest) (*orgv1.O
 			CreatedBy:   org.CreatedUser.Name,
 			MemberCount: int32(len(memberItems)),
 			Members:     memberItems,
+			MyRole:      utils.GetOrgRole(org, members, reqUser),
 		},
 	}, nil
 }

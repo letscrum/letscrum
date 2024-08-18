@@ -138,6 +138,7 @@ func (s ProjectService) Get(ctx context.Context, req *projectv1.GetProjectReques
 			CurrentSprint: &sprint,
 			CreatedAt:     project.CreatedAt.Unix(),
 			UpdatedAt:     project.UpdatedAt.Unix(),
+			MyRole:        utils.GetProjectRole(*project, user),
 		},
 	}, nil
 }
