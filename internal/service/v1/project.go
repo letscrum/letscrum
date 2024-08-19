@@ -237,9 +237,8 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 			return nil, status.Error(codes.PermissionDenied, utils.ErrNotOrgAdmin)
 		}
 	}
-
-	if req.DisplayName == "" {
-		return nil, status.Error(codes.InvalidArgument, "project display name can't be empty.")
+	if !utils.IsLegalName(req.Name) {
+		return nil, status.Error(codes.InvalidArgument, "project name can't be less than 5, can only contain lower case letter, number, _ and -, only can start from lower case letter.")
 	}
 	var members []*projectv1.ProjectMember
 	if req.Members != nil && len(req.Members) > 0 {
@@ -281,7 +280,7 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 	var newProject model.Project
 	newProject.OrgId = oId
 	newProject.Id = uuid.New()
-	newProject.Name = req.DisplayName
+	newProject.Name = req.Name
 	newProject.DisplayName = req.DisplayName
 	newProject.Description = req.Description
 	newProject.Members = string(membersJson)

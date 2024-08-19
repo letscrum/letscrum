@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+	"regexp"
 
 	projectv1 "github.com/letscrum/letscrum/api/project/v1"
 	"github.com/letscrum/letscrum/internal/model"
@@ -64,4 +65,15 @@ func IsOrgMember(org model.Org, orgUser []model.OrgUser, user model.User) bool {
 		}
 	}
 	return false
+}
+
+func IsLegalName(name string) bool {
+	if len(name) < 5 || len(name) > 50 {
+		return false
+	}
+	result, err := regexp.Match(`^[a-z][a-z0-9_-]+$`, []byte(name))
+	if err != nil {
+		return false
+	}
+	return result
 }

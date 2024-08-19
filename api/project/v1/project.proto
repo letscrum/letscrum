@@ -29,9 +29,10 @@ message ProjectMember {
 
 message CreateProjectRequest {
   string org_id = 1;
-  string display_name = 2;
-  string description = 3;
-  repeated ProjectMember members = 4;
+  string name = 2;
+  string display_name = 3;
+  string description = 4;
+  repeated ProjectMember members = 5;
 }
 
 message CreateProjectResponse {

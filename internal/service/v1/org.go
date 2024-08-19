@@ -43,14 +43,14 @@ func (s OrgService) Create(ctx context.Context, req *orgv1.CreateOrgRequest) (*o
 	if orgCount >= user.OrgLimitation {
 		return nil, status.Error(codes.PermissionDenied, utils.ErrReachOrgLimit)
 	}
-
-	if req.Name == "" {
-		return nil, status.Error(codes.InvalidArgument, "organization name can't be empty.")
+	if !utils.IsLegalName(req.Name) {
+		return nil, status.Error(codes.InvalidArgument, "organization name can't be less than 5, and only allow letters, numbers, and underscores.")
 	}
-
 	var newOrg model.Org
 	newOrg.Id = uuid.New()
 	newOrg.Name = req.Name
+	newOrg.DisplayName = req.DisplayName
+	newOrg.Description = req.Description
 	newOrg.CreatedBy = user.Id
 
 	org, err := s.orgDao.Create(newOrg)
