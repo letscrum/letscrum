@@ -170,12 +170,28 @@ func (s OrgService) List(ctx context.Context, req *orgv1.ListOrgRequest) (*orgv1
 	}
 	var orgItems []*orgv1.Org
 	for _, org := range orgs {
+		orgUsers, err := s.orgDao.ListMember(org)
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		var members []*orgv1.OrgMember
+		for _, m := range orgUsers {
+			members = append(members, &orgv1.OrgMember{
+				Member: &userv1.User{
+					Id:    m.UserId.String(),
+					Name:  m.Member.Name,
+					Email: m.Member.Email,
+				},
+				IsAdmin: m.IsAdmin,
+			})
+		}
 		orgItems = append(orgItems, &orgv1.Org{
 			Id:          org.Id.String(),
 			Name:        org.Name,
 			CreatedBy:   org.CreatedUser.Name,
-			MemberCount: 0,
-			Members:     nil,
+			MemberCount: int32(len(orgUsers)),
+			Members:     members,
+			MyRole:      utils.GetOrgRole(org, orgUsers, reqUser),
 		})
 	}
 	count := s.orgDao.CountVisibleOrg(req.Keyword, reqUser)
