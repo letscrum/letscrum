@@ -52,6 +52,7 @@ api_gen:
 		api/item/v1/feature.proto \
 		api/item/v1/work_item.proto \
 		api/item/v1/task.proto \
+		api/item/v1/log.proto \
 		api/user/v1/user.proto
 	cp -R *.swagger.json swagger-ui/letscrum.swagger.json
 	rm *.swagger.json

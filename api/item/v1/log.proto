@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package letscrum.api.item.v1;
+
+option go_package = "github.com/letscrum/letscrum/api/item/v1";
+
+message Log {
+  string id = 1;
+  string item_type = 2;
+  string item_id = 3;
+  string user_id = 4;
+  string action = 5;
+  string log = 6;
+  int64 created_at = 7;
+}

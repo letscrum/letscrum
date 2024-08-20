@@ -57,6 +57,15 @@ func (w WorkItemDao) Create(workItem model.WorkItem) (*model.WorkItem, error) {
 	if err := w.DB.Create(&workItem).Error; err != nil {
 		return nil, err
 	}
+	if err := w.DB.Create(&model.ItemLog{
+		ItemId:    workItem.Id,
+		ItemType:  "WorkItem",
+		Action:    "CREATE",
+		Log:       "Create work item",
+		CreatedBy: workItem.CreatedBy,
+	}).Error; err != nil {
+		return nil, err
+	}
 	return &workItem, nil
 }
 

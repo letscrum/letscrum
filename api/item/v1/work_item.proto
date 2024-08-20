@@ -3,6 +3,7 @@ syntax = "proto3";
 import "api/general/v1/common.proto";
 import "api/user/v1/user.proto";
 import "api/item/v1/task.proto";
+import "api/item/v1/log.proto";
 
 package letscrum.api.item.v1;
 
@@ -37,8 +38,9 @@ message WorkItem {
   repeated Task tasks_done = 14;
   repeated Task tasks_removed = 15;
   repeated Task tasks_all = 16;
-  int64 created_at = 17;
-  int64 updated_at = 18;
+  repeated Log logs = 17;
+  int64 created_at = 18;
+  int64 updated_at = 19;
 }
 
 message CreateWorkItemRequest {

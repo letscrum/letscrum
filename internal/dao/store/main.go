@@ -81,9 +81,8 @@ func GetDao(opts *db.Options) (dao.Interface, error) {
 		&model.Epic{},
 		&model.Feature{},
 		&model.WorkItem{},
-		&model.WorkItemLog{},
 		&model.Task{},
-		&model.TaskLog{},
+		&model.ItemLog{},
 	)
 
 	if initErr != nil {
