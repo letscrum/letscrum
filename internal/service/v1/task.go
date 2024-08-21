@@ -110,8 +110,79 @@ func (t TaskService) List(ctx context.Context, req *itemv1.ListTaskRequest) (*it
 }
 
 func (t TaskService) Get(ctx context.Context, req *itemv1.GetTaskRequest) (*itemv1.GetTaskResponse, error) {
-	//TODO implement me
-	panic("implement me")
+	claims, err := utils.GetTokenDetails(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	var user model.User
+	user.Id = claims.Id
+	user.IsSuperAdmin = claims.IsSuperAdmin
+	var reqProject model.Project
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	pId, err := uuid.Parse(req.ProjectId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqProject.OrgId = oId
+	reqProject.Id = pId
+	project, err := t.projectDao.Get(reqProject)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if utils.IsProjectMember(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectMember)
+	}
+	var task model.Task
+	task.Id = req.TaskId
+	getTask, getLogs, err := t.taskDao.Get(task)
+	if err != nil {
+		return nil, status.Error(codes.NotFound, err.Error())
+	}
+	// convert task to itemv1.Task
+	var resTask itemv1.Task
+	if getTask.Id > 0 {
+		// convert getLogs to itemv1.ItemLog
+		var resLogs []*itemv1.Log
+		for _, log := range getLogs {
+			resLogs = append(resLogs, &itemv1.Log{
+				Id:        log.Id.String(),
+				ItemId:    log.ItemId,
+				ItemType:  itemv1.Log_ItemType(itemv1.Log_ItemType_value[log.ItemType]),
+				Action:    itemv1.Log_Action(itemv1.Log_Action_value[log.Action]),
+				Log:       log.Log,
+				CreatedBy: log.CreatedBy.String(),
+				CreatedAt: log.CreatedAt.Unix(),
+			})
+		}
+		resTask = itemv1.Task{
+			Id:          getTask.Id,
+			ProjectId:   getTask.ProjectId.String(),
+			SprintId:    getTask.SprintId.String(),
+			WorkItemId:  getTask.WorkItemId,
+			Title:       getTask.Title,
+			Description: getTask.Description,
+			Status:      itemv1.Task_TaskStatus(itemv1.Task_TaskStatus_value[getTask.Status]),
+			AssignUser: &userv1.User{
+				Id:    getTask.AssignUser.Id.String(),
+				Name:  getTask.AssignUser.Name,
+				Email: getTask.AssignUser.Email,
+			},
+			CreatedUser: &userv1.User{
+				Id:    getTask.CreatedUser.Id.String(),
+				Name:  getTask.CreatedUser.Name,
+				Email: getTask.CreatedUser.Email,
+			},
+			Logs:      resLogs,
+			CreatedAt: getTask.CreatedAt.Unix(),
+			UpdatedAt: getTask.UpdatedAt.Unix(),
+		}
+	}
+	return &itemv1.GetTaskResponse{
+		Item: &resTask,
+	}, nil
 }
 
 func (t TaskService) Update(ctx context.Context, req *itemv1.UpdateTaskRequest) (*itemv1.UpdateTaskResponse, error) {
@@ -148,7 +219,7 @@ func (t TaskService) UpdateStatus(ctx context.Context, req *itemv1.UpdateTaskSta
 	var task model.Task
 	task.Id = req.TaskId
 	task.Status = req.Status.String()
-	updateTask, err := t.taskDao.UpdateStatus(task)
+	updateTask, err := t.taskDao.UpdateStatus(task, user.Id)
 	if err != nil {
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
@@ -211,7 +282,7 @@ func (t TaskService) Assign(ctx context.Context, req *itemv1.AssignTaskRequest) 
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	task.AssignTo = auId
-	updateTask, err := t.taskDao.UpdateAssignUser(task)
+	updateTask, err := t.taskDao.UpdateAssignUser(task, user.Id)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -271,7 +342,7 @@ func (t TaskService) Move(ctx context.Context, req *itemv1.MoveTaskRequest) (*it
 	task.Id = req.TaskId
 	task.Status = req.Status.String()
 	task.WorkItemId = req.ToWorkItemId
-	updateTask, err := t.taskDao.Move(task)
+	updateTask, err := t.taskDao.Move(task, user.Id)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}

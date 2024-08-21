@@ -21,11 +21,16 @@ func (t TaskDao) ListByWorkItemIds(workItemIds []int64) ([]*model.Task, error) {
 	return tasks, nil
 }
 
-func (t TaskDao) Get(task model.Task) (*model.Task, error) {
+func (t TaskDao) Get(task model.Task) (*model.Task, []*model.ItemLog, error) {
 	if err := t.DB.Where("id = ?", task.Id).Find(&task).Error; err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return &task, nil
+	var logs []*model.ItemLog
+	err := t.DB.Where("item_id = ?", task.Id).Where("item_type = ?", "TASK").Find(&logs).Error
+	if err != nil {
+		return nil, nil, err
+	}
+	return &task, logs, nil
 }
 
 func (t TaskDao) List(page, size int32, keyword string) ([]*model.Task, error) {
@@ -62,46 +67,100 @@ func (t TaskDao) Create(task model.Task) (*model.Task, error) {
 	if err := t.DB.Create(&task).Error; err != nil {
 		return nil, err
 	}
+	if err := t.DB.Create(&model.ItemLog{
+		ItemId:    task.Id,
+		ItemType:  "TASK",
+		Action:    "CREATE",
+		Log:       "Create task",
+		CreatedBy: task.CreatedBy,
+	}).Error; err != nil {
+		return nil, err
+	}
 	return &task, nil
 }
 
-func (t TaskDao) Update(task model.Task) (*model.Task, error) {
+func (t TaskDao) Update(task model.Task, userId uuid.UUID) (*model.Task, error) {
 	if err := t.DB.Model(&model.Task{}).Where("id = ?", task.Id).Updates(task).Error; err != nil {
 		return nil, err
 	}
-	return &task, nil
-}
-
-func (t TaskDao) UpdateStatus(task model.Task) (*model.Task, error) {
-	if err := t.DB.Model(&model.Task{}).Where("id = ?", task.Id).Update("status", task.Status).Error; err != nil {
+	// add update log
+	if err := t.DB.Create(&model.ItemLog{
+		ItemId:    task.Id,
+		ItemType:  "TASK",
+		Action:    "UPDATE",
+		Log:       "Update task",
+		CreatedBy: userId,
+	}).Error; err != nil {
 		return nil, err
 	}
 	return &task, nil
 }
 
-func (t TaskDao) UpdateAssignUser(task model.Task) (*model.Task, error) {
+func (t TaskDao) UpdateStatus(task model.Task, userId uuid.UUID) (*model.Task, error) {
+	if err := t.DB.Model(&model.Task{}).Where("id = ?", task.Id).Update("status", task.Status).Error; err != nil {
+		return nil, err
+	}
+	if err := t.DB.Create(&model.ItemLog{
+		ItemId:    task.Id,
+		ItemType:  "TASK",
+		Action:    "UPDATE",
+		Log:       "Update task status to: " + task.Status,
+		CreatedBy: userId,
+	}).Error; err != nil {
+		return nil, err
+	}
+	return &task, nil
+}
+
+func (t TaskDao) UpdateAssignUser(task model.Task, userId uuid.UUID) (*model.Task, error) {
 	if task.AssignTo == uuid.Nil {
 		if err := t.DB.Model(&model.Task{}).Where("id = ?", task.Id).Update("assign_to", sql.NullString{}).Error; err != nil {
 			return nil, err
 		}
-		return &task, nil
+	} else {
+		if err := t.DB.Model(&model.Task{}).Where("id = ?", task.Id).Update("assign_to", task.AssignTo).Error; err != nil {
+			return nil, err
+		}
 	}
-
-	if err := t.DB.Model(&model.Task{}).Where("id = ?", task.Id).Update("assign_to", task.AssignTo).Error; err != nil {
+	if err := t.DB.Create(&model.ItemLog{
+		ItemId:    task.Id,
+		ItemType:  "TASK",
+		Action:    "UPDATE",
+		Log:       "Update task, assign task to the user, id is: " + task.AssignTo.String(),
+		CreatedBy: userId,
+	}).Error; err != nil {
 		return nil, err
 	}
 	return &task, nil
 }
 
-func (t TaskDao) Move(task model.Task) (*model.Task, error) {
+func (t TaskDao) Move(task model.Task, userId uuid.UUID) (*model.Task, error) {
 	if err := t.DB.Model(&model.Task{}).Where("id = ?", task.Id).Update("status", task.Status).Update("work_item_id", task.WorkItemId).Error; err != nil {
 		return nil, err
 	}
+	if err := t.DB.Create(&model.ItemLog{
+		ItemId:    task.Id,
+		ItemType:  "TASK",
+		Action:    "UPDATE",
+		Log:       "Update task status and move task to work item",
+		CreatedBy: userId,
+	}).Error; err != nil {
+		return nil, err
+	}
 	return &task, nil
 }
 
-func (t TaskDao) Delete(task model.Task) (bool, error) {
+func (t TaskDao) Delete(task model.Task, userId uuid.UUID) (bool, error) {
 	if err := t.DB.Where("id = ?", task.Id).Delete(&model.Task{}).Error; err != nil {
+		return false, err
+	}
+	if err := t.DB.Create(&model.ItemLog{
+		ItemId:    task.Id,
+		ItemType:  "TASK",
+		Action:    "DELETE",
+		Log:       "Delete task",
+		CreatedBy: userId,
+	}).Error; err != nil {
 		return false, err
 	}
 	return true, nil

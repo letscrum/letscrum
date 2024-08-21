@@ -249,8 +249,82 @@ func (s WorkItemService) List(ctx context.Context, req *itemv1.ListWorkItemReque
 }
 
 func (s WorkItemService) Get(ctx context.Context, req *itemv1.GetWorkItemRequest) (*itemv1.GetWorkItemResponse, error) {
-	//TODO implement me
-	panic("implement me")
+	claims, err := utils.GetTokenDetails(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	var user model.User
+	user.Id = claims.Id
+	user.IsSuperAdmin = claims.IsSuperAdmin
+	var reqProject model.Project
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	pId, err := uuid.Parse(req.ProjectId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqProject.OrgId = oId
+	reqProject.Id = pId
+	project, err := s.projectDao.Get(reqProject)
+	if err != nil {
+		return nil, status.Error(codes.NotFound, err.Error())
+	}
+	if utils.IsProjectMember(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectMember)
+	}
+	var workItem model.WorkItem
+	workItem.Id = req.WorkItemId
+	getWorkItem, getLogs, err := s.workItemDao.Get(workItem)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	// convert w.AssignUser to userv1.User
+	assignUser := &userv1.User{
+		Id:    getWorkItem.AssignUser.Id.String(),
+		Name:  getWorkItem.AssignUser.Name,
+		Email: getWorkItem.AssignUser.Email,
+	}
+	// convert w.CreatedUser to userv1.User
+	createdUser := &userv1.User{
+		Id:    getWorkItem.CreatedUser.Id.String(),
+		Name:  getWorkItem.CreatedUser.Name,
+		Email: getWorkItem.CreatedUser.Email,
+	}
+	// get tasks by workItemId from tasks
+	var tasksAll []*itemv1.Task
+	var resLogs []*itemv1.Log
+	for _, l := range getLogs {
+		resLog := &itemv1.Log{
+			Id:        l.Id.String(),
+			ItemId:    l.ItemId,
+			ItemType:  itemv1.Log_ItemType(itemv1.Log_ItemType_value[l.ItemType]),
+			Action:    itemv1.Log_Action(itemv1.Log_Action_value[l.Action]),
+			Log:       l.Log,
+			CreatedBy: l.CreatedBy.String(),
+			CreatedAt: l.CreatedAt.Unix(),
+		}
+		resLogs = append(resLogs, resLog)
+	}
+	resWorkItem := &itemv1.WorkItem{
+		Id:          getWorkItem.Id,
+		ProjectId:   getWorkItem.ProjectId.String(),
+		SprintId:    getWorkItem.SprintId.String(),
+		FeatureId:   getWorkItem.FeatureId,
+		Title:       getWorkItem.Title,
+		Type:        itemv1.WorkItemType(itemv1.WorkItemType_value[getWorkItem.Type]),
+		Description: getWorkItem.Description,
+		Status:      itemv1.WorkItem_WorkItemStatus(itemv1.WorkItem_WorkItemStatus_value[getWorkItem.Status]),
+		AssignUser:  assignUser,
+		CreatedUser: createdUser,
+		TasksAll:    tasksAll,
+		Logs:        resLogs,
+	}
+	return &itemv1.GetWorkItemResponse{
+		Item: resWorkItem,
+	}, nil
 }
 
 func (s WorkItemService) Assign(ctx context.Context, req *itemv1.AssignWorkItemRequest) (*itemv1.UpdateWorkItemResponse, error) {
@@ -286,7 +360,7 @@ func (s WorkItemService) Assign(ctx context.Context, req *itemv1.AssignWorkItemR
 	var workItem model.WorkItem
 	workItem.Id = req.WorkItemId
 	workItem.AssignTo = uId
-	_, err = s.workItemDao.UpdateAssignUser(workItem)
+	_, err = s.workItemDao.UpdateAssignUser(workItem, user.Id)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -325,7 +399,7 @@ func (s WorkItemService) UpdateStatus(ctx context.Context, req *itemv1.UpdateWor
 	var workItem model.WorkItem
 	workItem.Id = req.WorkItemId
 	workItem.Status = req.Status.String()
-	_, err = s.workItemDao.UpdateStatus(workItem)
+	_, err = s.workItemDao.UpdateStatus(workItem, user.Id)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -368,7 +442,7 @@ func (s WorkItemService) Move(ctx context.Context, req *itemv1.MoveWorkItemReque
 	var workItem model.WorkItem
 	workItem.Id = req.WorkItemId
 	workItem.SprintId = sId
-	_, err = s.workItemDao.UpdateSprintWithTasks(workItem)
+	_, err = s.workItemDao.UpdateSprintWithTasks(workItem, user.Id)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}

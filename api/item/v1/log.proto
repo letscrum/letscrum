@@ -6,10 +6,21 @@ option go_package = "github.com/letscrum/letscrum/api/item/v1";
 
 message Log {
   string id = 1;
-  string item_type = 2;
-  string item_id = 3;
-  string user_id = 4;
-  string action = 5;
-  string log = 6;
+  enum ItemType {
+    UNSPECIFIED = 0;
+    WORKITEM = 1;
+    TASK = 2;
+  }
+  ItemType item_type = 2;
+  int64 item_id = 3;
+  enum Action {
+    UNKNOWN = 0;
+    CREATE = 1;
+    UPDATE = 2;
+    DELETE = 3;
+  }
+  Action action = 4;
+  string log = 5;
+  string created_by = 6;
   int64 created_at = 7;
 }

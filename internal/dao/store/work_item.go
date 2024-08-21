@@ -12,12 +12,18 @@ type WorkItemDao struct {
 	DB *gorm.DB
 }
 
-func (w WorkItemDao) Get(workItem model.WorkItem) (*model.WorkItem, error) {
+func (w WorkItemDao) Get(workItem model.WorkItem) (*model.WorkItem, []*model.ItemLog, error) {
 	// get workitem from database
 	if err := w.DB.Where("id = ?", workItem.Id).Find(&workItem).Error; err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return &workItem, nil
+	// get logs from database
+	var logs []*model.ItemLog
+	err := w.DB.Where("item_id = ?", workItem.Id).Where("item_type = ?", "WORKITEM").Find(&logs).Error
+	if err != nil {
+		return nil, nil, err
+	}
+	return &workItem, logs, nil
 }
 
 func (w WorkItemDao) ListByProject(projectId uuid.UUID, page, size int32, keyword string) ([]*model.WorkItem, error) {
@@ -59,7 +65,7 @@ func (w WorkItemDao) Create(workItem model.WorkItem) (*model.WorkItem, error) {
 	}
 	if err := w.DB.Create(&model.ItemLog{
 		ItemId:    workItem.Id,
-		ItemType:  "WorkItem",
+		ItemType:  "WORKITEM",
 		Action:    "CREATE",
 		Log:       "Create work item",
 		CreatedBy: workItem.CreatedBy,
@@ -69,36 +75,76 @@ func (w WorkItemDao) Create(workItem model.WorkItem) (*model.WorkItem, error) {
 	return &workItem, nil
 }
 
-func (w WorkItemDao) Update(workItem model.WorkItem) (*model.WorkItem, error) {
+func (w WorkItemDao) Update(workItem model.WorkItem, userId uuid.UUID) (*model.WorkItem, error) {
 	if err := w.DB.Model(&model.WorkItem{}).Where("id = ?", workItem.Id).Update("assign_to", workItem.AssignTo).Error; err != nil {
+		return nil, err
+	}
+	// add log
+	if err := w.DB.Create(&model.ItemLog{
+		ItemId:    workItem.Id,
+		ItemType:  "WORKITEM",
+		Action:    "UPDATE",
+		Log:       "Update work item",
+		CreatedBy: userId,
+	}).Error; err != nil {
 		return nil, err
 	}
 	return &workItem, nil
 }
 
-func (w WorkItemDao) UpdateAssignUser(workItem model.WorkItem) (*model.WorkItem, error) {
+func (w WorkItemDao) UpdateAssignUser(workItem model.WorkItem, userId uuid.UUID) (*model.WorkItem, error) {
 	if workItem.AssignTo == uuid.Nil {
 		if err := w.DB.Model(&model.WorkItem{}).Where("id = ?", workItem.Id).Update("assign_to", sql.NullString{}).Error; err != nil {
 			return nil, err
 		}
-		return &workItem, nil
+	} else {
+		if err := w.DB.Model(&model.WorkItem{}).Where("id = ?", workItem.Id).Update("assign_to", workItem.AssignTo).Error; err != nil {
+			return nil, err
+		}
 	}
-	if err := w.DB.Model(&model.WorkItem{}).Where("id = ?", workItem.Id).Update("assign_to", workItem.AssignTo).Error; err != nil {
+	// add log
+	if err := w.DB.Create(&model.ItemLog{
+		ItemId:    workItem.Id,
+		ItemType:  "WORKITEM",
+		Action:    "UPDATE",
+		Log:       "Update work item, assign work item to the user, id is: " + workItem.AssignTo.String(),
+		CreatedBy: userId,
+	}).Error; err != nil {
 		return nil, err
 	}
 	return &workItem, nil
 }
 
-func (w WorkItemDao) UpdateStatus(workItem model.WorkItem) (*model.WorkItem, error) {
+func (w WorkItemDao) UpdateStatus(workItem model.WorkItem, userId uuid.UUID) (*model.WorkItem, error) {
 	if err := w.DB.Model(&model.WorkItem{}).Where("id = ?", workItem.Id).Update("status", workItem.Status).Error; err != nil {
 		return nil, err
 	}
+	// add log
+	if err := w.DB.Create(&model.ItemLog{
+		ItemId:    workItem.Id,
+		ItemType:  "WORKITEM",
+		Action:    "UPDATE",
+		Log:       "Update work item status to: " + workItem.Status,
+		CreatedBy: userId,
+	}).Error; err != nil {
+		return nil, err
+	}
 	return &workItem, nil
 }
 
-func (w WorkItemDao) UpdateSprintWithTasks(workItem model.WorkItem) (*model.WorkItem, error) {
+func (w WorkItemDao) UpdateSprintWithTasks(workItem model.WorkItem, userId uuid.UUID) (*model.WorkItem, error) {
 	// update work item to database
 	if err := w.DB.Model(&model.WorkItem{}).Where("id = ?", workItem.Id).Update("sprint_id", workItem.SprintId).Error; err != nil {
+		return nil, err
+	}
+	// add log
+	if err := w.DB.Create(&model.ItemLog{
+		ItemId:    workItem.Id,
+		ItemType:  "WORKITEM",
+		Action:    "UPDATE",
+		Log:       "Update work item sprint, move to sprint: " + workItem.SprintId.String(),
+		CreatedBy: userId,
+	}).Error; err != nil {
 		return nil, err
 	}
 	// update tasks to database
@@ -108,9 +154,19 @@ func (w WorkItemDao) UpdateSprintWithTasks(workItem model.WorkItem) (*model.Work
 	return &workItem, nil
 }
 
-func (w WorkItemDao) Delete(workItem model.WorkItem) (bool, error) {
+func (w WorkItemDao) Delete(workItem model.WorkItem, userId uuid.UUID) (bool, error) {
 	// delete work item from database
 	if err := w.DB.Where("id = ?", workItem.Id).Delete(&model.WorkItem{}).Error; err != nil {
+		return false, err
+	}
+	// add log
+	if err := w.DB.Create(&model.ItemLog{
+		ItemId:    workItem.Id,
+		ItemType:  "WORKITEM",
+		Action:    "DELETE",
+		Log:       "Delete work item",
+		CreatedBy: userId,
+	}).Error; err != nil {
 		return false, err
 	}
 	return true, nil
