@@ -67,13 +67,14 @@ func (t TaskDao) Create(task model.Task) (*model.Task, error) {
 	if err := t.DB.Create(&task).Error; err != nil {
 		return nil, err
 	}
-	if err := t.DB.Create(&model.ItemLog{
-		ItemId:    task.Id,
-		ItemType:  "TASK",
-		Action:    "CREATE",
-		Log:       "Create task",
-		CreatedBy: task.CreatedBy,
-	}).Error; err != nil {
+	var log model.ItemLog
+	log.Id = uuid.New()
+	log.ItemId = task.Id
+	log.ItemType = "TASK"
+	log.Action = "CREATE"
+	log.Log = "Create task"
+	log.CreatedBy = task.CreatedBy
+	if err := t.DB.Create(&log).Error; err != nil {
 		return nil, err
 	}
 	return &task, nil
@@ -84,13 +85,14 @@ func (t TaskDao) Update(task model.Task, userId uuid.UUID) (*model.Task, error) 
 		return nil, err
 	}
 	// add update log
-	if err := t.DB.Create(&model.ItemLog{
-		ItemId:    task.Id,
-		ItemType:  "TASK",
-		Action:    "UPDATE",
-		Log:       "Update task",
-		CreatedBy: userId,
-	}).Error; err != nil {
+	var log model.ItemLog
+	log.Id = uuid.New()
+	log.ItemId = task.Id
+	log.ItemType = "TASK"
+	log.Action = "UPDATE"
+	log.Log = "Update task"
+	log.CreatedBy = userId
+	if err := t.DB.Create(&log).Error; err != nil {
 		return nil, err
 	}
 	return &task, nil
@@ -100,13 +102,14 @@ func (t TaskDao) UpdateStatus(task model.Task, userId uuid.UUID) (*model.Task, e
 	if err := t.DB.Model(&model.Task{}).Where("id = ?", task.Id).Update("status", task.Status).Error; err != nil {
 		return nil, err
 	}
-	if err := t.DB.Create(&model.ItemLog{
-		ItemId:    task.Id,
-		ItemType:  "TASK",
-		Action:    "UPDATE",
-		Log:       "Update task status to: " + task.Status,
-		CreatedBy: userId,
-	}).Error; err != nil {
+	var log model.ItemLog
+	log.Id = uuid.New()
+	log.ItemId = task.Id
+	log.ItemType = "TASK"
+	log.Action = "UPDATE"
+	log.Log = "Update task status to: " + task.Status
+	log.CreatedBy = userId
+	if err := t.DB.Create(&log).Error; err != nil {
 		return nil, err
 	}
 	return &task, nil
@@ -122,13 +125,14 @@ func (t TaskDao) UpdateAssignUser(task model.Task, userId uuid.UUID) (*model.Tas
 			return nil, err
 		}
 	}
-	if err := t.DB.Create(&model.ItemLog{
-		ItemId:    task.Id,
-		ItemType:  "TASK",
-		Action:    "UPDATE",
-		Log:       "Update task, assign task to the user, id is: " + task.AssignTo.String(),
-		CreatedBy: userId,
-	}).Error; err != nil {
+	var log model.ItemLog
+	log.Id = uuid.New()
+	log.ItemId = task.Id
+	log.ItemType = "TASK"
+	log.Action = "UPDATE"
+	log.Log = "Update task, assign task to the user, id is: " + task.AssignTo.String()
+	log.CreatedBy = userId
+	if err := t.DB.Create(&log).Error; err != nil {
 		return nil, err
 	}
 	return &task, nil
@@ -138,13 +142,14 @@ func (t TaskDao) Move(task model.Task, userId uuid.UUID) (*model.Task, error) {
 	if err := t.DB.Model(&model.Task{}).Where("id = ?", task.Id).Update("status", task.Status).Update("work_item_id", task.WorkItemId).Error; err != nil {
 		return nil, err
 	}
-	if err := t.DB.Create(&model.ItemLog{
-		ItemId:    task.Id,
-		ItemType:  "TASK",
-		Action:    "UPDATE",
-		Log:       "Update task status and move task to work item",
-		CreatedBy: userId,
-	}).Error; err != nil {
+	var log model.ItemLog
+	log.Id = uuid.New()
+	log.ItemId = task.Id
+	log.ItemType = "TASK"
+	log.Action = "UPDATE"
+	log.Log = "Update task status and move task to work item"
+	log.CreatedBy = userId
+	if err := t.DB.Create(&log).Error; err != nil {
 		return nil, err
 	}
 	return &task, nil
@@ -154,13 +159,14 @@ func (t TaskDao) Delete(task model.Task, userId uuid.UUID) (bool, error) {
 	if err := t.DB.Where("id = ?", task.Id).Delete(&model.Task{}).Error; err != nil {
 		return false, err
 	}
-	if err := t.DB.Create(&model.ItemLog{
-		ItemId:    task.Id,
-		ItemType:  "TASK",
-		Action:    "DELETE",
-		Log:       "Delete task",
-		CreatedBy: userId,
-	}).Error; err != nil {
+	var log model.ItemLog
+	log.Id = uuid.New()
+	log.ItemId = task.Id
+	log.ItemType = "TASK"
+	log.Action = "DELETE"
+	log.Log = "Delete task"
+	log.CreatedBy = userId
+	if err := t.DB.Create(&log).Error; err != nil {
 		return false, err
 	}
 	return true, nil

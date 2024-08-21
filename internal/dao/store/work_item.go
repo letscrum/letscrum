@@ -63,13 +63,14 @@ func (w WorkItemDao) Create(workItem model.WorkItem) (*model.WorkItem, error) {
 	if err := w.DB.Create(&workItem).Error; err != nil {
 		return nil, err
 	}
-	if err := w.DB.Create(&model.ItemLog{
-		ItemId:    workItem.Id,
-		ItemType:  "WORKITEM",
-		Action:    "CREATE",
-		Log:       "Create work item",
-		CreatedBy: workItem.CreatedBy,
-	}).Error; err != nil {
+	var log model.ItemLog
+	log.Id = uuid.New()
+	log.ItemId = workItem.Id
+	log.ItemType = "WORKITEM"
+	log.Action = "CREATE"
+	log.Log = "Create work item"
+	log.CreatedBy = workItem.CreatedBy
+	if err := w.DB.Create(&log).Error; err != nil {
 		return nil, err
 	}
 	return &workItem, nil
@@ -79,14 +80,14 @@ func (w WorkItemDao) Update(workItem model.WorkItem, userId uuid.UUID) (*model.W
 	if err := w.DB.Model(&model.WorkItem{}).Where("id = ?", workItem.Id).Update("assign_to", workItem.AssignTo).Error; err != nil {
 		return nil, err
 	}
-	// add log
-	if err := w.DB.Create(&model.ItemLog{
-		ItemId:    workItem.Id,
-		ItemType:  "WORKITEM",
-		Action:    "UPDATE",
-		Log:       "Update work item",
-		CreatedBy: userId,
-	}).Error; err != nil {
+	var log model.ItemLog
+	log.Id = uuid.New()
+	log.ItemId = workItem.Id
+	log.ItemType = "WORKITEM"
+	log.Action = "UPDATE"
+	log.Log = "Update work item"
+	log.CreatedBy = userId
+	if err := w.DB.Create(&log).Error; err != nil {
 		return nil, err
 	}
 	return &workItem, nil
@@ -102,14 +103,14 @@ func (w WorkItemDao) UpdateAssignUser(workItem model.WorkItem, userId uuid.UUID)
 			return nil, err
 		}
 	}
-	// add log
-	if err := w.DB.Create(&model.ItemLog{
-		ItemId:    workItem.Id,
-		ItemType:  "WORKITEM",
-		Action:    "UPDATE",
-		Log:       "Update work item, assign work item to the user, id is: " + workItem.AssignTo.String(),
-		CreatedBy: userId,
-	}).Error; err != nil {
+	var log model.ItemLog
+	log.Id = uuid.New()
+	log.ItemId = workItem.Id
+	log.ItemType = "WORKITEM"
+	log.Action = "UPDATE"
+	log.Log = "Update work item, assign work item to the user, id is: " + workItem.AssignTo.String()
+	log.CreatedBy = userId
+	if err := w.DB.Create(&log).Error; err != nil {
 		return nil, err
 	}
 	return &workItem, nil
@@ -119,14 +120,14 @@ func (w WorkItemDao) UpdateStatus(workItem model.WorkItem, userId uuid.UUID) (*m
 	if err := w.DB.Model(&model.WorkItem{}).Where("id = ?", workItem.Id).Update("status", workItem.Status).Error; err != nil {
 		return nil, err
 	}
-	// add log
-	if err := w.DB.Create(&model.ItemLog{
-		ItemId:    workItem.Id,
-		ItemType:  "WORKITEM",
-		Action:    "UPDATE",
-		Log:       "Update work item status to: " + workItem.Status,
-		CreatedBy: userId,
-	}).Error; err != nil {
+	var log model.ItemLog
+	log.Id = uuid.New()
+	log.ItemId = workItem.Id
+	log.ItemType = "WORKITEM"
+	log.Action = "UPDATE"
+	log.Log = "Update work item status to: " + workItem.Status
+	log.CreatedBy = userId
+	if err := w.DB.Create(&log).Error; err != nil {
 		return nil, err
 	}
 	return &workItem, nil
@@ -137,20 +138,21 @@ func (w WorkItemDao) UpdateSprintWithTasks(workItem model.WorkItem, userId uuid.
 	if err := w.DB.Model(&model.WorkItem{}).Where("id = ?", workItem.Id).Update("sprint_id", workItem.SprintId).Error; err != nil {
 		return nil, err
 	}
-	// add log
-	if err := w.DB.Create(&model.ItemLog{
-		ItemId:    workItem.Id,
-		ItemType:  "WORKITEM",
-		Action:    "UPDATE",
-		Log:       "Update work item sprint, move to sprint: " + workItem.SprintId.String(),
-		CreatedBy: userId,
-	}).Error; err != nil {
+	var log model.ItemLog
+	log.Id = uuid.New()
+	log.ItemId = workItem.Id
+	log.ItemType = "WORKITEM"
+	log.Action = "UPDATE"
+	log.Log = "Update work item sprint, move to sprint: " + workItem.SprintId.String()
+	log.CreatedBy = userId
+	if err := w.DB.Create(&log).Error; err != nil {
 		return nil, err
 	}
 	// update tasks to database
 	if err := w.DB.Model(&model.Task{}).Where("work_item_id = ?", workItem.Id).Update("sprint_id", workItem.SprintId).Error; err != nil {
 		return nil, err
 	}
+	// TODO: add task logs
 	return &workItem, nil
 }
 
@@ -159,14 +161,14 @@ func (w WorkItemDao) Delete(workItem model.WorkItem, userId uuid.UUID) (bool, er
 	if err := w.DB.Where("id = ?", workItem.Id).Delete(&model.WorkItem{}).Error; err != nil {
 		return false, err
 	}
-	// add log
-	if err := w.DB.Create(&model.ItemLog{
-		ItemId:    workItem.Id,
-		ItemType:  "WORKITEM",
-		Action:    "DELETE",
-		Log:       "Delete work item",
-		CreatedBy: userId,
-	}).Error; err != nil {
+	var log model.ItemLog
+	log.Id = uuid.New()
+	log.ItemId = workItem.Id
+	log.ItemType = "WORKITEM"
+	log.Action = "DELETE"
+	log.Log = "Delete work item"
+	log.CreatedBy = userId
+	if err := w.DB.Create(&log).Error; err != nil {
 		return false, err
 	}
 	return true, nil
