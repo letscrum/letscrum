@@ -191,6 +191,7 @@ func (s WorkItemService) List(ctx context.Context, req *itemv1.ListWorkItemReque
 						Name:  t.CreatedUser.Name,
 						Email: t.CreatedUser.Email,
 					},
+					Order: t.Order,
 				}
 				tasksAll = append(tasksAll, resTask)
 				if resTask.Status == itemv1.Task_UNKNOWN {
@@ -227,6 +228,7 @@ func (s WorkItemService) List(ctx context.Context, req *itemv1.ListWorkItemReque
 			TasksInProgress: tasksInProgress,
 			TasksDone:       tasksDone,
 			TasksRemoved:    tasksRemoved,
+			Order:           w.Order,
 		})
 	}
 	// order items by its id desc
