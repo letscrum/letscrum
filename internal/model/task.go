@@ -14,6 +14,7 @@ type Task struct {
 	AssignTo     uuid.UUID `gorm:"column:assign_to;varchar(191);default:null" json:"assign_to,omitempty"`
 	Remaining    float32   `gorm:"column:remaining" json:"remaining,omitempty"`
 	CreatedBy    uuid.UUID `gorm:"column:created_by;varchar(191);default:null" json:"created_by,omitempty"`
+	Order        int32     `gorm:"column:order;default:0" json:"order,omitempty"`
 	AssignUser   User      `gorm:"foreignKey:AssignTo" json:"assign_user,omitempty"`
 	CreatedUser  User      `gorm:"foreignKey:CreatedBy" json:"created_user,omitempty"`
 	FromProject  Project   `gorm:"foreignKey:ProjectId" json:"from_project,omitempty"`

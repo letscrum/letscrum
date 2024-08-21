@@ -172,6 +172,15 @@ func (t TaskDao) Delete(task model.Task, userId uuid.UUID) (bool, error) {
 	return true, nil
 }
 
+func (t TaskDao) ReOrder(taskIds []int64) ([]int64, error) {
+	for i, id := range taskIds {
+		if err := t.DB.Model(&model.Task{}).Where("id = ?", id).Update("order", i+1).Error; err != nil {
+			return nil, err
+		}
+	}
+	return taskIds, nil
+}
+
 func NewTaskDao(d *gorm.DB) *TaskDao {
 	return &TaskDao{d}
 }

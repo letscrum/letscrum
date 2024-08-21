@@ -371,3 +371,38 @@ func (t TaskService) Move(ctx context.Context, req *itemv1.MoveTaskRequest) (*it
 		},
 	}, nil
 }
+
+func (t TaskService) ReOrder(ctx context.Context, req *itemv1.ReOrderTasksRequest) (*itemv1.ReOrderTasksResponse, error) {
+	claims, err := utils.GetTokenDetails(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	var user model.User
+	user.Id = claims.Id
+	user.IsSuperAdmin = claims.IsSuperAdmin
+	var reqProject model.Project
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	pId, err := uuid.Parse(req.ProjectId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqProject.OrgId = oId
+	reqProject.Id = pId
+	project, err := t.projectDao.Get(reqProject)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if utils.IsProjectMember(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectMember)
+	}
+	_, err = t.taskDao.ReOrder(req.TaskIds)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	return &itemv1.ReOrderTasksResponse{
+		Success: true,
+	}, nil
+}

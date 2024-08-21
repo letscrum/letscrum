@@ -122,3 +122,13 @@ message UpdateWorkItemResponse {
   bool success = 1;
   WorkItem item = 2;
 }
+
+message ReOrderWorkItemsRequest {
+  string org_id = 1;
+  string project_id = 2;
+  repeated int64 work_item_ids = 3;
+}
+
+message ReOrderWorkItemsResponse {
+  bool success = 1;
+}

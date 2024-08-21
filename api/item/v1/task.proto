@@ -109,3 +109,13 @@ message UpdateTaskResponse {
   bool success = 1;
   Task item = 2;
 }
+
+message ReOrderTasksRequest {
+  string org_id = 1;
+  string project_id = 2;
+  repeated int64 task_ids = 3;
+}
+
+message ReOrderTasksResponse {
+  bool success = 1;
+}

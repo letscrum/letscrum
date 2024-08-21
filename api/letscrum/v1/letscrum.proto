@@ -261,6 +261,13 @@ service WorkItem {
       body: "*"
     };
   }
+
+  rpc ReOrder(letscrum.api.item.v1.ReOrderWorkItemsRequest) returns (letscrum.api.item.v1.ReOrderWorkItemsResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/orgs/{org_id}/projects/{project_id}/workitems/reorder"
+      body: "*"
+    };
+  }
 }
 
 service Task {
@@ -307,6 +314,13 @@ service Task {
   rpc Move(letscrum.api.item.v1.MoveTaskRequest) returns (letscrum.api.item.v1.UpdateTaskResponse) {
     option (google.api.http) = {
       put: "/api/v1/orgs/{org_id}/projects/{project_id}/workitems/{work_item_id}/tasks/{task_id}/move"
+      body: "*"
+    };
+  }
+
+  rpc ReOrder(letscrum.api.item.v1.ReOrderTasksRequest) returns (letscrum.api.item.v1.ReOrderTasksResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/orgs/{org_id}/projects/{project_id}/tasks/reorder"
       body: "*"
     };
   }

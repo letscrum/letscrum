@@ -18,4 +18,5 @@ type TaskDao interface {
 	UpdateAssignUser(task model.Task, userId uuid.UUID) (*model.Task, error)
 	Move(task model.Task, userId uuid.UUID) (*model.Task, error)
 	Delete(task model.Task, userId uuid.UUID) (bool, error)
+	ReOrder(taskIds []int64) ([]int64, error)
 }

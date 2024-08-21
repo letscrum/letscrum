@@ -174,6 +174,16 @@ func (w WorkItemDao) Delete(workItem model.WorkItem, userId uuid.UUID) (bool, er
 	return true, nil
 }
 
+func (w WorkItemDao) ReOrder(workItemIds []int64) ([]int64, error) {
+	// re-order work items
+	for i, id := range workItemIds {
+		if err := w.DB.Model(&model.WorkItem{}).Where("id = ?", id).Update("order", i+1).Error; err != nil {
+			return nil, err
+		}
+	}
+	return workItemIds, nil
+}
+
 func NewWorkItemDao(d *gorm.DB) *WorkItemDao {
 	return &WorkItemDao{d}
 }

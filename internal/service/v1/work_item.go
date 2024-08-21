@@ -452,6 +452,41 @@ func (s WorkItemService) Move(ctx context.Context, req *itemv1.MoveWorkItemReque
 	}, nil
 }
 
+func (s WorkItemService) ReOrder(ctx context.Context, req *itemv1.ReOrderWorkItemsRequest) (*itemv1.ReOrderWorkItemsResponse, error) {
+	claims, err := utils.GetTokenDetails(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	var user model.User
+	user.Id = claims.Id
+	user.IsSuperAdmin = claims.IsSuperAdmin
+	var reqProject model.Project
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	pId, err := uuid.Parse(req.ProjectId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqProject.OrgId = oId
+	reqProject.Id = pId
+	project, err := s.projectDao.Get(reqProject)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if utils.IsProjectMember(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectMember)
+	}
+	_, err = s.workItemDao.ReOrder(req.WorkItemIds)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	return &itemv1.ReOrderWorkItemsResponse{
+		Success: true,
+	}, nil
+}
+
 func NewWorkItemService(dao dao.Interface) *WorkItemService {
 	return &WorkItemService{
 		workItemDao: dao.WorkItemDao(),

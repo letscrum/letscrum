@@ -17,4 +17,5 @@ type WorkItemDao interface {
 	UpdateStatus(workItem model.WorkItem, userId uuid.UUID) (*model.WorkItem, error)
 	UpdateSprintWithTasks(workItem model.WorkItem, userId uuid.UUID) (*model.WorkItem, error)
 	Delete(workItem model.WorkItem, userId uuid.UUID) (bool, error)
+	ReOrder(workItemIds []int64) ([]int64, error)
 }
