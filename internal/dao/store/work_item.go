@@ -29,7 +29,7 @@ func (w WorkItemDao) Get(workItem model.WorkItem) (*model.WorkItem, []*model.Ite
 func (w WorkItemDao) ListByProject(projectId uuid.UUID, page, size int32, keyword string) ([]*model.WorkItem, error) {
 	// get workitems from database
 	var workItems []*model.WorkItem
-	err := w.DB.Where("project_id = ?", projectId).Where("title LIKE ?", "%"+keyword+"%").Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Preload("AssignUser").Order("created_at").Find(&workItems).Error
+	err := w.DB.Where("project_id = ?", projectId).Where("title LIKE ?", "%"+keyword+"%").Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Preload("AssignUser").Order("`order`").Order("created_at").Find(&workItems).Error
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func (w WorkItemDao) ListByProject(projectId uuid.UUID, page, size int32, keywor
 func (w WorkItemDao) ListBySprint(sprintId uuid.UUID, page, size int32, keyword string) ([]*model.WorkItem, error) {
 	// get workitems from database
 	var workItems []*model.WorkItem
-	err := w.DB.Where("sprint_id = ?", sprintId).Where("title LIKE ?", "%"+keyword+"%").Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Preload("AssignUser").Order("created_at").Find(&workItems).Error
+	err := w.DB.Where("sprint_id = ?", sprintId).Where("title LIKE ?", "%"+keyword+"%").Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Preload("AssignUser").Order("`order`").Order("created_at").Find(&workItems).Error
 	if err != nil {
 		return nil, err
 	}

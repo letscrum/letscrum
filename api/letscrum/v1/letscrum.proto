@@ -320,7 +320,7 @@ service Task {
 
   rpc ReOrder(letscrum.api.item.v1.ReOrderTasksRequest) returns (letscrum.api.item.v1.ReOrderTasksResponse) {
     option (google.api.http) = {
-      put: "/api/v1/orgs/{org_id}/projects/{project_id}/tasks/reorder"
+      put: "/api/v1/orgs/{org_id}/projects/{project_id}/workitems/{work_item_id}/tasks/reorder"
       body: "*"
     };
   }

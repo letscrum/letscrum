@@ -14,7 +14,7 @@ type TaskDao struct {
 
 func (t TaskDao) ListByWorkItemIds(workItemIds []int64) ([]*model.Task, error) {
 	var tasks []*model.Task
-	err := t.DB.Where("work_item_id IN ?", workItemIds).Preload("CreatedUser").Preload("AssignUser").Find(&tasks).Error
+	err := t.DB.Where("work_item_id IN ?", workItemIds).Preload("CreatedUser").Preload("AssignUser").Order("`order`").Order("created_at").Find(&tasks).Error
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +35,7 @@ func (t TaskDao) Get(task model.Task) (*model.Task, []*model.ItemLog, error) {
 
 func (t TaskDao) List(page, size int32, keyword string) ([]*model.Task, error) {
 	var tasks []*model.Task
-	err := t.DB.Where("title LIKE ?", "%"+keyword+"%").Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Preload("AssignUser").Order("created_at").Find(&tasks).Error
+	err := t.DB.Where("title LIKE ?", "%"+keyword+"%").Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Preload("AssignUser").Order("`order`").Order("created_at").Find(&tasks).Error
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func (t TaskDao) List(page, size int32, keyword string) ([]*model.Task, error) {
 
 func (t TaskDao) ListByWorkItem(workItemId int64, page, size int32, keyword string) ([]*model.Task, error) {
 	var tasks []*model.Task
-	err := t.DB.Where("work_item_id = ?", workItemId).Where("title LIKE ?", "%"+keyword+"%").Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Preload("AssignUser").Order("created_at").Find(&tasks).Error
+	err := t.DB.Where("work_item_id = ?", workItemId).Where("title LIKE ?", "%"+keyword+"%").Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Preload("AssignUser").Order("`order`").Order("created_at").Find(&tasks).Error
 	if err != nil {
 		return nil, err
 	}

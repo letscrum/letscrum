@@ -231,14 +231,6 @@ func (s WorkItemService) List(ctx context.Context, req *itemv1.ListWorkItemReque
 			Order:           w.Order,
 		})
 	}
-	// order items by its id desc
-	for i := 0; i < len(items); i++ {
-		for j := i + 1; j < len(items); j++ {
-			if items[i].Id < items[j].Id {
-				items[i], items[j] = items[j], items[i]
-			}
-		}
-	}
 
 	return &itemv1.ListWorkItemResponse{
 		Items: items,

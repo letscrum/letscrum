@@ -114,7 +114,8 @@ message UpdateTaskResponse {
 message ReOrderTasksRequest {
   string org_id = 1;
   string project_id = 2;
-  repeated int64 task_ids = 3;
+  int64 work_item_id = 3;
+  repeated int64 task_ids = 4;
 }
 
 message ReOrderTasksResponse {
