@@ -104,7 +104,7 @@ service Org {
 
   rpc SetAdmin(letscrum.api.org.v1.SetAdminRequest) returns (letscrum.api.org.v1.ListMemberResponse) {
     option (google.api.http) = {
-      get: "/api/v1/orgs/{org_id}/members/{user_id}/admin/{is_admin}"
+      put: "/api/v1/orgs/{org_id}/members/{user_id}/admin/{is_admin}"
     };
   }
 
@@ -147,6 +147,12 @@ service Project {
       get: "/api/v1/orgs/{org_id}/projects/{project_id}"
     };
   }
+
+  rpc SetAdmin(letscrum.api.project.v1.SetAdminRequest) returns (letscrum.api.project.v1.UpdateProjectResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/orgs/{org_id}/projects/{project_id}/members/{user_id}/admin/{is_admin}"
+    };
+  }
 }
 
 service Sprint {
@@ -186,6 +192,19 @@ service Sprint {
   rpc Get(letscrum.api.project.v1.GetSprintRequest) returns (letscrum.api.project.v1.GetSprintResponse) {
     option (google.api.http) = {
       get: "/api/v1/orgs/{org_id}/projects/{project_id}/sprints/{sprint_id}"
+    };
+  }
+
+  rpc AddMember(letscrum.api.project.v1.AddSprintMemberRequest) returns (letscrum.api.project.v1.UpdateSprintResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/orgs/{org_id}/projects/{project_id}/sprints/{sprint_id}/members"
+      body: "*"
+    };
+  }
+
+  rpc RemoveMember(letscrum.api.project.v1.RemoveSprintMemberRequest) returns (letscrum.api.project.v1.UpdateSprintResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/orgs/{org_id}/projects/{project_id}/sprints/{sprint_id}/members/{user_id}"
     };
   }
 }

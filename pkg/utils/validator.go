@@ -67,6 +67,15 @@ func IsOrgMember(org model.Org, orgUser []model.OrgUser, user model.User) bool {
 	return false
 }
 
+func IsSprintMember(sprintMembers []*projectv1.SprintMember, user model.User) bool {
+	for _, m := range sprintMembers {
+		if m.UserId == user.Id.String() {
+			return true
+		}
+	}
+	return false
+}
+
 func IsLegalName(name string) bool {
 	if len(name) < 5 || len(name) > 50 {
 		return false

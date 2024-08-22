@@ -67,6 +67,7 @@ func (s *SprintService) Create(ctx context.Context, req *projectv1.CreateSprintR
 			UserId:   m.UserId,
 			UserName: m.UserName,
 			Capacity: 0,
+			Role:     projectv1.SprintMember_Unassigned,
 		}
 		sprintMembers = append(sprintMembers, member)
 	}
@@ -259,10 +260,15 @@ func (s *SprintService) Update(ctx context.Context, req *projectv1.UpdateSprintR
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 	pId, err := uuid.Parse(req.ProjectId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	reqProject.OrgId = oId
 	reqProject.Id = pId
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
@@ -314,10 +320,15 @@ func (s *SprintService) UpdateMembers(ctx context.Context, req *projectv1.Update
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 	pId, err := uuid.Parse(req.ProjectId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	reqProject.OrgId = oId
 	reqProject.Id = pId
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
@@ -338,6 +349,7 @@ func (s *SprintService) UpdateMembers(ctx context.Context, req *projectv1.Update
 			UserId:   m.UserId,
 			UserName: m.UserName,
 			Capacity: m.Capacity,
+			Role:     m.Role,
 		}
 		sprintMembers = append(sprintMembers, member)
 	}
@@ -374,10 +386,15 @@ func (s *SprintService) Delete(ctx context.Context, req *projectv1.DeleteSprintR
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
 	var reqProject model.Project
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 	pId, err := uuid.Parse(req.ProjectId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	reqProject.OrgId = oId
 	reqProject.Id = pId
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
@@ -399,5 +416,167 @@ func (s *SprintService) Delete(ctx context.Context, req *projectv1.DeleteSprintR
 	return &projectv1.DeleteSprintResponse{
 		Success: deleteSprint,
 	}, nil
+}
 
+func (s SprintService) AddMember(ctx context.Context, req *projectv1.AddSprintMemberRequest) (*projectv1.UpdateSprintResponse, error) {
+	claims, err := utils.GetTokenDetails(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	var user model.User
+	user.Id = claims.Id
+	user.IsSuperAdmin = claims.IsSuperAdmin
+	var reqProject model.Project
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	pId, err := uuid.Parse(req.ProjectId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqProject.OrgId = oId
+	reqProject.Id = pId
+	project, err := s.projectDao.Get(reqProject)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if utils.IsProjectAdmin(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectAdmin)
+	}
+	var sprint model.Sprint
+	sId, err := uuid.Parse(req.SprintId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	sprint.Id = sId
+	sprint.ProjectId = pId
+	getSprint, err := s.sprintDao.Get(sprint)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	var sprintMembers []*projectv1.SprintMember
+	err = json.Unmarshal([]byte(getSprint.Members), &sprintMembers)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	success := false
+	var member model.User
+	member.Id = uuid.MustParse(req.Member.UserId)
+	member.Name = req.Member.UserName
+	if !utils.IsSprintMember(sprintMembers, member) {
+		sprintMembers = append(sprintMembers, &projectv1.SprintMember{
+			UserId:   req.Member.UserId,
+			UserName: req.Member.UserName,
+			Capacity: req.Member.Capacity,
+			Role:     req.Member.Role,
+		})
+		members, err := json.Marshal(sprintMembers)
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		getSprint.Members = string(members)
+		updateSprint, err := s.sprintDao.UpdateMembers(*getSprint)
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		if updateSprint.Id != uuid.Nil {
+			success = true
+		}
+	}
+	return &projectv1.UpdateSprintResponse{
+		Success: success,
+		Item: &projectv1.Sprint{
+			Id:        getSprint.Id.String(),
+			ProjectId: getSprint.ProjectId.String(),
+			Name:      getSprint.Name,
+			StartDate: getSprint.StartDate.Unix(),
+			EndDate:   getSprint.EndDate.Unix(),
+			CreatedAt: getSprint.CreatedAt.Unix(),
+			UpdatedAt: getSprint.UpdatedAt.Unix(),
+			Members:   sprintMembers,
+		},
+	}, nil
+}
+
+func (s SprintService) RemoveMember(ctx context.Context, req *projectv1.RemoveSprintMemberRequest) (*projectv1.UpdateSprintResponse, error) {
+	claims, err := utils.GetTokenDetails(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	var user model.User
+	user.Id = claims.Id
+	user.IsSuperAdmin = claims.IsSuperAdmin
+	var reqProject model.Project
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	pId, err := uuid.Parse(req.ProjectId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqProject.OrgId = oId
+	reqProject.Id = pId
+	project, err := s.projectDao.Get(reqProject)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if utils.IsProjectAdmin(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectAdmin)
+	}
+	var sprint model.Sprint
+	sId, err := uuid.Parse(req.SprintId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	sprint.Id = sId
+	sprint.ProjectId = pId
+	getSprint, err := s.sprintDao.Get(sprint)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	var sprintMembers []*projectv1.SprintMember
+	err = json.Unmarshal([]byte(getSprint.Members), &sprintMembers)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	success := false
+	var member model.User
+	member.Id = uuid.MustParse(req.UserId)
+	if utils.IsSprintMember(sprintMembers, member) {
+		// from sprintMembers remove the item if userId is req.UserId don't use additional memory
+		for i, m := range sprintMembers {
+			if m.UserId == req.UserId {
+				sprintMembers = append(sprintMembers[:i], sprintMembers[i+1:]...)
+				break
+			}
+		}
+
+		members, err := json.Marshal(sprintMembers)
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		getSprint.Members = string(members)
+		updateSprint, err := s.sprintDao.UpdateMembers(*getSprint)
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		if updateSprint.Id != uuid.Nil {
+			success = true
+		}
+	}
+	return &projectv1.UpdateSprintResponse{
+		Success: success,
+		Item: &projectv1.Sprint{
+			Id:        getSprint.Id.String(),
+			ProjectId: getSprint.ProjectId.String(),
+			Name:      getSprint.Name,
+			StartDate: getSprint.StartDate.Unix(),
+			EndDate:   getSprint.EndDate.Unix(),
+			CreatedAt: getSprint.CreatedAt.Unix(),
+			UpdatedAt: getSprint.UpdatedAt.Unix(),
+			Members:   sprintMembers,
+		},
+	}, nil
 }

@@ -27,7 +27,16 @@ message Sprint {
 message SprintMember {
   string user_id = 1;
   string user_name = 2;
-  string role = 3;
+  enum Role {
+    Unassigned = 0;
+    Development = 1;
+    Design = 2;
+    Deployment = 3;
+    Testing = 4;
+    Requirement = 5;
+    Documentation = 6;
+  }
+  Role role = 3;
   float capacity = 4;
 }
 
@@ -58,6 +67,20 @@ message UpdateSprintMembersRequest {
   string project_id = 2;
   string sprint_id = 3;
   repeated SprintMember members = 4;
+}
+
+message AddSprintMemberRequest {
+  string org_id = 1;
+  string project_id = 2;
+  string sprint_id = 3;
+  SprintMember member = 4;
+}
+
+message RemoveSprintMemberRequest {
+  string org_id = 1;
+  string project_id = 2;
+  string sprint_id = 3;
+  string user_id = 4;
 }
 
 message UpdateSprintResponse {
