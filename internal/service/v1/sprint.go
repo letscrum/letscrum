@@ -20,12 +20,14 @@ type SprintService struct {
 	v1.UnimplementedSprintServer
 	sprintDao  dao.SprintDao
 	projectDao dao.ProjectDao
+	orgDao     dao.OrgDao
 }
 
 func NewSprintService(dao dao.Interface) *SprintService {
 	return &SprintService{
 		sprintDao:  dao.SprintDao(),
 		projectDao: dao.ProjectDao(),
+		orgDao:     dao.OrgDao(),
 	}
 }
 
@@ -37,23 +39,42 @@ func (s *SprintService) Create(ctx context.Context, req *projectv1.CreateSprintR
 	var user model.User
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
-	var reqProject model.Project
+	var reqOrg model.Org
 	oId, err := uuid.Parse(req.OrgId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	reqOrg.Id = oId
+	org, err := s.orgDao.Get(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	orgUsers, err := s.orgDao.ListMember(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if utils.IsOrgMember(org, orgUsers, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotOrgMember)
+	}
+	var reqProject model.Project
 	pId, err := uuid.Parse(req.ProjectId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	reqProject.OrgId = oId
 	reqProject.Id = pId
+	reqProject.CreatedUser.Id = user.Id
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	if project.Id == uuid.Nil {
+		return nil, status.Error(codes.NotFound, "project not fount.")
+	}
 	if utils.IsProjectAdmin(*project, user) == false {
-		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectAdmin)
+		if utils.IsOrgAdmin(org, orgUsers, user) == false {
+			return nil, status.Error(codes.PermissionDenied, utils.ErrNoAdminPermissionForProject)
+		}
 	}
 	var projectMembers []*projectv1.ProjectMember
 	err = json.Unmarshal([]byte(project.Members), &projectMembers)
@@ -111,20 +132,37 @@ func (s *SprintService) Get(ctx context.Context, req *projectv1.GetSprintRequest
 	var user model.User
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
-	var reqProject model.Project
+	var reqOrg model.Org
 	oId, err := uuid.Parse(req.OrgId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	reqOrg.Id = oId
+	org, err := s.orgDao.Get(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	orgUsers, err := s.orgDao.ListMember(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if utils.IsOrgMember(org, orgUsers, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotOrgMember)
+	}
+	var reqProject model.Project
 	pId, err := uuid.Parse(req.ProjectId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	reqProject.OrgId = oId
 	reqProject.Id = pId
+	reqProject.CreatedUser.Id = user.Id
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if project.Id == uuid.Nil {
+		return nil, status.Error(codes.NotFound, "project not fount.")
 	}
 	if utils.IsProjectMember(*project, user) == false {
 		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectMember)
@@ -180,20 +218,37 @@ func (s *SprintService) List(ctx context.Context, req *projectv1.ListSprintReque
 	var user model.User
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
-	var reqProject model.Project
+	var reqOrg model.Org
 	oId, err := uuid.Parse(req.OrgId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	reqOrg.Id = oId
+	org, err := s.orgDao.Get(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	orgUsers, err := s.orgDao.ListMember(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if utils.IsOrgMember(org, orgUsers, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotOrgMember)
+	}
+	var reqProject model.Project
 	pId, err := uuid.Parse(req.ProjectId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	reqProject.OrgId = oId
 	reqProject.Id = pId
+	reqProject.CreatedUser.Id = user.Id
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if project.Id == uuid.Nil {
+		return nil, status.Error(codes.NotFound, "project not fount.")
 	}
 	if utils.IsProjectMember(*project, user) == false {
 		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectMember)
@@ -259,23 +314,42 @@ func (s *SprintService) Update(ctx context.Context, req *projectv1.UpdateSprintR
 	var user model.User
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
-	var reqProject model.Project
+	var reqOrg model.Org
 	oId, err := uuid.Parse(req.OrgId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	reqOrg.Id = oId
+	org, err := s.orgDao.Get(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	orgUsers, err := s.orgDao.ListMember(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if utils.IsOrgMember(org, orgUsers, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotOrgMember)
+	}
+	var reqProject model.Project
 	pId, err := uuid.Parse(req.ProjectId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	reqProject.OrgId = oId
 	reqProject.Id = pId
+	reqProject.CreatedUser.Id = user.Id
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	if project.Id == uuid.Nil {
+		return nil, status.Error(codes.NotFound, "project not fount.")
+	}
 	if utils.IsProjectAdmin(*project, user) == false {
-		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectAdmin)
+		if utils.IsOrgAdmin(org, orgUsers, user) == false {
+			return nil, status.Error(codes.PermissionDenied, utils.ErrNoAdminPermissionForProject)
+		}
 	}
 	var sprint model.Sprint
 	sId, err := uuid.Parse(req.SprintId)
@@ -319,23 +393,42 @@ func (s *SprintService) UpdateMembers(ctx context.Context, req *projectv1.Update
 	var user model.User
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
-	var reqProject model.Project
+	var reqOrg model.Org
 	oId, err := uuid.Parse(req.OrgId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	reqOrg.Id = oId
+	org, err := s.orgDao.Get(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	orgUsers, err := s.orgDao.ListMember(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if utils.IsOrgMember(org, orgUsers, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotOrgMember)
+	}
+	var reqProject model.Project
 	pId, err := uuid.Parse(req.ProjectId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	reqProject.OrgId = oId
 	reqProject.Id = pId
+	reqProject.CreatedUser.Id = user.Id
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	if project.Id == uuid.Nil {
+		return nil, status.Error(codes.NotFound, "project not fount.")
+	}
 	if utils.IsProjectAdmin(*project, user) == false {
-		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectAdmin)
+		if utils.IsOrgAdmin(org, orgUsers, user) == false {
+			return nil, status.Error(codes.PermissionDenied, utils.ErrNoAdminPermissionForProject)
+		}
 	}
 	var sprint model.Sprint
 	sId, err := uuid.Parse(req.SprintId)
@@ -385,23 +478,42 @@ func (s *SprintService) Delete(ctx context.Context, req *projectv1.DeleteSprintR
 	var user model.User
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
-	var reqProject model.Project
+	var reqOrg model.Org
 	oId, err := uuid.Parse(req.OrgId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	reqOrg.Id = oId
+	org, err := s.orgDao.Get(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	orgUsers, err := s.orgDao.ListMember(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if utils.IsOrgMember(org, orgUsers, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotOrgMember)
+	}
+	var reqProject model.Project
 	pId, err := uuid.Parse(req.ProjectId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	reqProject.OrgId = oId
 	reqProject.Id = pId
+	reqProject.CreatedUser.Id = user.Id
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	if project.Id == uuid.Nil {
+		return nil, status.Error(codes.NotFound, "project not fount.")
+	}
 	if utils.IsProjectAdmin(*project, user) == false {
-		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectAdmin)
+		if utils.IsOrgAdmin(org, orgUsers, user) == false {
+			return nil, status.Error(codes.PermissionDenied, utils.ErrNoAdminPermissionForProject)
+		}
 	}
 	var sprint model.Sprint
 	sId, err := uuid.Parse(req.SprintId)
@@ -426,23 +538,42 @@ func (s SprintService) AddMember(ctx context.Context, req *projectv1.AddSprintMe
 	var user model.User
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
-	var reqProject model.Project
+	var reqOrg model.Org
 	oId, err := uuid.Parse(req.OrgId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	reqOrg.Id = oId
+	org, err := s.orgDao.Get(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	orgUsers, err := s.orgDao.ListMember(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if utils.IsOrgMember(org, orgUsers, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotOrgMember)
+	}
+	var reqProject model.Project
 	pId, err := uuid.Parse(req.ProjectId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	reqProject.OrgId = oId
 	reqProject.Id = pId
+	reqProject.CreatedUser.Id = user.Id
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	if project.Id == uuid.Nil {
+		return nil, status.Error(codes.NotFound, "project not fount.")
+	}
 	if utils.IsProjectAdmin(*project, user) == false {
-		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectAdmin)
+		if utils.IsOrgAdmin(org, orgUsers, user) == false {
+			return nil, status.Error(codes.PermissionDenied, utils.ErrNoAdminPermissionForProject)
+		}
 	}
 	var sprint model.Sprint
 	sId, err := uuid.Parse(req.SprintId)
@@ -507,23 +638,42 @@ func (s SprintService) RemoveMember(ctx context.Context, req *projectv1.RemoveSp
 	var user model.User
 	user.Id = claims.Id
 	user.IsSuperAdmin = claims.IsSuperAdmin
-	var reqProject model.Project
+	var reqOrg model.Org
 	oId, err := uuid.Parse(req.OrgId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	reqOrg.Id = oId
+	org, err := s.orgDao.Get(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	orgUsers, err := s.orgDao.ListMember(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if utils.IsOrgMember(org, orgUsers, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotOrgMember)
+	}
+	var reqProject model.Project
 	pId, err := uuid.Parse(req.ProjectId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	reqProject.OrgId = oId
 	reqProject.Id = pId
+	reqProject.CreatedUser.Id = user.Id
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	if project.Id == uuid.Nil {
+		return nil, status.Error(codes.NotFound, "project not fount.")
+	}
 	if utils.IsProjectAdmin(*project, user) == false {
-		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectAdmin)
+		if utils.IsOrgAdmin(org, orgUsers, user) == false {
+			return nil, status.Error(codes.PermissionDenied, utils.ErrNoAdminPermissionForProject)
+		}
 	}
 	var sprint model.Sprint
 	sId, err := uuid.Parse(req.SprintId)

@@ -228,14 +228,12 @@ func (s *ProjectService) Create(ctx context.Context, req *projectv1.CreateProjec
 		return nil, status.Error(codes.PermissionDenied, utils.ErrReachProjectLimit)
 	}
 
-	if org.CreatedBy != user.Id {
-		orgUsers, err := s.orgDao.ListMember(reqOrg)
-		if err != nil {
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-		if utils.IsOrgAdmin(org, orgUsers, *user) == false {
-			return nil, status.Error(codes.PermissionDenied, utils.ErrNotOrgAdmin)
-		}
+	orgUsers, err := s.orgDao.ListMember(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if utils.IsOrgAdmin(org, orgUsers, *user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotOrgAdmin)
 	}
 	if !utils.IsLegalName(req.Name) {
 		return nil, status.Error(codes.InvalidArgument, "project name can't be less than 5, can only contain lower case letter, number, _ and -, only can start from lower case letter.")
@@ -337,8 +335,11 @@ func (s *ProjectService) Update(ctx context.Context, req *projectv1.UpdateProjec
 		return nil, status.Error(codes.NotFound, "project not fount.")
 	}
 	if utils.IsProjectAdmin(*project, user) == false {
-		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectAdmin)
+		if utils.IsOrgAdmin(org, orgUsers, user) == false {
+			return nil, status.Error(codes.PermissionDenied, utils.ErrNoAdminPermissionForProject)
+		}
 	}
+
 	project.DisplayName = req.DisplayName
 	project.Description = req.Description
 	var members []*projectv1.ProjectMember
@@ -393,8 +394,8 @@ func (s *ProjectService) Delete(ctx context.Context, req *projectv1.DeleteProjec
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	if utils.IsOrgAdmin(org, orgUsers, user) == false {
-		return nil, status.Error(codes.PermissionDenied, utils.ErrNotOrgAdmin)
+	if utils.IsOrgMember(org, orgUsers, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotOrgMember)
 	}
 	var reqProject model.Project
 	pId, err := uuid.Parse(req.ProjectId)
@@ -411,7 +412,9 @@ func (s *ProjectService) Delete(ctx context.Context, req *projectv1.DeleteProjec
 		return nil, status.Error(codes.NotFound, "project not fount.")
 	}
 	if utils.IsProjectAdmin(*project, user) == false {
-		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectAdmin)
+		if utils.IsOrgAdmin(org, orgUsers, user) == false {
+			return nil, status.Error(codes.PermissionDenied, utils.ErrNoAdminPermissionForProject)
+		}
 	}
 	deletedProject, err := s.projectDao.Delete(*project)
 	if err != nil {
@@ -445,8 +448,8 @@ func (s *ProjectService) SetAdmin(ctx context.Context, req *projectv1.SetAdminRe
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	if utils.IsOrgAdmin(org, orgUsers, user) == false {
-		return nil, status.Error(codes.PermissionDenied, utils.ErrNotOrgAdmin)
+	if utils.IsOrgMember(org, orgUsers, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotOrgMember)
 	}
 	var reqProject model.Project
 	pId, err := uuid.Parse(req.ProjectId)
@@ -455,6 +458,7 @@ func (s *ProjectService) SetAdmin(ctx context.Context, req *projectv1.SetAdminRe
 	}
 	reqProject.OrgId = oId
 	reqProject.Id = pId
+	reqProject.CreatedUser.Id = user.Id
 	project, err := s.projectDao.Get(reqProject)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -463,7 +467,9 @@ func (s *ProjectService) SetAdmin(ctx context.Context, req *projectv1.SetAdminRe
 		return nil, status.Error(codes.NotFound, "project not fount.")
 	}
 	if utils.IsProjectAdmin(*project, user) == false {
-		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectAdmin)
+		if utils.IsOrgAdmin(org, orgUsers, user) == false {
+			return nil, status.Error(codes.PermissionDenied, utils.ErrNoAdminPermissionForProject)
+		}
 	}
 	var members []*projectv1.ProjectMember
 	if project.Members != "" {
