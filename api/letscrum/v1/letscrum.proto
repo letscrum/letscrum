@@ -153,6 +153,12 @@ service Project {
       put: "/api/v1/orgs/{org_id}/projects/{project_id}/members/{user_id}/admin/{is_admin}"
     };
   }
+
+  rpc RemoveMember(letscrum.api.project.v1.RemoveMemberRequest) returns (letscrum.api.project.v1.UpdateProjectResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/orgs/{org_id}/projects/{project_id}/members/{user_id}"
+    };
+  }
 }
 
 service Sprint {

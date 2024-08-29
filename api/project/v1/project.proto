@@ -55,6 +55,12 @@ message SetAdminRequest {
   bool is_admin = 4;
 }
 
+message RemoveMemberRequest {
+  string org_id = 1;
+  string project_id = 2;
+  string user_id = 3;
+}
+
 message UpdateProjectResponse {
   bool success = 1;
   string id = 2;

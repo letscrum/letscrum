@@ -498,3 +498,76 @@ func (s *ProjectService) SetAdmin(ctx context.Context, req *projectv1.SetAdminRe
 		Id:      updatedProject.Id.String(),
 	}, nil
 }
+
+func (s *ProjectService) RemoveMember(ctx context.Context, req *projectv1.RemoveMemberRequest) (*projectv1.UpdateProjectResponse, error) {
+	claims, err := utils.GetTokenDetails(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	var user model.User
+	user.Id = claims.Id
+	user.IsSuperAdmin = claims.IsSuperAdmin
+	var reqOrg model.Org
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqOrg.Id = oId
+	org, err := s.orgDao.Get(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	orgUsers, err := s.orgDao.ListMember(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if utils.IsOrgMember(org, orgUsers, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotOrgMember)
+	}
+	var reqProject model.Project
+	pId, err := uuid.Parse(req.ProjectId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqProject.OrgId = oId
+	reqProject.Id = pId
+	reqProject.CreatedUser.Id = user.Id
+	project, err := s.projectDao.Get(reqProject)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if project.Id == uuid.Nil {
+		return nil, status.Error(codes.NotFound, "project not fount.")
+	}
+	if utils.IsProjectAdmin(*project, user) == false {
+		if utils.IsOrgAdmin(org, orgUsers, user) == false {
+			return nil, status.Error(codes.PermissionDenied, utils.ErrNoAdminPermissionForProject)
+		}
+	}
+	var members []*projectv1.ProjectMember
+	if project.Members != "" {
+		err = json.Unmarshal([]byte(project.Members), &members)
+		if err != nil {
+			return nil, status.Error(codes.Unknown, err.Error())
+		}
+	}
+	var newMembers []*projectv1.ProjectMember
+	for _, m := range members {
+		if m.UserId != req.UserId {
+			newMembers = append(newMembers, m)
+		}
+	}
+	membersJson, err := json.Marshal(newMembers)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	project.Members = string(membersJson)
+	updatedProject, err := s.projectDao.Update(*project)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	return &projectv1.UpdateProjectResponse{
+		Success: true,
+		Id:      updatedProject.Id.String(),
+	}, nil
+}
