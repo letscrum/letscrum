@@ -153,6 +153,7 @@ func (t TaskService) Get(ctx context.Context, req *itemv1.GetTaskRequest) (*item
 				ItemType:  itemv1.Log_ItemType(itemv1.Log_ItemType_value[log.ItemType]),
 				Action:    itemv1.Log_Action(itemv1.Log_Action_value[log.Action]),
 				Log:       log.Log,
+				Changes:   log.Changes,
 				CreatedBy: log.CreatedBy.String(),
 				CreatedAt: log.CreatedAt.Unix(),
 			})

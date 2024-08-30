@@ -297,6 +297,7 @@ func (s WorkItemService) Get(ctx context.Context, req *itemv1.GetWorkItemRequest
 			ItemType:  itemv1.Log_ItemType(itemv1.Log_ItemType_value[l.ItemType]),
 			Action:    itemv1.Log_Action(itemv1.Log_Action_value[l.Action]),
 			Log:       l.Log,
+			Changes:   l.Changes,
 			CreatedBy: l.CreatedBy.String(),
 			CreatedAt: l.CreatedAt.Unix(),
 		}

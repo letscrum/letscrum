@@ -69,6 +69,7 @@ func (w WorkItemDao) Create(workItem model.WorkItem) (*model.WorkItem, error) {
 	log.ItemType = "WORKITEM"
 	log.Action = "CREATE"
 	log.Log = "Create work item"
+	log.Changes = "projectId: " + workItem.ProjectId.String() + ", sprintId: " + workItem.SprintId.String()
 	log.CreatedBy = workItem.CreatedBy
 	if err := w.DB.Create(&log).Error; err != nil {
 		return nil, err
@@ -144,6 +145,7 @@ func (w WorkItemDao) UpdateSprintWithTasks(workItem model.WorkItem, userId uuid.
 	log.ItemType = "WORKITEM"
 	log.Action = "UPDATE"
 	log.Log = "Update work item sprint, move to sprint: " + workItem.SprintId.String()
+	log.Changes = "projectId: " + workItem.ProjectId.String() + ", sprintId: " + workItem.SprintId.String()
 	log.CreatedBy = userId
 	if err := w.DB.Create(&log).Error; err != nil {
 		return nil, err
@@ -167,6 +169,7 @@ func (w WorkItemDao) Delete(workItem model.WorkItem, userId uuid.UUID) (bool, er
 	log.ItemType = "WORKITEM"
 	log.Action = "DELETE"
 	log.Log = "Delete work item"
+	log.Changes = "projectId: " + workItem.ProjectId.String() + ", sprintId: " + workItem.SprintId.String()
 	log.CreatedBy = userId
 	if err := w.DB.Create(&log).Error; err != nil {
 		return false, err

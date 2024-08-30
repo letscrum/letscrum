@@ -73,6 +73,7 @@ func (t TaskDao) Create(task model.Task) (*model.Task, error) {
 	log.ItemType = "TASK"
 	log.Action = "CREATE"
 	log.Log = "Create task"
+	log.Changes = "projectId: " + task.ProjectId.String() + ", sprintId: " + task.SprintId.String()
 	log.CreatedBy = task.CreatedBy
 	if err := t.DB.Create(&log).Error; err != nil {
 		return nil, err
@@ -148,6 +149,7 @@ func (t TaskDao) Move(task model.Task, userId uuid.UUID) (*model.Task, error) {
 	log.ItemType = "TASK"
 	log.Action = "UPDATE"
 	log.Log = "Update task status and move task to work item"
+	log.Changes = "projectId: " + task.ProjectId.String() + ", sprintId: " + task.SprintId.String()
 	log.CreatedBy = userId
 	if err := t.DB.Create(&log).Error; err != nil {
 		return nil, err
@@ -165,6 +167,7 @@ func (t TaskDao) Delete(task model.Task, userId uuid.UUID) (bool, error) {
 	log.ItemType = "TASK"
 	log.Action = "DELETE"
 	log.Log = "Delete task"
+	log.Changes = "projectId: " + task.ProjectId.String() + ", sprintId: " + task.SprintId.String()
 	log.CreatedBy = userId
 	if err := t.DB.Create(&log).Error; err != nil {
 		return false, err
