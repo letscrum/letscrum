@@ -365,22 +365,10 @@ func (s *SprintService) Update(ctx context.Context, req *projectv1.UpdateSprintR
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	var sprintMembers []*projectv1.SprintMember
-	err = json.Unmarshal([]byte(updateSprint.Members), &sprintMembers)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
 	return &projectv1.UpdateSprintResponse{
 		Success: updateSprint.Id != uuid.Nil,
 		Item: &projectv1.Sprint{
-			Id:        updateSprint.Id.String(),
-			ProjectId: updateSprint.ProjectId.String(),
-			Name:      updateSprint.Name,
-			StartDate: updateSprint.StartDate.Unix(),
-			EndDate:   updateSprint.EndDate.Unix(),
-			CreatedAt: updateSprint.CreatedAt.Unix(),
-			UpdatedAt: updateSprint.UpdatedAt.Unix(),
-			Members:   sprintMembers,
+			Id: updateSprint.Id.String(),
 		},
 	}, nil
 }

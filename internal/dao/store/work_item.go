@@ -59,21 +59,28 @@ func (w WorkItemDao) CountBySprint(sprintId uuid.UUID, keyword string) int64 {
 }
 
 func (w WorkItemDao) Create(workItem model.WorkItem) (*model.WorkItem, error) {
-	// create work item to database
-	if err := w.DB.Create(&workItem).Error; err != nil {
+	// make transaction of create work item and work item log
+	err := w.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&workItem).Error; err != nil {
+			return err
+		}
+		var log model.ItemLog
+		log.Id = uuid.New()
+		log.ItemId = workItem.Id
+		log.ItemType = "WORKITEM"
+		log.Action = "CREATE"
+		log.Log = "Create work item"
+		log.Changes = "projectId: " + workItem.ProjectId.String() + ", sprintId: " + workItem.SprintId.String()
+		log.CreatedBy = workItem.CreatedBy
+		if err := tx.Create(&log).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
 		return nil, err
 	}
-	var log model.ItemLog
-	log.Id = uuid.New()
-	log.ItemId = workItem.Id
-	log.ItemType = "WORKITEM"
-	log.Action = "CREATE"
-	log.Log = "Create work item"
-	log.Changes = "projectId: " + workItem.ProjectId.String() + ", sprintId: " + workItem.SprintId.String()
-	log.CreatedBy = workItem.CreatedBy
-	if err := w.DB.Create(&log).Error; err != nil {
-		return nil, err
-	}
+
 	return &workItem, nil
 }
 
