@@ -72,10 +72,19 @@ func (d OrgDao) Update(org model.Org) (model.Org, error) {
 }
 
 func (d OrgDao) Delete(org model.Org) (bool, error) {
-	if err := d.DB.Where("org_id = ?", org.Id).Delete(&model.OrgUser{}).Error; err != nil {
-		return false, err
-	}
-	if err := d.DB.Where("id = ?", org.Id).Delete(&model.Org{}).Error; err != nil {
+	// delete org and orgUser
+	err := d.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("org_id = ?", org.Id).Delete(&model.OrgUser{}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+		if err := tx.Where("id = ?", org.Id).Delete(&model.Org{}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+		return nil
+	})
+	if err != nil {
 		return false, err
 	}
 	return true, nil
