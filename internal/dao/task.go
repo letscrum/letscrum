@@ -12,6 +12,8 @@ type TaskDao interface {
 	ListByWorkItemIds(workItemIds []int64) ([]*model.Task, error)
 	Count(keyword string) int64
 	CountByWorkItem(workItemId int64, keyword string) int64
+	CountBySprint(sprintId uuid.UUID, keyword string) int64
+	CountBySprints(sprintIds []uuid.UUID) []int64
 	Create(task model.Task) (*model.Task, error)
 	Update(task model.Task, userId uuid.UUID) (*model.Task, error)
 	UpdateStatus(task model.Task, userId uuid.UUID) (*model.Task, error)

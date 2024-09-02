@@ -21,7 +21,9 @@ message Sprint {
     Future = 3;
   }
   SprintStatus status = 8;
-  repeated SprintMember members = 9;
+  int64 work_item_count = 9;
+  int64 task_count = 10;
+  repeated SprintMember members = 11;
 }
 
 message SprintMember {

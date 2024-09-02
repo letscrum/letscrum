@@ -18,16 +18,20 @@ import (
 
 type SprintService struct {
 	v1.UnimplementedSprintServer
-	sprintDao  dao.SprintDao
-	projectDao dao.ProjectDao
-	orgDao     dao.OrgDao
+	sprintDao   dao.SprintDao
+	projectDao  dao.ProjectDao
+	orgDao      dao.OrgDao
+	workItemDao dao.WorkItemDao
+	taskDao     dao.TaskDao
 }
 
 func NewSprintService(dao dao.Interface) *SprintService {
 	return &SprintService{
-		sprintDao:  dao.SprintDao(),
-		projectDao: dao.ProjectDao(),
-		orgDao:     dao.OrgDao(),
+		sprintDao:   dao.SprintDao(),
+		projectDao:  dao.ProjectDao(),
+		orgDao:      dao.OrgDao(),
+		workItemDao: dao.WorkItemDao(),
+		taskDao:     dao.TaskDao(),
 	}
 }
 
@@ -195,17 +199,22 @@ func (s *SprintService) Get(ctx context.Context, req *projectv1.GetSprintRequest
 		sprintStatus = projectv1.Sprint_Future
 		break
 	}
+	workItemCount := s.workItemDao.CountBySprint(reqSprint.Id, "")
+	taskCount := s.taskDao.CountBySprint(reqSprint.Id, "")
+
 	return &projectv1.GetSprintResponse{
 		Item: &projectv1.Sprint{
-			Id:        sprint.Id.String(),
-			ProjectId: sprint.ProjectId.String(),
-			Name:      sprint.Name,
-			StartDate: sprint.StartDate.Unix(),
-			EndDate:   sprint.EndDate.Unix(),
-			Status:    sprintStatus,
-			CreatedAt: sprint.CreatedAt.Unix(),
-			UpdatedAt: sprint.UpdatedAt.Unix(),
-			Members:   sprintMembers,
+			Id:            sprint.Id.String(),
+			ProjectId:     sprint.ProjectId.String(),
+			Name:          sprint.Name,
+			StartDate:     sprint.StartDate.Unix(),
+			EndDate:       sprint.EndDate.Unix(),
+			Status:        sprintStatus,
+			WorkItemCount: workItemCount,
+			TaskCount:     taskCount,
+			CreatedAt:     sprint.CreatedAt.Unix(),
+			UpdatedAt:     sprint.UpdatedAt.Unix(),
+			Members:       sprintMembers,
 		},
 	}, nil
 }
@@ -259,7 +268,16 @@ func (s *SprintService) List(ctx context.Context, req *projectv1.ListSprintReque
 	}
 	var list []*projectv1.Sprint
 	hasCurrent := false
-	for _, sprint := range sprints {
+	// get sprint ids from sprints
+	var sprintIds []uuid.UUID
+	for _, s := range sprints {
+		sprintIds = append(sprintIds, s.Id)
+	}
+	// get work item count by sprint ids
+	workItemCounts := s.workItemDao.CountBySprints(sprintIds)
+	// get task count by sprint ids
+	taskCounts := s.taskDao.CountBySprints(sprintIds)
+	for i, sprint := range sprints {
 		var sprintStatus projectv1.Sprint_SprintStatus
 		switch {
 		case time.Now().After(sprint.StartDate) && time.Now().Before(sprint.EndDate) && !hasCurrent:
@@ -283,18 +301,21 @@ func (s *SprintService) List(ctx context.Context, req *projectv1.ListSprintReque
 			return nil, status.Error(codes.Unknown, err.Error())
 		}
 		var currentSprint = &projectv1.Sprint{
-			Id:        sprint.Id.String(),
-			ProjectId: sprint.ProjectId.String(),
-			Name:      sprint.Name,
-			StartDate: sprint.StartDate.Unix(),
-			EndDate:   sprint.EndDate.Unix(),
-			Status:    sprintStatus,
-			CreatedAt: sprint.CreatedAt.Unix(),
-			UpdatedAt: sprint.UpdatedAt.Unix(),
-			Members:   sprintMembers,
+			Id:            sprint.Id.String(),
+			ProjectId:     sprint.ProjectId.String(),
+			Name:          sprint.Name,
+			StartDate:     sprint.StartDate.Unix(),
+			EndDate:       sprint.EndDate.Unix(),
+			Status:        sprintStatus,
+			WorkItemCount: workItemCounts[i],
+			TaskCount:     taskCounts[i],
+			CreatedAt:     sprint.CreatedAt.Unix(),
+			UpdatedAt:     sprint.UpdatedAt.Unix(),
+			Members:       sprintMembers,
 		}
 		list = append(list, currentSprint)
 	}
+
 	count := s.sprintDao.CountByProject(reqProject, req.Keyword)
 	return &projectv1.ListSprintResponse{
 		Items: list,

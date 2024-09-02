@@ -64,6 +64,22 @@ func (t TaskDao) CountByWorkItem(workItemId int64, keyword string) int64 {
 	return count
 }
 
+func (t TaskDao) CountBySprint(sprintId uuid.UUID, keyword string) int64 {
+	count := int64(0)
+	t.DB.Where("sprint_id = ?", sprintId).Where("title LIKE ?", "%"+keyword+"%").Model(&model.Task{}).Count(&count)
+	return count
+}
+
+func (t TaskDao) CountBySprints(sprintIds []uuid.UUID) []int64 {
+	var counts []int64
+	for _, sprintId := range sprintIds {
+		count := int64(0)
+		t.DB.Where("sprint_id = ?", sprintId).Model(&model.Task{}).Count(&count)
+		counts = append(counts, count)
+	}
+	return counts
+}
+
 func (t TaskDao) Create(task model.Task) (*model.Task, error) {
 	// make transaction of create task and task log
 	err := t.DB.Transaction(func(tx *gorm.DB) error {

@@ -11,6 +11,7 @@ type WorkItemDao interface {
 	ListBySprint(sprintId uuid.UUID, page, size int32, keyword string) ([]*model.WorkItem, error)
 	CountByProject(projectId uuid.UUID, keyword string) int64
 	CountBySprint(sprintId uuid.UUID, keyword string) int64
+	CountBySprints(sprintIds []uuid.UUID) []int64
 	Create(workItem model.WorkItem) (*model.WorkItem, error)
 	Update(workItem model.WorkItem, userId uuid.UUID) (*model.WorkItem, error)
 	UpdateAssignUser(workItem model.WorkItem, userId uuid.UUID) (*model.WorkItem, error)

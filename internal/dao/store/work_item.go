@@ -59,6 +59,16 @@ func (w WorkItemDao) CountBySprint(sprintId uuid.UUID, keyword string) int64 {
 	return count
 }
 
+func (w WorkItemDao) CountBySprints(sprintIds []uuid.UUID) []int64 {
+	var counts []int64
+	for _, sprintId := range sprintIds {
+		count := int64(0)
+		w.DB.Where("sprint_id = ?", sprintId).Model(&model.WorkItem{}).Count(&count)
+		counts = append(counts, count)
+	}
+	return counts
+}
+
 func (w WorkItemDao) Create(workItem model.WorkItem) (*model.WorkItem, error) {
 	// make transaction of create work item and work item log
 	err := w.DB.Transaction(func(tx *gorm.DB) error {
