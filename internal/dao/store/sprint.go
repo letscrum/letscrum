@@ -188,6 +188,15 @@ func (s SprintDao) DeleteByProject(project model.Project) (bool, error) {
 	return true, nil
 }
 
+func (s SprintDao) ListSprintStatus(sprint model.Sprint) ([]*model.SprintStatus, error) {
+	var sprintStatuses []*model.SprintStatus
+	err := s.DB.Where("sprint_id = ?", sprint.Id).Order("sprint_date").Find(&sprintStatuses).Error
+	if err != nil {
+		return nil, err
+	}
+	return sprintStatuses, nil
+}
+
 func NewSprintDao(d *gorm.DB) *SprintDao {
 	return &SprintDao{d}
 }

@@ -739,3 +739,73 @@ func (s SprintService) RemoveMember(ctx context.Context, req *projectv1.RemoveSp
 		},
 	}, nil
 }
+
+func (s SprintService) ItemBurndown(ctx context.Context, req *projectv1.SprintItemBurndownRequest) (*projectv1.SprintItemBurndownResponse, error) {
+	claims, err := utils.GetTokenDetails(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	var user model.User
+	user.Id = claims.Id
+	user.IsSuperAdmin = claims.IsSuperAdmin
+	var reqOrg model.Org
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqOrg.Id = oId
+	org, err := s.orgDao.Get(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	orgUsers, err := s.orgDao.ListMember(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if utils.IsOrgMember(org, orgUsers, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotOrgMember)
+	}
+	var reqProject model.Project
+	pId, err := uuid.Parse(req.ProjectId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqProject.OrgId = oId
+	reqProject.Id = pId
+	reqProject.CreatedUser.Id = user.Id
+	project, err := s.projectDao.Get(reqProject)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if project.Id == uuid.Nil {
+		return nil, status.Error(codes.NotFound, "project not fount.")
+	}
+	if utils.IsProjectMember(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectMember)
+	}
+	// get sprint sprintStatus by sprint id
+	var reqSprint model.Sprint
+	sId, err := uuid.Parse(req.SprintId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqSprint.Id = sId
+	sprintStatus, err := s.sprintDao.ListSprintStatus(reqSprint)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	// get work item count and task count by sprint id
+	taskCount := s.taskDao.CountBySprint(reqSprint.Id, "")
+	// build sprint burndown
+	var burndown []*projectv1.ItemBurndown
+	for _, sStatus := range sprintStatus {
+		burndown = append(burndown, &projectv1.ItemBurndown{
+			Date:   sStatus.SprintDate.Unix(),
+			Actual: int64(sStatus.TaskCount),
+		})
+	}
+	return &projectv1.SprintItemBurndownResponse{
+		Total:    taskCount,
+		Burndown: burndown,
+	}, nil
+}

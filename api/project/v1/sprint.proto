@@ -123,3 +123,19 @@ message GetSprintRequest {
 message GetSprintResponse {
   Sprint item = 1;
 }
+
+message SprintItemBurndownRequest {
+  string org_id = 1;
+  string project_id = 2;
+  string sprint_id = 3;
+}
+
+message ItemBurndown {
+  int64 date = 1;
+  int64 actual = 3;
+}
+
+message SprintItemBurndownResponse {
+  int64 total = 1;
+  repeated ItemBurndown burndown = 2;
+}

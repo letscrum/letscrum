@@ -213,6 +213,12 @@ service Sprint {
       delete: "/api/v1/orgs/{org_id}/projects/{project_id}/sprints/{sprint_id}/members/{user_id}"
     };
   }
+
+  rpc ItemBurndown(letscrum.api.project.v1.SprintItemBurndownRequest) returns (letscrum.api.project.v1.SprintItemBurndownResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/orgs/{org_id}/projects/{project_id}/sprints/{sprint_id}/item_burndown"
+    };
+  }
 }
 
 service Item {
