@@ -255,6 +255,11 @@ func (t TaskDao) Move(task model.Task, userId uuid.UUID) (*model.Task, error) {
 			tx.Rollback()
 			return err
 		}
+		// get the updated task
+		if err := tx.Where("id = ?", task.Id).Find(&task).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
 		var log model.ItemLog
 		log.Id = uuid.New()
 		log.ItemId = task.Id
