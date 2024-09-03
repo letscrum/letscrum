@@ -73,4 +73,4 @@ jobs:
               docker rm letscrum
               docker image rm letscrum/letscrum:latest
               docker pull letscrum/letscrum:latest
-              docker run -d --name letscrum -v /etc/letscrum/config.yaml:/etc/letscrum/config.yaml -p 8081:8081 -p 9091:9091 letscrum/letscrum:latest
+              docker run -d --name letscrum -v /etc/letscrum/config.yaml:/etc/letscrum/config.yaml -p 8081:8081 -p 9091:9091 letscrum/letscrum:latest --restart always
