@@ -93,7 +93,7 @@ func (s WorkItemService) Create(ctx context.Context, req *itemv1.CreateWorkItemR
 	}, nil
 }
 
-func (s WorkItemService) List(ctx context.Context, req *itemv1.ListWorkItemRequest) (*itemv1.ListWorkItemResponse, error) {
+func (s WorkItemService) ListByProject(ctx context.Context, req *itemv1.ListWorkItemRequest) (*itemv1.ListWorkItemResponse, error) {
 	claims, err := utils.GetTokenDetails(ctx)
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
@@ -122,26 +122,153 @@ func (s WorkItemService) List(ctx context.Context, req *itemv1.ListWorkItemReque
 	req.Page, req.Size = utils.Pagination(req.Page, req.Size)
 	var workItems []*model.WorkItem
 	count := int64(0)
-	// if req.ProjectId is not empty uuid string "00000000-0000-0000-0000-000000000000"
-	if req.ProjectId != uuid.Nil.String() {
-		if req.SprintId != uuid.Nil.String() {
-			sId, err := uuid.Parse(req.SprintId)
-			if err != nil {
-				return nil, status.Error(codes.Internal, err.Error())
-			}
-			workItems, err = s.workItemDao.ListBySprint(sId, req.Page, req.Size, req.Keyword)
-			if err != nil {
-				return nil, status.Error(codes.Internal, err.Error())
-			}
-			count = s.workItemDao.CountBySprint(sId, req.Keyword)
-		} else {
-			workItems, err = s.workItemDao.ListByProject(project.Id, req.Page, req.Size, req.Keyword)
-			if err != nil {
-				return nil, status.Error(codes.Internal, err.Error())
-			}
-			count = s.workItemDao.CountByProject(project.Id, req.Keyword)
-		}
+
+	workItems, err = s.workItemDao.ListByProject(project.Id, req.Page, req.Size, req.Keyword)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
 	}
+	count = s.workItemDao.CountByProject(project.Id, req.Keyword)
+
+	// get workitemIds list by workItems
+	var workItemIds []int64
+	for _, w := range workItems {
+		workItemIds = append(workItemIds, w.Id)
+	}
+	// get tasks by workItemIds
+	tasks, err := s.taskDao.ListByWorkItemIds(workItemIds)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	var items []*itemv1.WorkItem
+	for _, w := range workItems {
+		// convert w.AssignUser to userv1.User
+		assignUser := &userv1.User{
+			Id:    w.AssignUser.Id.String(),
+			Name:  w.AssignUser.Name,
+			Email: w.AssignUser.Email,
+		}
+		// convert w.CreatedUser to userv1.User
+		createdUser := &userv1.User{
+			Id:    w.CreatedUser.Id.String(),
+			Name:  w.CreatedUser.Name,
+			Email: w.CreatedUser.Email,
+		}
+		// get tasks by workItemId from tasks
+		var tasksAll []*itemv1.Task
+		var tasksUNKNOWN []*itemv1.Task
+		var tasksToDo []*itemv1.Task
+		var tasksInProgress []*itemv1.Task
+		var tasksDone []*itemv1.Task
+		var tasksRemoved []*itemv1.Task
+		for _, t := range tasks {
+			if t.WorkItemId == w.Id {
+				resTask := &itemv1.Task{
+					Id:          t.Id,
+					WorkItemId:  t.WorkItemId,
+					Title:       t.Title,
+					Description: t.Description,
+					Status:      itemv1.Task_TaskStatus(itemv1.Task_TaskStatus_value[t.Status]),
+					AssignUser: &userv1.User{
+						Id:    t.AssignUser.Id.String(),
+						Name:  t.AssignUser.Name,
+						Email: t.AssignUser.Email,
+					},
+					CreatedUser: &userv1.User{
+						Id:    t.CreatedUser.Id.String(),
+						Name:  t.CreatedUser.Name,
+						Email: t.CreatedUser.Email,
+					},
+					Order: t.Order,
+				}
+				tasksAll = append(tasksAll, resTask)
+				if resTask.Status == itemv1.Task_UNKNOWN {
+					tasksUNKNOWN = append(tasksUNKNOWN, resTask)
+				}
+				if resTask.Status == itemv1.Task_ToDo {
+					tasksToDo = append(tasksToDo, resTask)
+				}
+				if resTask.Status == itemv1.Task_InProgress {
+					tasksInProgress = append(tasksInProgress, resTask)
+				}
+				if resTask.Status == itemv1.Task_Done {
+					tasksDone = append(tasksDone, resTask)
+				}
+				if resTask.Status == itemv1.Task_Removed {
+					tasksRemoved = append(tasksRemoved, resTask)
+				}
+			}
+		}
+		items = append(items, &itemv1.WorkItem{
+			Id:              w.Id,
+			ProjectId:       w.ProjectId.String(),
+			SprintId:        w.SprintId.String(),
+			FeatureId:       w.FeatureId,
+			Title:           w.Title,
+			Type:            itemv1.WorkItemType(itemv1.WorkItemType_value[w.Type]),
+			Description:     w.Description,
+			Status:          itemv1.WorkItem_WorkItemStatus(itemv1.WorkItem_WorkItemStatus_value[w.Status]),
+			AssignUser:      assignUser,
+			CreatedUser:     createdUser,
+			TasksAll:        tasksAll,
+			TasksUnknown:    tasksUNKNOWN,
+			TasksToDo:       tasksToDo,
+			TasksInProgress: tasksInProgress,
+			TasksDone:       tasksDone,
+			TasksRemoved:    tasksRemoved,
+			Order:           w.Order,
+		})
+	}
+
+	return &itemv1.ListWorkItemResponse{
+		Items: items,
+		Pagination: &generalv1.Pagination{
+			Page:  req.Page,
+			Size:  req.Size,
+			Total: int32(count),
+		},
+	}, nil
+}
+
+func (s WorkItemService) ListBySprint(ctx context.Context, req *itemv1.ListWorkItemRequest) (*itemv1.ListWorkItemResponse, error) {
+	claims, err := utils.GetTokenDetails(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	var user model.User
+	user.Id = claims.Id
+	user.IsSuperAdmin = claims.IsSuperAdmin
+	var reqProject model.Project
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	pId, err := uuid.Parse(req.ProjectId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqProject.OrgId = oId
+	reqProject.Id = pId
+	project, err := s.projectDao.Get(reqProject)
+	if err != nil {
+		return nil, status.Error(codes.NotFound, err.Error())
+	}
+	if utils.IsProjectMember(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectMember)
+	}
+	req.Page, req.Size = utils.Pagination(req.Page, req.Size)
+	var workItems []*model.WorkItem
+	count := int64(0)
+
+	sId, err := uuid.Parse(req.SprintId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	workItems, err = s.workItemDao.ListBySprint(sId, req.Page, req.Size, req.Keyword)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	count = s.workItemDao.CountBySprint(sId, req.Keyword)
+
 	// get workitemIds list by workItems
 	var workItemIds []int64
 	for _, w := range workItems {

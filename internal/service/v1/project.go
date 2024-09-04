@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	generalv1 "github.com/letscrum/letscrum/api/general/v1"
+	itemv1 "github.com/letscrum/letscrum/api/item/v1"
 	v1 "github.com/letscrum/letscrum/api/letscrum/v1"
 	projectv1 "github.com/letscrum/letscrum/api/project/v1"
 	userv1 "github.com/letscrum/letscrum/api/user/v1"
@@ -19,18 +20,22 @@ import (
 
 type ProjectService struct {
 	v1.UnimplementedProjectServer
-	projectDao dao.ProjectDao
-	userDao    dao.UserDao
-	sprintDao  dao.SprintDao
-	orgDao     dao.OrgDao
+	projectDao  dao.ProjectDao
+	userDao     dao.UserDao
+	sprintDao   dao.SprintDao
+	orgDao      dao.OrgDao
+	workItemDao dao.WorkItemDao
+	taskDao     dao.TaskDao
 }
 
 func NewProjectService(dao dao.Interface) *ProjectService {
 	return &ProjectService{
-		projectDao: dao.ProjectDao(),
-		userDao:    dao.UserDao(),
-		sprintDao:  dao.SprintDao(),
-		orgDao:     dao.OrgDao(),
+		projectDao:  dao.ProjectDao(),
+		userDao:     dao.UserDao(),
+		sprintDao:   dao.SprintDao(),
+		orgDao:      dao.OrgDao(),
+		workItemDao: dao.WorkItemDao(),
+		taskDao:     dao.TaskDao(),
 	}
 }
 
@@ -569,5 +574,134 @@ func (s *ProjectService) RemoveMember(ctx context.Context, req *projectv1.Remove
 	return &projectv1.UpdateProjectResponse{
 		Success: true,
 		Id:      updatedProject.Id.String(),
+	}, nil
+}
+
+func (s *ProjectService) ListItem(ctx context.Context, req *itemv1.ListItemRequest) (*itemv1.ListItemResponse, error) {
+	claims, err := utils.GetTokenDetails(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	var user model.User
+	user.Id = claims.Id
+	user.IsSuperAdmin = claims.IsSuperAdmin
+	var reqOrg model.Org
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqOrg.Id = oId
+	org, err := s.orgDao.Get(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	orgUsers, err := s.orgDao.ListMember(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if utils.IsOrgMember(org, orgUsers, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotOrgMember)
+	}
+	var reqProject model.Project
+	pId, err := uuid.Parse(req.ProjectId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqProject.OrgId = oId
+	reqProject.Id = pId
+	reqProject.CreatedUser.Id = user.Id
+	project, err := s.projectDao.Get(reqProject)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if project.Id == uuid.Nil {
+		return nil, status.Error(codes.NotFound, "project not fount.")
+	}
+	if utils.IsProjectMember(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectMember)
+	}
+	var workItems []*model.WorkItem
+	workItemCount := 0
+	var tasks []*model.Task
+	taskCount := 0
+	if req.ShowAll == true {
+		workItems, err = s.workItemDao.ListByProject(project.Id, req.Page, req.Size, req.Keyword)
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		workItemCount = int(s.workItemDao.CountByProject(project.Id, req.Keyword))
+		tasks, err = s.taskDao.ListByProject(project.Id, req.Page, req.Size, req.Keyword)
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		taskCount = int(s.taskDao.CountByProject(project.Id, req.Keyword))
+	} else {
+		workItems, err = s.workItemDao.ListByProjectNotInSprint(project.Id, req.Page, req.Size, req.Keyword)
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		workItemCount = int(s.workItemDao.CountByProjectNotInSprint(project.Id, req.Keyword))
+		tasks, err = s.taskDao.ListByProjectNotInSprint(project.Id, req.Page, req.Size, req.Keyword)
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		taskCount = int(s.taskDao.CountByProjectNotInSprint(project.Id, req.Keyword))
+	}
+	var items []*itemv1.Item
+	for _, w := range workItems {
+		items = append(items, &itemv1.Item{
+			ItemType:    itemv1.Item_WORK_ITEM,
+			Id:          w.Id,
+			Title:       w.Title,
+			Description: w.Description,
+			ProjectId:   w.ProjectId.String(),
+			SprintId:    w.SprintId.String(),
+			Type:        w.Type,
+			Status:      w.Status,
+			AssignUser: &userv1.User{
+				Id:    w.AssignUser.Id.String(),
+				Name:  w.AssignUser.Name,
+				Email: w.AssignUser.Email,
+			},
+			CreatedUser: &userv1.User{
+				Id:    w.CreatedUser.Id.String(),
+				Name:  w.CreatedUser.Name,
+				Email: w.CreatedUser.Email,
+			},
+			CreatedAt: w.CreatedAt.Unix(),
+			UpdatedAt: w.UpdatedAt.Unix(),
+		})
+	}
+	for _, t := range tasks {
+		items = append(items, &itemv1.Item{
+			ItemType:    itemv1.Item_TASK,
+			Id:          t.Id,
+			Title:       t.Title,
+			Description: t.Description,
+			ProjectId:   t.ProjectId.String(),
+			SprintId:    t.SprintId.String(),
+			Type:        itemv1.Item_TASK.String(),
+			Status:      t.Status,
+			AssignUser: &userv1.User{
+				Id:    t.AssignUser.Id.String(),
+				Name:  t.AssignUser.Name,
+				Email: t.AssignUser.Email,
+			},
+			CreatedUser: &userv1.User{
+				Id:    t.CreatedUser.Id.String(),
+				Name:  t.CreatedUser.Name,
+				Email: t.CreatedUser.Email,
+			},
+			CreatedAt: t.CreatedAt.Unix(),
+			UpdatedAt: t.UpdatedAt.Unix(),
+		})
+	}
+	return &itemv1.ListItemResponse{
+		Items: items,
+		Pagination: &generalv1.Pagination{
+			Page:  req.Page,
+			Size:  req.Size,
+			Total: int32(workItemCount + taskCount),
+		},
 	}, nil
 }

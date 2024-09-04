@@ -1,13 +1,31 @@
 syntax = "proto3";
 
 import "api/general/v1/common.proto";
+import "api/user/v1/user.proto";
 
 package letscrum.api.item.v1;
 
 option go_package = "github.com/letscrum/letscrum/api/item/v1";
 
 message Item {
-  int64 id = 1;
+  enum ItemType {
+    UNKNOWN = 0;
+    WORK_ITEM = 1;
+    TASK = 2;
+  }
+  ItemType item_type = 1;
+  int64 id = 2;
+  string project_id = 3;
+  string sprint_id = 4;
+  int64 feature_id = 5;
+  string title = 6;
+  string type = 7;
+  string description = 8;
+  string status = 9;
+  letscrum.api.user.v1.User assign_user = 10;
+  letscrum.api.user.v1.User created_user = 11;
+  int64 created_at = 12;
+  int64 updated_at = 13;
 }
 
 message ListItemRequest {
@@ -16,6 +34,7 @@ message ListItemRequest {
   int32 page = 3;
   int32 size = 4;
   string keyword = 5;
+  bool show_all = 6;
 }
 
 message ListItemResponse {

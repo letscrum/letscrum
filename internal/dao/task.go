@@ -10,6 +10,10 @@ type TaskDao interface {
 	List(page, size int32, keyword string) ([]*model.Task, error)
 	ListByWorkItem(workItemId int64, page, size int32, keyword string) ([]*model.Task, error)
 	ListByWorkItemIds(workItemIds []int64) ([]*model.Task, error)
+	ListByProject(projectId uuid.UUID, page, size int32, keyword string) ([]*model.Task, error)
+	CountByProject(projectId uuid.UUID, keyword string) int64
+	ListByProjectNotInSprint(projectId uuid.UUID, page, size int32, keyword string) ([]*model.Task, error)
+	CountByProjectNotInSprint(projectId uuid.UUID, keyword string) int64
 	Count(keyword string) int64
 	CountByWorkItem(workItemId int64, keyword string) int64
 	CountBySprint(sprintId uuid.UUID, keyword string) int64

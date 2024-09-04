@@ -30,7 +30,17 @@ func (w WorkItemDao) Get(workItem model.WorkItem) (*model.WorkItem, []*model.Ite
 func (w WorkItemDao) ListByProject(projectId uuid.UUID, page, size int32, keyword string) ([]*model.WorkItem, error) {
 	// get workitems from database
 	var workItems []*model.WorkItem
-	err := w.DB.Where("project_id = ?", projectId).Where("title LIKE ?", "%"+keyword+"%").Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Preload("AssignUser").Order("`order`").Order("created_at").Find(&workItems).Error
+	err := w.DB.Where("project_id = ?", projectId).Where("sprint_id IS NULL").Where("title LIKE ?", "%"+keyword+"%").Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Preload("AssignUser").Order("`order`").Order("created_at").Find(&workItems).Error
+	if err != nil {
+		return nil, err
+	}
+	return workItems, nil
+}
+
+func (w WorkItemDao) ListByProjectNotInSprint(projectId uuid.UUID, page, size int32, keyword string) ([]*model.WorkItem, error) {
+	// get workitems from database
+	var workItems []*model.WorkItem
+	err := w.DB.Where("project_id = ?", projectId).Where("sprint_id IS NULL").Where("title LIKE ?", "%"+keyword+"%").Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Preload("AssignUser").Order("`order`").Order("created_at").Find(&workItems).Error
 	if err != nil {
 		return nil, err
 	}
@@ -50,6 +60,12 @@ func (w WorkItemDao) ListBySprint(sprintId uuid.UUID, page, size int32, keyword 
 func (w WorkItemDao) CountByProject(projectId uuid.UUID, keyword string) int64 {
 	count := int64(0)
 	w.DB.Where("project_id = ?", projectId).Where("title LIKE ?", "%"+keyword+"%").Model(&model.WorkItem{}).Count(&count)
+	return count
+}
+
+func (w WorkItemDao) CountByProjectNotInSprint(projectId uuid.UUID, keyword string) int64 {
+	count := int64(0)
+	w.DB.Where("project_id = ?", projectId).Where("sprint_id IS NULL").Where("title LIKE ?", "%"+keyword+"%").Model(&model.WorkItem{}).Count(&count)
 	return count
 }
 
@@ -215,82 +231,84 @@ func (w WorkItemDao) UpdateSprintWithTasks(workItem model.WorkItem, userId uuid.
 			tx.Rollback()
 			return err
 		}
-		// update tasks to database
-		if err := tx.Model(&model.Task{}).Where("work_item_id = ?", workItem.Id).Update("sprint_id", workItem.SprintId).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-		// add item log for each task
-		var taskLogs []*model.ItemLog
-		for _, task := range tasks {
-			var log model.ItemLog
-			log.Id = uuid.New()
-			log.ItemId = task.Id
-			log.ItemType = "TASK"
-			log.Action = "UPDATE"
-			log.Log = "Update task sprint, move to sprint: " + workItem.SprintId.String()
-			log.Changes = "projectId: " + task.ProjectId.String() + ", sprintId: " + workItem.SprintId.String()
-			log.CreatedBy = userId
-			taskLogs = append(taskLogs, &log)
-		}
-		if err := tx.Create(&taskLogs).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-		// get task count that status is not Done or Removed
-		needUpdatetaskCount := 0
-		for _, task := range tasks {
-			if task.Status != "Done" && task.Status != "Removed" {
-				needUpdatetaskCount++
-			}
-		}
-		// get now time
-		createdOldDate := time.Now()
-		// get old sprint statuses ordered by date
-		var oldSprintStatuses []*model.SprintStatus
-		if err := tx.Where("sprint_id = ?", oldWorkItem.SprintId).Order("sprint_date").Find(&oldSprintStatuses).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-		lastOldSprintStatusIndex := len(oldSprintStatuses) - 1
-
-		// if createdDate before or equal the last sprint status date
-		if createdOldDate.Before(oldSprintStatuses[lastOldSprintStatusIndex].SprintDate) || createdOldDate.Equal(oldSprintStatuses[lastOldSprintStatusIndex].SprintDate) {
-			// if the first sprint status date is after createdDate, set createdDate to the first sprint status date
-			if oldSprintStatuses[0].SprintDate.After(createdOldDate) {
-				createdOldDate = oldSprintStatuses[0].SprintDate
-			}
-			// format createdDate to date
-			correctOldDate := time.Date(createdOldDate.Year(), createdOldDate.Month(), createdOldDate.Day(), 0, 0, 0, 0, createdOldDate.Location())
-			// update sprint status record and set work item count + 1
-			if err := tx.Model(&model.SprintStatus{}).Where("sprint_id = ?", oldWorkItem.SprintId).Where("sprint_date = ?", correctOldDate).Update("task_count", gorm.Expr("task_count - ?", needUpdatetaskCount)).Error; err != nil {
+		if len(tasks) > 0 {
+			// update tasks to database
+			if err := tx.Model(&model.Task{}).Where("work_item_id = ?", workItem.Id).Update("sprint_id", workItem.SprintId).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
-		}
-
-		// get now time
-		createdDate := time.Now()
-		// get current sprint statuses ordered by date
-		var currentSprintStatuses []*model.SprintStatus
-		if err := tx.Where("sprint_id = ?", workItem.SprintId).Order("sprint_date").Find(&currentSprintStatuses).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-		lastSprintStatusIndex := len(currentSprintStatuses) - 1
-
-		// if createdDate before or equal the last sprint status date
-		if createdDate.Before(currentSprintStatuses[lastSprintStatusIndex].SprintDate) || createdDate.Equal(currentSprintStatuses[lastSprintStatusIndex].SprintDate) {
-			// if the first sprint status date is after createdDate, set createdDate to the first sprint status date
-			if currentSprintStatuses[0].SprintDate.After(createdDate) {
-				createdDate = currentSprintStatuses[0].SprintDate
+			// add item log for each task
+			var taskLogs []*model.ItemLog
+			for _, task := range tasks {
+				var log model.ItemLog
+				log.Id = uuid.New()
+				log.ItemId = task.Id
+				log.ItemType = "TASK"
+				log.Action = "UPDATE"
+				log.Log = "Update task sprint, move to sprint: " + workItem.SprintId.String()
+				log.Changes = "projectId: " + task.ProjectId.String() + ", sprintId: " + workItem.SprintId.String()
+				log.CreatedBy = userId
+				taskLogs = append(taskLogs, &log)
 			}
-			// format createdDate to date
-			correctDate := time.Date(createdDate.Year(), createdDate.Month(), createdDate.Day(), 0, 0, 0, 0, createdDate.Location())
-			// update sprint status record and set work item count + 1
-			if err := tx.Model(&model.SprintStatus{}).Where("sprint_id = ?", workItem.SprintId).Where("sprint_date = ?", correctDate).Update("task_count", gorm.Expr("task_count + ?", needUpdatetaskCount)).Error; err != nil {
+			if err := tx.Create(&taskLogs).Error; err != nil {
 				tx.Rollback()
 				return err
+			}
+			// get task count that status is not Done or Removed
+			needUpdatetaskCount := 0
+			for _, task := range tasks {
+				if task.Status != "Done" && task.Status != "Removed" {
+					needUpdatetaskCount++
+				}
+			}
+			// get now time
+			createdOldDate := time.Now()
+			// get old sprint statuses ordered by date
+			var oldSprintStatuses []*model.SprintStatus
+			if err := tx.Where("sprint_id = ?", oldWorkItem.SprintId).Order("sprint_date").Find(&oldSprintStatuses).Error; err != nil {
+				tx.Rollback()
+				return err
+			}
+			lastOldSprintStatusIndex := len(oldSprintStatuses) - 1
+
+			// if createdDate before or equal the last sprint status date
+			if createdOldDate.Before(oldSprintStatuses[lastOldSprintStatusIndex].SprintDate) || createdOldDate.Equal(oldSprintStatuses[lastOldSprintStatusIndex].SprintDate) {
+				// if the first sprint status date is after createdDate, set createdDate to the first sprint status date
+				if oldSprintStatuses[0].SprintDate.After(createdOldDate) {
+					createdOldDate = oldSprintStatuses[0].SprintDate
+				}
+				// format createdDate to date
+				correctOldDate := time.Date(createdOldDate.Year(), createdOldDate.Month(), createdOldDate.Day(), 0, 0, 0, 0, createdOldDate.Location())
+				// update sprint status record and set work item count + 1
+				if err := tx.Model(&model.SprintStatus{}).Where("sprint_id = ?", oldWorkItem.SprintId).Where("sprint_date = ?", correctOldDate).Update("task_count", gorm.Expr("task_count - ?", needUpdatetaskCount)).Error; err != nil {
+					tx.Rollback()
+					return err
+				}
+			}
+
+			// get now time
+			createdDate := time.Now()
+			// get current sprint statuses ordered by date
+			var currentSprintStatuses []*model.SprintStatus
+			if err := tx.Where("sprint_id = ?", workItem.SprintId).Order("sprint_date").Find(&currentSprintStatuses).Error; err != nil {
+				tx.Rollback()
+				return err
+			}
+			lastSprintStatusIndex := len(currentSprintStatuses) - 1
+
+			// if createdDate before or equal the last sprint status date
+			if createdDate.Before(currentSprintStatuses[lastSprintStatusIndex].SprintDate) || createdDate.Equal(currentSprintStatuses[lastSprintStatusIndex].SprintDate) {
+				// if the first sprint status date is after createdDate, set createdDate to the first sprint status date
+				if currentSprintStatuses[0].SprintDate.After(createdDate) {
+					createdDate = currentSprintStatuses[0].SprintDate
+				}
+				// format createdDate to date
+				correctDate := time.Date(createdDate.Year(), createdDate.Month(), createdDate.Day(), 0, 0, 0, 0, createdDate.Location())
+				// update sprint status record and set work item count + 1
+				if err := tx.Model(&model.SprintStatus{}).Where("sprint_id = ?", workItem.SprintId).Where("sprint_date = ?", correctDate).Update("task_count", gorm.Expr("task_count + ?", needUpdatetaskCount)).Error; err != nil {
+					tx.Rollback()
+					return err
+				}
 			}
 		}
 

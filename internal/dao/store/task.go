@@ -52,6 +52,36 @@ func (t TaskDao) ListByWorkItem(workItemId int64, page, size int32, keyword stri
 	return tasks, nil
 }
 
+func (t TaskDao) ListByProject(projectId uuid.UUID, page, size int32, keyword string) ([]*model.Task, error) {
+	var tasks []*model.Task
+	err := t.DB.Where("project_id = ?", projectId).Where("title LIKE ?", "%"+keyword+"%").Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Preload("AssignUser").Order("`order`").Order("created_at").Find(&tasks).Error
+	if err != nil {
+		return nil, err
+	}
+	return tasks, nil
+}
+
+func (t TaskDao) CountByProject(projectId uuid.UUID, keyword string) int64 {
+	count := int64(0)
+	t.DB.Where("project_id = ?", projectId).Where("title LIKE ?", "%"+keyword+"%").Model(&model.Task{}).Count(&count)
+	return count
+}
+
+func (t TaskDao) ListByProjectNotInSprint(projectId uuid.UUID, page, size int32, keyword string) ([]*model.Task, error) {
+	var tasks []*model.Task
+	err := t.DB.Where("project_id = ?", projectId).Where("sprint_id IS NULL").Where("title LIKE ?", "%"+keyword+"%").Limit(int(size)).Offset(int((page - 1) * size)).Preload("CreatedUser").Preload("AssignUser").Order("`order`").Order("created_at").Find(&tasks).Error
+	if err != nil {
+		return nil, err
+	}
+	return tasks, nil
+}
+
+func (t TaskDao) CountByProjectNotInSprint(projectId uuid.UUID, keyword string) int64 {
+	count := int64(0)
+	t.DB.Where("project_id = ?", projectId).Where("sprint_id IS NULL").Where("title LIKE ?", "%"+keyword+"%").Model(&model.Task{}).Count(&count)
+	return count
+}
+
 func (t TaskDao) Count(keyword string) int64 {
 	count := int64(0)
 	t.DB.Where("title LIKE ?", "%"+keyword+"%").Model(&model.Task{}).Count(&count)

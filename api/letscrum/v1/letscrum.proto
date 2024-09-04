@@ -159,6 +159,12 @@ service Project {
       delete: "/api/v1/orgs/{org_id}/projects/{project_id}/members/{user_id}"
     };
   }
+
+  rpc ListItem(letscrum.api.item.v1.ListItemRequest) returns (letscrum.api.item.v1.ListItemResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/orgs/{org_id}/projects/{project_id}/items"
+    };
+  }
 }
 
 service Sprint {
@@ -221,14 +227,6 @@ service Sprint {
   }
 }
 
-service Item {
-  rpc List(letscrum.api.item.v1.ListItemRequest) returns (letscrum.api.item.v1.ListItemResponse) {
-    option (google.api.http) = {
-      get: "/api/v1/orgs/{org_id}/projects/{project_id}/items"
-    };
-  }
-}
-
 service Epic {
   rpc List(letscrum.api.item.v1.ListEpicRequest) returns (letscrum.api.item.v1.ListEpicResponse) {
     option (google.api.http) = {
@@ -253,9 +251,15 @@ service WorkItem {
     };
   }
 
-  rpc List(letscrum.api.item.v1.ListWorkItemRequest) returns (letscrum.api.item.v1.ListWorkItemResponse) {
+  rpc ListByProject(letscrum.api.item.v1.ListWorkItemRequest) returns (letscrum.api.item.v1.ListWorkItemResponse) {
     option (google.api.http) = {
       get: "/api/v1/orgs/{org_id}/projects/{project_id}/workitems"
+    };
+  }
+
+  rpc ListBySprint(letscrum.api.item.v1.ListWorkItemRequest) returns (letscrum.api.item.v1.ListWorkItemResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/orgs/{org_id}/projects/{project_id}/sprints/{sprint_id}/workitems"
     };
   }
 

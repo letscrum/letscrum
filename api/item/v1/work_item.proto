@@ -74,10 +74,9 @@ message ListWorkItemRequest {
   string org_id = 1;
   string project_id = 2;
   string sprint_id = 3;
-  int64 task_id = 4;
-  int32 page = 5;
-  int32 size = 6;
-  string keyword = 7;
+  int32 page = 4;
+  int32 size = 5;
+  string keyword = 6;
 }
 
 message ListWorkItemResponse {
