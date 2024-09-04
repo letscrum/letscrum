@@ -275,28 +275,31 @@ func (w WorkItemDao) UpdateSprintWithTasks(workItem model.WorkItem, userId uuid.
 					needUpdatetaskCount++
 				}
 			}
-			// get now time
-			createdOldDate := time.Now()
-			// get old sprint statuses ordered by date
-			var oldSprintStatuses []*model.SprintStatus
-			if err := tx.Where("sprint_id = ?", oldWorkItem.SprintId).Order("sprint_date").Find(&oldSprintStatuses).Error; err != nil {
-				tx.Rollback()
-				return err
-			}
-			lastOldSprintStatusIndex := len(oldSprintStatuses) - 1
 
-			// if createdDate before or equal the last sprint status date
-			if createdOldDate.Before(oldSprintStatuses[lastOldSprintStatusIndex].SprintDate) || createdOldDate.Equal(oldSprintStatuses[lastOldSprintStatusIndex].SprintDate) {
-				// if the first sprint status date is after createdDate, set createdDate to the first sprint status date
-				if oldSprintStatuses[0].SprintDate.After(createdOldDate) {
-					createdOldDate = oldSprintStatuses[0].SprintDate
-				}
-				// format createdDate to date
-				correctOldDate := time.Date(createdOldDate.Year(), createdOldDate.Month(), createdOldDate.Day(), 0, 0, 0, 0, createdOldDate.Location())
-				// update sprint status record and set work item count + 1
-				if err := tx.Model(&model.SprintStatus{}).Where("sprint_id = ?", oldWorkItem.SprintId).Where("sprint_date = ?", correctOldDate).Update("task_count", gorm.Expr("task_count - ?", needUpdatetaskCount)).Error; err != nil {
+			if oldWorkItem.SprintId != uuid.Nil {
+				// get now time
+				createdOldDate := time.Now()
+				// get old sprint statuses ordered by date
+				var oldSprintStatuses []*model.SprintStatus
+				if err := tx.Where("sprint_id = ?", oldWorkItem.SprintId).Order("sprint_date").Find(&oldSprintStatuses).Error; err != nil {
 					tx.Rollback()
 					return err
+				}
+				lastOldSprintStatusIndex := len(oldSprintStatuses) - 1
+
+				// if createdDate before or equal the last sprint status date
+				if createdOldDate.Before(oldSprintStatuses[lastOldSprintStatusIndex].SprintDate) || createdOldDate.Equal(oldSprintStatuses[lastOldSprintStatusIndex].SprintDate) {
+					// if the first sprint status date is after createdDate, set createdDate to the first sprint status date
+					if oldSprintStatuses[0].SprintDate.After(createdOldDate) {
+						createdOldDate = oldSprintStatuses[0].SprintDate
+					}
+					// format createdDate to date
+					correctOldDate := time.Date(createdOldDate.Year(), createdOldDate.Month(), createdOldDate.Day(), 0, 0, 0, 0, createdOldDate.Location())
+					// update sprint status record and set work item count + 1
+					if err := tx.Model(&model.SprintStatus{}).Where("sprint_id = ?", oldWorkItem.SprintId).Where("sprint_date = ?", correctOldDate).Update("task_count", gorm.Expr("task_count - ?", needUpdatetaskCount)).Error; err != nil {
+						tx.Rollback()
+						return err
+					}
 				}
 			}
 
