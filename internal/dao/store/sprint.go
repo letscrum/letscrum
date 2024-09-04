@@ -165,11 +165,11 @@ func (s SprintDao) UpdateMembers(sprint model.Sprint) (*model.Sprint, error) {
 func (s SprintDao) Delete(sprint model.Sprint) (bool, error) {
 	// make transaction of delete sprint and sprint status
 	err := s.DB.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Where("id = ?", sprint.Id).Delete(&model.Sprint{}).Error; err != nil {
+		if err := tx.Where("sprint_id = ?", sprint.Id).Delete(&model.SprintStatus{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
-		if err := tx.Where("sprint_id = ?", sprint.Id).Delete(&model.SprintStatus{}).Error; err != nil {
+		if err := tx.Where("id = ?", sprint.Id).Delete(&model.Sprint{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
