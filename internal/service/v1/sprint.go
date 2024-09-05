@@ -798,11 +798,25 @@ func (s SprintService) ItemBurndown(ctx context.Context, req *projectv1.SprintIt
 	taskCount := s.taskDao.CountBySprint(reqSprint.Id, "")
 	// build sprint burndown
 	var burndown []*projectv1.ItemBurndown
-	for _, sStatus := range sprintStatus {
-		burndown = append(burndown, &projectv1.ItemBurndown{
-			Date:   sStatus.SprintDate.Unix(),
-			Actual: int64(sStatus.TaskCount),
-		})
+	for i, sStatus := range sprintStatus {
+		// get current date
+		currentDate := time.Now()
+		// if the sStatus date is before currentDate sum all before actual as current actual
+		if sStatus.SprintDate.Before(currentDate) || sStatus.SprintDate.Equal(currentDate) {
+			var actual int64
+			for j := 0; j <= i; j++ {
+				actual += int64(sprintStatus[j].TaskCount)
+			}
+			burndown = append(burndown, &projectv1.ItemBurndown{
+				Date:   sStatus.SprintDate.Unix(),
+				Actual: actual,
+			})
+		} else {
+			burndown = append(burndown, &projectv1.ItemBurndown{
+				Date:   sStatus.SprintDate.Unix(),
+				Actual: int64(sStatus.TaskCount),
+			})
+		}
 	}
 	return &projectv1.SprintItemBurndownResponse{
 		Total:    taskCount,
