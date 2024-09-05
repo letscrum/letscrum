@@ -168,6 +168,7 @@ func (s WorkItemService) ListByProject(ctx context.Context, req *itemv1.ListWork
 					Title:       t.Title,
 					Description: t.Description,
 					Status:      itemv1.Task_TaskStatus(itemv1.Task_TaskStatus_value[t.Status]),
+					Remaining:   t.Remaining,
 					AssignUser: &userv1.User{
 						Id:    t.AssignUser.Id.String(),
 						Name:  t.AssignUser.Name,
@@ -308,6 +309,7 @@ func (s WorkItemService) ListBySprint(ctx context.Context, req *itemv1.ListWorkI
 					Title:       t.Title,
 					Description: t.Description,
 					Status:      itemv1.Task_TaskStatus(itemv1.Task_TaskStatus_value[t.Status]),
+					Remaining:   t.Remaining,
 					AssignUser: &userv1.User{
 						Id:    t.AssignUser.Id.String(),
 						Name:  t.AssignUser.Name,

@@ -740,7 +740,7 @@ func (s SprintService) RemoveMember(ctx context.Context, req *projectv1.RemoveSp
 	}, nil
 }
 
-func (s SprintService) ItemBurndown(ctx context.Context, req *projectv1.SprintItemBurndownRequest) (*projectv1.SprintItemBurndownResponse, error) {
+func (s SprintService) ItemBurndown(ctx context.Context, req *projectv1.SprintBurndownRequest) (*projectv1.SprintBurndownResponse, error) {
 	claims, err := utils.GetTokenDetails(ctx)
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
@@ -783,43 +783,127 @@ func (s SprintService) ItemBurndown(ctx context.Context, req *projectv1.SprintIt
 	if utils.IsProjectMember(*project, user) == false {
 		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectMember)
 	}
-	// get sprint sprintStatus by sprint id
+	// get sprint sprintBurndown by sprint id
 	var reqSprint model.Sprint
 	sId, err := uuid.Parse(req.SprintId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	reqSprint.Id = sId
-	sprintStatus, err := s.sprintDao.ListSprintStatus(reqSprint)
+	sprintBurndown, err := s.sprintDao.GetBurndown(reqSprint)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	// get work item count and task count by sprint id
-	taskCount := s.taskDao.CountBySprint(reqSprint.Id, "")
+	totalTaskCount := s.taskDao.CountBySprint(reqSprint.Id, "")
 	// build sprint burndown
-	var burndown []*projectv1.ItemBurndown
-	for i, sStatus := range sprintStatus {
+	var burndown []*projectv1.Burndown
+	for i, b := range sprintBurndown {
 		// get current date
 		currentDate := time.Now()
-		// if the sStatus date is before currentDate sum all before actual as current actual
-		if sStatus.SprintDate.Before(currentDate) || sStatus.SprintDate.Equal(currentDate) {
-			var actual int64
+		// if the b date is before currentDate sum all before actual as current actual
+		if b.SprintDate.Before(currentDate) || b.SprintDate.Equal(currentDate) {
+			var actual float32
 			for j := 0; j <= i; j++ {
-				actual += int64(sprintStatus[j].TaskCount)
+				actual += float32(sprintBurndown[j].TaskCount)
 			}
-			burndown = append(burndown, &projectv1.ItemBurndown{
-				Date:   sStatus.SprintDate.Unix(),
+			burndown = append(burndown, &projectv1.Burndown{
+				Date:   b.SprintDate.Unix(),
 				Actual: actual,
 			})
 		} else {
-			burndown = append(burndown, &projectv1.ItemBurndown{
-				Date:   sStatus.SprintDate.Unix(),
-				Actual: int64(sStatus.TaskCount),
+			burndown = append(burndown, &projectv1.Burndown{
+				Date:   b.SprintDate.Unix(),
+				Actual: float32(b.TaskCount),
 			})
 		}
 	}
-	return &projectv1.SprintItemBurndownResponse{
-		Total:    taskCount,
+	return &projectv1.SprintBurndownResponse{
+		Total:    float32(totalTaskCount),
+		Burndown: burndown,
+	}, nil
+}
+
+func (s SprintService) WorkBurndown(ctx context.Context, req *projectv1.SprintBurndownRequest) (*projectv1.SprintBurndownResponse, error) {
+	claims, err := utils.GetTokenDetails(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	var user model.User
+	user.Id = claims.Id
+	user.IsSuperAdmin = claims.IsSuperAdmin
+	var reqOrg model.Org
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqOrg.Id = oId
+	org, err := s.orgDao.Get(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	orgUsers, err := s.orgDao.ListMember(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if utils.IsOrgMember(org, orgUsers, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotOrgMember)
+	}
+	var reqProject model.Project
+	pId, err := uuid.Parse(req.ProjectId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqProject.OrgId = oId
+	reqProject.Id = pId
+	reqProject.CreatedUser.Id = user.Id
+	project, err := s.projectDao.Get(reqProject)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if project.Id == uuid.Nil {
+		return nil, status.Error(codes.NotFound, "project not fount.")
+	}
+	if utils.IsProjectMember(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectMember)
+	}
+	// get sprint sprintBurndown by sprint id
+	var reqSprint model.Sprint
+	sId, err := uuid.Parse(req.SprintId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqSprint.Id = sId
+	sprintBurndown, err := s.sprintDao.GetBurndown(reqSprint)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	// get work item count and task count by sprint id
+	totalWorkHours := s.taskDao.WorkHoursBySprint(reqSprint.Id)
+	// build sprint burndown
+	var burndown []*projectv1.Burndown
+	for i, b := range sprintBurndown {
+		// get current date
+		currentDate := time.Now()
+		// if the b date is before currentDate sum all before actual as current actual
+		if b.SprintDate.Before(currentDate) || b.SprintDate.Equal(currentDate) {
+			var actual float32
+			for j := 0; j <= i; j++ {
+				actual += sprintBurndown[j].WorkHours
+			}
+			burndown = append(burndown, &projectv1.Burndown{
+				Date:   b.SprintDate.Unix(),
+				Actual: actual,
+			})
+		} else {
+			burndown = append(burndown, &projectv1.Burndown{
+				Date:   b.SprintDate.Unix(),
+				Actual: b.WorkHours,
+			})
+		}
+	}
+	return &projectv1.SprintBurndownResponse{
+		Total:    totalWorkHours,
 		Burndown: burndown,
 	}, nil
 }

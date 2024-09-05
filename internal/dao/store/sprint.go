@@ -42,9 +42,9 @@ func (s SprintDao) Create(sprint model.Sprint) (*model.Sprint, error) {
 			tx.Rollback()
 			return err
 		}
-		var sprintStatuses []*model.SprintStatus
+		var sprintStatuses []*model.SprintBurndown
 		for d := sprint.StartDate; d.Before(sprint.EndDate) || d.Equal(sprint.EndDate); d = d.AddDate(0, 0, 1) {
-			sprintStatus := model.SprintStatus{
+			sprintStatus := model.SprintBurndown{
 				SprintId:   sprint.Id,
 				SprintDate: d,
 			}
@@ -70,7 +70,7 @@ func (s SprintDao) Update(sprint model.Sprint) (*model.Sprint, error) {
 			return err
 		}
 		// get current sprint statuses ordered by date
-		var currentSprintStatuses []*model.SprintStatus
+		var currentSprintStatuses []*model.SprintBurndown
 		if err := tx.Where("sprint_id = ?", sprint.Id).Order("sprint_date").Find(&currentSprintStatuses).Error; err != nil {
 			tx.Rollback()
 			return err
@@ -83,9 +83,9 @@ func (s SprintDao) Update(sprint model.Sprint) (*model.Sprint, error) {
 
 		// if current sprint statuses is empty, create new sprint statuses
 		if len(currentSprintStatuses) == 0 {
-			var sprintStatuses []*model.SprintStatus
+			var sprintStatuses []*model.SprintBurndown
 			for d := sprint.StartDate; d.Before(sprint.EndDate) || d.Equal(sprint.EndDate); d = d.AddDate(0, 0, 1) {
-				sprintStatus := model.SprintStatus{
+				sprintStatus := model.SprintBurndown{
 					SprintId:   sprint.Id,
 					SprintDate: d,
 				}
@@ -102,9 +102,9 @@ func (s SprintDao) Update(sprint model.Sprint) (*model.Sprint, error) {
 				// if updated sprint start date is before current sprint status
 				if sprint.StartDate.Before(currentSprintStatuses[0].SprintDate) {
 					// create new sprint status from updated sprint start date to current sprint status 0
-					var beforeSprintStatuses []*model.SprintStatus
+					var beforeSprintStatuses []*model.SprintBurndown
 					for d := sprint.StartDate; d.Before(currentSprintStatuses[0].SprintDate); d = d.AddDate(0, 0, 1) {
-						sprintStatus := model.SprintStatus{
+						sprintStatus := model.SprintBurndown{
 							SprintId:   sprint.Id,
 							SprintDate: d,
 						}
@@ -116,7 +116,7 @@ func (s SprintDao) Update(sprint model.Sprint) (*model.Sprint, error) {
 					}
 				} else {
 					// delete sprint status from current sprint status 0 to updated sprint start date
-					if err := tx.Where("sprint_id = ?", sprint.Id).Where("sprint_date < ?", sprint.StartDate).Delete(&model.SprintStatus{}).Error; err != nil {
+					if err := tx.Where("sprint_id = ?", sprint.Id).Where("sprint_date < ?", sprint.StartDate).Delete(&model.SprintBurndown{}).Error; err != nil {
 						tx.Rollback()
 						return err
 					}
@@ -124,9 +124,9 @@ func (s SprintDao) Update(sprint model.Sprint) (*model.Sprint, error) {
 				// if updated sprint end date is after the last current sprint status
 				if sprint.EndDate.After(currentSprintStatuses[len(currentSprintStatuses)-1].SprintDate) {
 					// create new sprint status from the last current sprint status to updated sprint end date
-					var afterSprintStatuses []*model.SprintStatus
+					var afterSprintStatuses []*model.SprintBurndown
 					for d := currentSprintStatuses[len(currentSprintStatuses)-1].SprintDate.AddDate(0, 0, 1); d.Before(sprint.EndDate) || d.Equal(sprint.EndDate); d = d.AddDate(0, 0, 1) {
-						sprintStatus := model.SprintStatus{
+						sprintStatus := model.SprintBurndown{
 							SprintId:   sprint.Id,
 							SprintDate: d,
 						}
@@ -138,7 +138,7 @@ func (s SprintDao) Update(sprint model.Sprint) (*model.Sprint, error) {
 					}
 				} else {
 					// delete sprint status from updated sprint end date to
-					if err := tx.Where("sprint_id = ?", sprint.Id).Where("sprint_date > ?", sprint.EndDate).Delete(&model.SprintStatus{}).Error; err != nil {
+					if err := tx.Where("sprint_id = ?", sprint.Id).Where("sprint_date > ?", sprint.EndDate).Delete(&model.SprintBurndown{}).Error; err != nil {
 						tx.Rollback()
 						return err
 					}
@@ -165,7 +165,7 @@ func (s SprintDao) UpdateMembers(sprint model.Sprint) (*model.Sprint, error) {
 func (s SprintDao) Delete(sprint model.Sprint) (bool, error) {
 	// make transaction of delete sprint and sprint status
 	err := s.DB.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Where("sprint_id = ?", sprint.Id).Delete(&model.SprintStatus{}).Error; err != nil {
+		if err := tx.Where("sprint_id = ?", sprint.Id).Delete(&model.SprintBurndown{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -188,8 +188,8 @@ func (s SprintDao) DeleteByProject(project model.Project) (bool, error) {
 	return true, nil
 }
 
-func (s SprintDao) ListSprintStatus(sprint model.Sprint) ([]*model.SprintStatus, error) {
-	var sprintStatuses []*model.SprintStatus
+func (s SprintDao) GetBurndown(sprint model.Sprint) ([]*model.SprintBurndown, error) {
+	var sprintStatuses []*model.SprintBurndown
 	err := s.DB.Where("sprint_id = ?", sprint.Id).Order("sprint_date").Find(&sprintStatuses).Error
 	if err != nil {
 		return nil, err

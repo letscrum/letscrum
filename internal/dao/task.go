@@ -18,11 +18,12 @@ type TaskDao interface {
 	CountByWorkItem(workItemId int64, keyword string) int64
 	CountBySprint(sprintId uuid.UUID, keyword string) int64
 	CountBySprints(sprintIds []uuid.UUID) []int64
+	WorkHoursBySprint(sprintId uuid.UUID) float32
 	Create(task model.Task) (*model.Task, error)
 	Update(task model.Task, userId uuid.UUID) (*model.Task, error)
-	UpdateStatus(task model.Task, userId uuid.UUID) (*model.Task, error)
 	UpdateAssignUser(task model.Task, userId uuid.UUID) (*model.Task, error)
 	Move(task model.Task, userId uuid.UUID) (*model.Task, error)
+	UpdateWorkHours(task model.Task, userId uuid.UUID) (*model.Task, error)
 	Delete(task model.Task, userId uuid.UUID) (bool, error)
 	ReOrder(taskIds []int64) ([]int64, error)
 }

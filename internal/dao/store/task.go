@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/letscrum/letscrum/internal/model"
+	"github.com/letscrum/letscrum/pkg/utils"
 	"gorm.io/gorm"
 )
 
@@ -110,6 +111,12 @@ func (t TaskDao) CountBySprints(sprintIds []uuid.UUID) []int64 {
 	return counts
 }
 
+func (t TaskDao) WorkHoursBySprint(sprintId uuid.UUID) float32 {
+	var workHours float32
+	t.DB.Model(&model.Task{}).Where("sprint_id = ?", sprintId).Select("COALESCE(SUM(remaining), 0)").Scan(&workHours)
+	return workHours
+}
+
 func (t TaskDao) Create(task model.Task) (*model.Task, error) {
 	// make transaction of create task and task log
 	err := t.DB.Transaction(func(tx *gorm.DB) error {
@@ -133,13 +140,10 @@ func (t TaskDao) Create(task model.Task) (*model.Task, error) {
 		if task.SprintId != uuid.Nil {
 			// get now time
 			createdDate := time.Now()
-			// get current sprint statuses ordered by date
-			var currentSprintStatuses []*model.SprintStatus
-			if err := tx.Where("sprint_id = ?", task.SprintId).Order("sprint_date").Find(&currentSprintStatuses).Error; err != nil {
-				tx.Rollback()
+			currentSprintStatuses, lastSprintStatusIndex, err := utils.GetBurndown(tx, task.SprintId)
+			if err != nil {
 				return err
 			}
-			lastSprintStatusIndex := len(currentSprintStatuses) - 1
 
 			// if createdDate before or equal the last sprint status date
 			if createdDate.Before(currentSprintStatuses[lastSprintStatusIndex].SprintDate) || createdDate.Equal(currentSprintStatuses[lastSprintStatusIndex].SprintDate) {
@@ -150,9 +154,9 @@ func (t TaskDao) Create(task model.Task) (*model.Task, error) {
 				// format createdDate to date
 				correctDate := time.Date(createdDate.Year(), createdDate.Month(), createdDate.Day(), 0, 0, 0, 0, createdDate.Location())
 
-				// update sprint status record and set work item count + 1
-				if err := tx.Model(&model.SprintStatus{}).Where("sprint_id = ?", task.SprintId).Where("sprint_date = ?", correctDate).Update("task_count", gorm.Expr("task_count + ?", 1)).Error; err != nil {
-					tx.Rollback()
+				err := utils.UpdateBurndown(tx, task.SprintId, correctDate, 1, task.Remaining)
+
+				if err != nil {
 					return err
 				}
 			}
@@ -192,62 +196,6 @@ func (t TaskDao) Update(task model.Task, userId uuid.UUID) (*model.Task, error) 
 	return &task, nil
 }
 
-func (t TaskDao) UpdateStatus(task model.Task, userId uuid.UUID) (*model.Task, error) {
-	// make transaction of update task status and task log
-	err := t.DB.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Model(&model.Task{}).Where("id = ?", task.Id).Update("status", task.Status).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-		var log model.ItemLog
-		log.Id = uuid.New()
-		log.ItemId = task.Id
-		log.ItemType = "TASK"
-		log.Action = "UPDATE"
-		log.Log = "Update task status to: " + task.Status
-		log.CreatedBy = userId
-		if err := tx.Create(&log).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-		// get now time
-		createdDate := time.Now()
-		// get current sprint statuses ordered by date
-		var currentSprintStatuses []*model.SprintStatus
-		if err := tx.Where("sprint_id = ?", task.SprintId).Order("sprint_date").Find(&currentSprintStatuses).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-		lastSprintStatusIndex := len(currentSprintStatuses) - 1
-
-		// if createdDate before or equal the last sprint status date
-		if createdDate.Before(currentSprintStatuses[lastSprintStatusIndex].SprintDate) || createdDate.Equal(currentSprintStatuses[lastSprintStatusIndex].SprintDate) {
-			// if the first sprint status date is after createdDate, set createdDate to the first sprint status date
-			if currentSprintStatuses[0].SprintDate.After(createdDate) {
-				createdDate = currentSprintStatuses[0].SprintDate
-			}
-			// format createdDate to date
-			correctDate := time.Date(createdDate.Year(), createdDate.Month(), createdDate.Day(), 0, 0, 0, 0, createdDate.Location())
-
-			action := ""
-			if task.Status == "Done" || task.Status == "Removed" {
-				action = "task_count - ?"
-			} else {
-				action = "task_count + ?"
-			}
-			if err := tx.Model(&model.SprintStatus{}).Where("sprint_id = ?", task.SprintId).Where("sprint_date = ?", correctDate).Update("task_count", gorm.Expr(action, 1)).Error; err != nil {
-				tx.Rollback()
-				return err
-			}
-		}
-		return nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	return &task, nil
-}
-
 func (t TaskDao) UpdateAssignUser(task model.Task, userId uuid.UUID) (*model.Task, error) {
 	// make transaction of update task assign user and task log
 	err := t.DB.Transaction(func(tx *gorm.DB) error {
@@ -284,7 +232,23 @@ func (t TaskDao) UpdateAssignUser(task model.Task, userId uuid.UUID) (*model.Tas
 func (t TaskDao) Move(task model.Task, userId uuid.UUID) (*model.Task, error) {
 	// make transaction of update task status and move task to work item
 	err := t.DB.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Model(&model.Task{}).Where("id = ?", task.Id).Update("status", task.Status).Update("work_item_id", task.WorkItemId).Error; err != nil {
+		originalTask := model.Task{}
+		if err := tx.Where("id = ?", task.Id).Find(&originalTask).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+		var workItemId int64
+		if task.WorkItemId == 0 {
+			workItemId = originalTask.WorkItemId
+		}
+		workItemId = task.WorkItemId
+		var remaining float32
+		if task.Status == "Done" || task.Status == "Removed" {
+			remaining = 0
+		} else {
+			remaining = originalTask.Remaining
+		}
+		if err := tx.Model(&model.Task{}).Where("id = ?", task.Id).Find(&originalTask).Update("status", task.Status).Update("work_item_id", workItemId).Update("remaining", remaining).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -307,13 +271,10 @@ func (t TaskDao) Move(task model.Task, userId uuid.UUID) (*model.Task, error) {
 		}
 		// get now time
 		createdDate := time.Now()
-		// get current sprint statuses ordered by date
-		var currentSprintStatuses []*model.SprintStatus
-		if err := tx.Where("sprint_id = ?", task.SprintId).Order("sprint_date").Find(&currentSprintStatuses).Error; err != nil {
-			tx.Rollback()
+		currentSprintStatuses, lastSprintStatusIndex, err := utils.GetBurndown(tx, originalTask.SprintId)
+		if err != nil {
 			return err
 		}
-		lastSprintStatusIndex := len(currentSprintStatuses) - 1
 
 		// if createdDate before or equal the last sprint status date
 		if createdDate.Before(currentSprintStatuses[lastSprintStatusIndex].SprintDate) || createdDate.Equal(currentSprintStatuses[lastSprintStatusIndex].SprintDate) {
@@ -324,15 +285,91 @@ func (t TaskDao) Move(task model.Task, userId uuid.UUID) (*model.Task, error) {
 			// format createdDate to date
 			correctDate := time.Date(createdDate.Year(), createdDate.Month(), createdDate.Day(), 0, 0, 0, 0, createdDate.Location())
 
-			action := ""
-			if task.Status == "Done" || task.Status == "Removed" {
-				action = "task_count - ?"
+			var taskCount int32
+			var workHours float32
+			if originalTask.Status == "Done" || originalTask.Status == "Removed" {
+				// check task status is Done or Removed
+				if task.Status == "Done" || task.Status == "Removed" {
+					taskCount = 0
+					workHours = 0
+				} else {
+					taskCount = 1
+					workHours = 0
+				}
 			} else {
-				action = "task_count + ?"
+				if task.Status == "Done" || task.Status == "Removed" {
+					taskCount = -1
+					workHours = -originalTask.Remaining
+				} else {
+					taskCount = 0
+					workHours = 0
+				}
 			}
-			if err := tx.Model(&model.SprintStatus{}).Where("sprint_id = ?", task.SprintId).Where("sprint_date = ?", correctDate).Update("task_count", gorm.Expr(action, 1)).Error; err != nil {
-				tx.Rollback()
+
+			err := utils.UpdateBurndown(tx, originalTask.SprintId, correctDate, taskCount, workHours)
+			if err != nil {
 				return err
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &task, nil
+}
+
+func (t TaskDao) UpdateWorkHours(task model.Task, userId uuid.UUID) (*model.Task, error) {
+	// make transaction of update task work hours and task log
+	err := t.DB.Transaction(func(tx *gorm.DB) error {
+		originalTask := model.Task{}
+		if err := tx.Where("id = ?", task.Id).Find(&originalTask).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+		var remaining float32
+		if task.Status == "Done" || task.Status == "Removed" {
+			remaining = 0
+		} else {
+			remaining = task.Remaining
+		}
+		if err := tx.Model(&model.Task{}).Where("id = ?", task.Id).Update("remaining", remaining).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+		var log model.ItemLog
+		log.Id = uuid.New()
+		log.ItemId = task.Id
+		log.ItemType = "TASK"
+		log.Action = "UPDATE"
+		log.Log = "Update task work hours"
+		log.Changes = "projectId: " + task.ProjectId.String() + ", sprintId: " + task.SprintId.String()
+		log.CreatedBy = userId
+		if err := tx.Create(&log).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+		if task.Status != "Done" && task.Status != "Removed" {
+			// get now time
+			createdDate := time.Now()
+			currentSprintStatuses, lastSprintStatusIndex, err := utils.GetBurndown(tx, originalTask.SprintId)
+			if err != nil {
+				return err
+			}
+
+			// if createdDate before or equal the last sprint status date
+			if createdDate.Before(currentSprintStatuses[lastSprintStatusIndex].SprintDate) || createdDate.Equal(currentSprintStatuses[lastSprintStatusIndex].SprintDate) {
+				// if the first sprint status date is after createdDate, set createdDate to the first sprint status date
+				if currentSprintStatuses[0].SprintDate.After(createdDate) {
+					createdDate = currentSprintStatuses[0].SprintDate
+				}
+				// format createdDate to date
+				correctDate := time.Date(createdDate.Year(), createdDate.Month(), createdDate.Day(), 0, 0, 0, 0, createdDate.Location())
+				updateRemaining := task.Remaining - originalTask.Remaining
+				err := utils.UpdateBurndown(tx, originalTask.SprintId, correctDate, 0, updateRemaining)
+				if err != nil {
+					return err
+				}
 			}
 		}
 		return nil
@@ -346,10 +383,12 @@ func (t TaskDao) Move(task model.Task, userId uuid.UUID) (*model.Task, error) {
 func (t TaskDao) Delete(task model.Task, userId uuid.UUID) (bool, error) {
 	// make transaction of delete task and task log
 	err := t.DB.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Where("id = ?", task.Id).Delete(&model.Task{}).Error; err != nil {
+		// get task and delete from database
+		if err := tx.Where("id = ?", task.Id).Find(&task).Delete(&task).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
+
 		var log model.ItemLog
 		log.Id = uuid.New()
 		log.ItemId = task.Id
@@ -365,13 +404,10 @@ func (t TaskDao) Delete(task model.Task, userId uuid.UUID) (bool, error) {
 		if task.Status != "Done" && task.Status != "Removed" {
 			// get now time
 			createdDate := time.Now()
-			// get current sprint statuses ordered by date
-			var currentSprintStatuses []*model.SprintStatus
-			if err := tx.Where("sprint_id = ?", task.SprintId).Order("sprint_date").Find(&currentSprintStatuses).Error; err != nil {
-				tx.Rollback()
+			currentSprintStatuses, lastSprintStatusIndex, err := utils.GetBurndown(tx, task.SprintId)
+			if err != nil {
 				return err
 			}
-			lastSprintStatusIndex := len(currentSprintStatuses) - 1
 
 			// if createdDate before or equal the last sprint status date
 			if createdDate.Before(currentSprintStatuses[lastSprintStatusIndex].SprintDate) || createdDate.Equal(currentSprintStatuses[lastSprintStatusIndex].SprintDate) {
@@ -382,9 +418,8 @@ func (t TaskDao) Delete(task model.Task, userId uuid.UUID) (bool, error) {
 				// format createdDate to date
 				correctDate := time.Date(createdDate.Year(), createdDate.Month(), createdDate.Day(), 0, 0, 0, 0, createdDate.Location())
 
-				// update sprint status record and set work item count + 1
-				if err := tx.Model(&model.SprintStatus{}).Where("sprint_id = ?", task.SprintId).Where("sprint_date = ?", correctDate).Update("task_count", gorm.Expr("task_count - ?", 1)).Error; err != nil {
-					tx.Rollback()
+				err := utils.UpdateBurndown(tx, task.SprintId, correctDate, -1, -task.Remaining)
+				if err != nil {
 					return err
 				}
 			}

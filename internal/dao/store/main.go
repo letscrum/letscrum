@@ -83,7 +83,7 @@ func GetDao(opts *db.Options) (dao.Interface, error) {
 		&model.WorkItem{},
 		&model.Task{},
 		&model.ItemLog{},
-		&model.SprintStatus{},
+		&model.SprintBurndown{},
 	)
 
 	if initErr != nil {

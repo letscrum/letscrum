@@ -166,6 +166,7 @@ func (t TaskService) Get(ctx context.Context, req *itemv1.GetTaskRequest) (*item
 			Title:       getTask.Title,
 			Description: getTask.Description,
 			Status:      itemv1.Task_TaskStatus(itemv1.Task_TaskStatus_value[getTask.Status]),
+			Remaining:   getTask.Remaining,
 			AssignUser: &userv1.User{
 				Id:    getTask.AssignUser.Id.String(),
 				Name:  getTask.AssignUser.Name,
@@ -220,7 +221,7 @@ func (t TaskService) UpdateStatus(ctx context.Context, req *itemv1.UpdateTaskSta
 	var task model.Task
 	task.Id = req.TaskId
 	task.Status = req.Status.String()
-	updateTask, err := t.taskDao.UpdateStatus(task, user.Id)
+	updateTask, err := t.taskDao.Move(task, user.Id)
 	if err != nil {
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
@@ -234,6 +235,7 @@ func (t TaskService) UpdateStatus(ctx context.Context, req *itemv1.UpdateTaskSta
 			Title:       updateTask.Title,
 			Description: updateTask.Description,
 			Status:      itemv1.Task_TaskStatus(itemv1.Task_TaskStatus_value[updateTask.Status]),
+			Remaining:   updateTask.Remaining,
 			AssignUser: &userv1.User{
 				Id:    updateTask.AssignUser.Id.String(),
 				Name:  updateTask.AssignUser.Name,
@@ -297,6 +299,7 @@ func (t TaskService) Assign(ctx context.Context, req *itemv1.AssignTaskRequest) 
 			Title:       updateTask.Title,
 			Description: updateTask.Description,
 			Status:      itemv1.Task_TaskStatus(itemv1.Task_TaskStatus_value[updateTask.Status]),
+			Remaining:   updateTask.Remaining,
 			AssignUser: &userv1.User{
 				Id:    updateTask.AssignUser.Id.String(),
 				Name:  updateTask.AssignUser.Name,
@@ -357,6 +360,7 @@ func (t TaskService) Move(ctx context.Context, req *itemv1.MoveTaskRequest) (*it
 			Title:       updateTask.Title,
 			Description: updateTask.Description,
 			Status:      itemv1.Task_TaskStatus(itemv1.Task_TaskStatus_value[updateTask.Status]),
+			Remaining:   updateTask.Remaining,
 			AssignUser: &userv1.User{
 				Id:    updateTask.AssignUser.Id.String(),
 				Name:  updateTask.AssignUser.Name,
@@ -406,4 +410,67 @@ func (t TaskService) ReOrder(ctx context.Context, req *itemv1.ReOrderTasksReques
 	return &itemv1.ReOrderTasksResponse{
 		Success: true,
 	}, nil
+}
+
+func (t TaskService) UpdateWorkHours(ctx context.Context, req *itemv1.UpdateWorkHoursRequest) (*itemv1.UpdateTaskResponse, error) {
+	claims, err := utils.GetTokenDetails(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	var user model.User
+	user.Id = claims.Id
+	user.IsSuperAdmin = claims.IsSuperAdmin
+	var reqProject model.Project
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	pId, err := uuid.Parse(req.ProjectId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqProject.OrgId = oId
+	reqProject.Id = pId
+	project, err := t.projectDao.Get(reqProject)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if utils.IsProjectMember(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectMember)
+	}
+	var task model.Task
+	task.ProjectId = project.Id
+	task.Id = req.TaskId
+	task.Remaining = float32(req.Remaining)
+
+	updateTask, err := t.taskDao.UpdateWorkHours(task, user.Id)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	return &itemv1.UpdateTaskResponse{
+		Success: true,
+		Item: &itemv1.Task{
+			Id:          updateTask.Id,
+			ProjectId:   updateTask.ProjectId.String(),
+			SprintId:    updateTask.SprintId.String(),
+			WorkItemId:  updateTask.WorkItemId,
+			Title:       updateTask.Title,
+			Description: updateTask.Description,
+			Status:      itemv1.Task_TaskStatus(itemv1.Task_TaskStatus_value[updateTask.Status]),
+			Remaining:   updateTask.Remaining,
+			AssignUser: &userv1.User{
+				Id:    updateTask.AssignUser.Id.String(),
+				Name:  updateTask.AssignUser.Name,
+				Email: updateTask.AssignUser.Email,
+			},
+			CreatedUser: &userv1.User{
+				Id:    updateTask.CreatedUser.Id.String(),
+				Name:  updateTask.CreatedUser.Name,
+				Email: updateTask.CreatedUser.Email,
+			},
+			CreatedAt: updateTask.CreatedAt.Unix(),
+			UpdatedAt: updateTask.UpdatedAt.Unix(),
+		},
+	}, nil
+
 }

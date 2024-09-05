@@ -11,5 +11,5 @@ type SprintDao interface {
 	UpdateMembers(sprint model.Sprint) (*model.Sprint, error)
 	Delete(sprint model.Sprint) (bool, error)
 	DeleteByProject(project model.Project) (bool, error)
-	ListSprintStatus(sprint model.Sprint) ([]*model.SprintStatus, error)
+	GetBurndown(sprint model.Sprint) ([]*model.SprintBurndown, error)
 }
