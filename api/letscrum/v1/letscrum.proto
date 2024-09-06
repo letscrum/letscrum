@@ -220,9 +220,9 @@ service Sprint {
     };
   }
 
-  rpc ItemBurndown(letscrum.api.project.v1.SprintBurndownRequest) returns (letscrum.api.project.v1.SprintBurndownResponse) {
+  rpc TaskBurndown(letscrum.api.project.v1.SprintBurndownRequest) returns (letscrum.api.project.v1.SprintBurndownResponse) {
     option (google.api.http) = {
-      get: "/api/v1/orgs/{org_id}/projects/{project_id}/sprints/{sprint_id}/item_burndown"
+      get: "/api/v1/orgs/{org_id}/projects/{project_id}/sprints/{sprint_id}/task_burndown"
     };
   }
 

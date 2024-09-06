@@ -108,6 +108,7 @@ func (s *SprintService) Create(ctx context.Context, req *projectv1.CreateSprintR
 	newSprint.Members = string(members)
 	newSprint.StartDate = time.Unix(req.StartDate, 0)
 	newSprint.EndDate = time.Unix(req.EndDate, 0)
+	newSprint.BurndownType = projectv1.Sprint_ByTask.String()
 
 	sprint, err := s.sprintDao.Create(newSprint)
 	if err != nil {
@@ -210,6 +211,7 @@ func (s *SprintService) Get(ctx context.Context, req *projectv1.GetSprintRequest
 			StartDate:     sprint.StartDate.Unix(),
 			EndDate:       sprint.EndDate.Unix(),
 			Status:        sprintStatus,
+			BurndownType:  projectv1.Sprint_BurndownType(projectv1.Sprint_BurndownType_value[sprint.BurndownType]),
 			WorkItemCount: workItemCount,
 			TaskCount:     taskCount,
 			CreatedAt:     sprint.CreatedAt.Unix(),
@@ -307,6 +309,7 @@ func (s *SprintService) List(ctx context.Context, req *projectv1.ListSprintReque
 			StartDate:     sprint.StartDate.Unix(),
 			EndDate:       sprint.EndDate.Unix(),
 			Status:        sprintStatus,
+			BurndownType:  projectv1.Sprint_BurndownType(projectv1.Sprint_BurndownType_value[sprint.BurndownType]),
 			WorkItemCount: workItemCounts[i],
 			TaskCount:     taskCounts[i],
 			CreatedAt:     sprint.CreatedAt.Unix(),
@@ -382,6 +385,8 @@ func (s *SprintService) Update(ctx context.Context, req *projectv1.UpdateSprintR
 	sprint.Name = req.Name
 	sprint.StartDate = time.Unix(req.StartDate, 0)
 	sprint.EndDate = time.Unix(req.EndDate, 0)
+	sprint.BurndownType = req.BurndownType.String()
+
 	updateSprint, err := s.sprintDao.Update(sprint)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -740,7 +745,7 @@ func (s SprintService) RemoveMember(ctx context.Context, req *projectv1.RemoveSp
 	}, nil
 }
 
-func (s SprintService) ItemBurndown(ctx context.Context, req *projectv1.SprintBurndownRequest) (*projectv1.SprintBurndownResponse, error) {
+func (s SprintService) TaskBurndown(ctx context.Context, req *projectv1.SprintBurndownRequest) (*projectv1.SprintBurndownResponse, error) {
 	claims, err := utils.GetTokenDetails(ctx)
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())

@@ -21,9 +21,15 @@ message Sprint {
     Future = 3;
   }
   SprintStatus status = 8;
-  int64 work_item_count = 9;
-  int64 task_count = 10;
-  repeated SprintMember members = 11;
+  enum BurndownType {
+    UNDEFINED = 0;
+    ByTask = 1;
+    ByHour = 2;
+  }
+  BurndownType burndown_type = 9;
+  int64 work_item_count = 10;
+  int64 task_count = 11;
+  repeated SprintMember members = 12;
 }
 
 message SprintMember {
@@ -62,6 +68,7 @@ message UpdateSprintRequest {
   string name = 4;
   int64 start_date = 5;
   int64 end_date = 6;
+  Sprint.BurndownType burndown_type = 7;
 }
 
 message UpdateSprintMembersRequest {
