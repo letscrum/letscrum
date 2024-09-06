@@ -308,13 +308,10 @@ func (w WorkItemDao) UpdateSprintWithTasks(workItem model.WorkItem, userId uuid.
 			if workItem.SprintId != uuid.Nil {
 				// get now time
 				createdDate := time.Now()
-				// get current sprint statuses ordered by date
-				var currentSprintStatuses []*model.SprintBurndown
-				if err := tx.Where("sprint_id = ?", workItem.SprintId).Order("sprint_date").Find(&currentSprintStatuses).Error; err != nil {
-					tx.Rollback()
+				currentSprintStatuses, lastSprintStatusIndex, err := utils.GetBurndown(tx, workItem.SprintId)
+				if err != nil {
 					return err
 				}
-				lastSprintStatusIndex := len(currentSprintStatuses) - 1
 
 				// if createdDate before or equal the last sprint status date
 				if createdDate.Before(currentSprintStatuses[lastSprintStatusIndex].SprintDate) || createdDate.Equal(currentSprintStatuses[lastSprintStatusIndex].SprintDate) {

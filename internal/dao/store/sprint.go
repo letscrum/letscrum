@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/letscrum/letscrum/internal/model"
+	"github.com/letscrum/letscrum/pkg/utils"
 	"gorm.io/gorm"
 )
 
@@ -65,17 +66,14 @@ func (s SprintDao) Create(sprint model.Sprint) (*model.Sprint, error) {
 func (s SprintDao) Update(sprint model.Sprint) (*model.Sprint, error) {
 	// make transaction of update sprint and sprint status
 	err := s.DB.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Model(&model.Sprint{}).Where("id = ?", sprint.Id).Update("name", sprint.Name).Update("start_date", sprint.StartDate).Update("end_date", sprint.EndDate).Error; err != nil {
+		if err := tx.Model(&model.Sprint{}).Where("id = ?", sprint.Id).Update("name", sprint.Name).Update("start_date", sprint.StartDate).Update("end_date", sprint.EndDate).Update("burndown_type", sprint.BurndownType).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
-		// get current sprint statuses ordered by date
-		var currentSprintStatuses []*model.SprintBurndown
-		if err := tx.Where("sprint_id = ?", sprint.Id).Order("sprint_date").Find(&currentSprintStatuses).Error; err != nil {
-			tx.Rollback()
+		currentSprintStatuses, lastSprintStatusIndex, err := utils.GetBurndown(tx, sprint.Id)
+		if err != nil {
 			return err
 		}
-		lastSprintStatusIndex := len(currentSprintStatuses) - 1
 		// convert sprint end date to unix date
 		sprintEndDate := sprint.EndDate.Unix() + 1
 		// convert unix date to time
@@ -110,9 +108,11 @@ func (s SprintDao) Update(sprint model.Sprint) (*model.Sprint, error) {
 						}
 						beforeSprintStatuses = append(beforeSprintStatuses, &sprintStatus)
 					}
-					if err := tx.Create(&beforeSprintStatuses).Error; err != nil {
-						tx.Rollback()
-						return err
+					if len(beforeSprintStatuses) > 0 {
+						if err := tx.Create(&beforeSprintStatuses).Error; err != nil {
+							tx.Rollback()
+							return err
+						}
 					}
 				} else {
 					// delete sprint status from current sprint status 0 to updated sprint start date
@@ -132,9 +132,11 @@ func (s SprintDao) Update(sprint model.Sprint) (*model.Sprint, error) {
 						}
 						afterSprintStatuses = append(afterSprintStatuses, &sprintStatus)
 					}
-					if err := tx.Create(&afterSprintStatuses).Error; err != nil {
-						tx.Rollback()
-						return err
+					if len(afterSprintStatuses) > 0 {
+						if err := tx.Create(&afterSprintStatuses).Error; err != nil {
+							tx.Rollback()
+							return err
+						}
 					}
 				} else {
 					// delete sprint status from updated sprint end date to
