@@ -120,6 +120,17 @@ message UpdateTaskResponse {
   Task item = 2;
 }
 
+message DeleteTaskRequest {
+  string org_id = 1;
+  string project_id = 2;
+  int64 work_item_id = 3;
+  int64 task_id = 4;
+}
+
+message DeleteTaskResponse {
+  bool success = 1;
+}
+
 message ReOrderTasksRequest {
   string org_id = 1;
   string project_id = 2;

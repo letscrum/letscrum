@@ -372,6 +372,12 @@ service Task {
       body: "*"
     };
   }
+
+  rpc Delete(letscrum.api.item.v1.DeleteTaskRequest) returns (letscrum.api.item.v1.DeleteTaskResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/orgs/{org_id}/projects/{project_id}/workitems/{work_item_id}/tasks/{task_id}"
+    };
+  }
 }
 
 service User {

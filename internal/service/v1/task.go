@@ -472,5 +472,42 @@ func (t TaskService) UpdateWorkHours(ctx context.Context, req *itemv1.UpdateWork
 			UpdatedAt: updateTask.UpdatedAt.Unix(),
 		},
 	}, nil
+}
 
+func (t TaskService) Delete(ctx context.Context, req *itemv1.DeleteTaskRequest) (*itemv1.DeleteTaskResponse, error) {
+	claims, err := utils.GetTokenDetails(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	var user model.User
+	user.Id = claims.Id
+	user.IsSuperAdmin = claims.IsSuperAdmin
+	var reqProject model.Project
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	pId, err := uuid.Parse(req.ProjectId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqProject.OrgId = oId
+	reqProject.Id = pId
+	project, err := t.projectDao.Get(reqProject)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if utils.IsProjectMember(*project, user) == false {
+		return nil, status.Error(codes.PermissionDenied, utils.ErrNotProjectMember)
+	}
+	var task model.Task
+	task.Id = req.TaskId
+	success := false
+	success, err = t.taskDao.Delete(task, user.Id)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	return &itemv1.DeleteTaskResponse{
+		Success: success,
+	}, nil
 }
