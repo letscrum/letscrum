@@ -240,8 +240,9 @@ func (t TaskDao) Move(task model.Task, userId uuid.UUID) (*model.Task, error) {
 		var workItemId int64
 		if task.WorkItemId == 0 {
 			workItemId = originalTask.WorkItemId
+		} else {
+			workItemId = task.WorkItemId
 		}
-		workItemId = task.WorkItemId
 		var remaining float32
 		if task.Status == "Done" || task.Status == "Removed" {
 			remaining = 0
