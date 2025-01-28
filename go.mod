@@ -4,7 +4,7 @@ go 1.22.3
 
 require (
 	github.com/golang-jwt/jwt/v5 v5.2.1
-	github.com/golang/glog v1.2.1
+	github.com/golang/glog v1.2.4
 	github.com/google/uuid v1.6.0
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.1.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.20.0
@@ -15,7 +15,6 @@ require (
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/zap v1.27.0
-	google.golang.org/genproto/googleapis/api v0.0.0-20240528184218-531527333157
 	google.golang.org/grpc v1.64.1
 	google.golang.org/protobuf v1.34.1
 	gorm.io/driver/mysql v1.5.6
@@ -55,6 +54,7 @@ require (
 	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.21.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20240528184218-531527333157 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240528184218-531527333157 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
