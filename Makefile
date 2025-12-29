@@ -33,6 +33,7 @@ api_dep_install:
 	go install github.com/rakyll/statik@latest
 
 api_gen:
+	export PATH=$PATH:$(go env GOPATH)/bin
 	protoc -I . -I third_party \
 		--go_out=paths=source_relative:. \
 		--go-grpc_out=paths=source_relative:. \
