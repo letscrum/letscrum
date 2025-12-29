@@ -115,8 +115,76 @@ func (s OrgService) Get(ctx context.Context, req *orgv1.GetOrgRequest) (*orgv1.O
 }
 
 func (s OrgService) Update(ctx context.Context, req *orgv1.UpdateOrgRequest) (*orgv1.OrgResponse, error) {
-	//TODO implement me
-	panic("implement me")
+	claims, err := utils.GetTokenDetails(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	var reqUser model.User
+	reqUser.Id = claims.Id
+	var reqOrg model.Org
+	oId, err := uuid.Parse(req.OrgId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	reqOrg.Id = oId
+	org, err := s.orgDao.Get(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	orgUsers, err := s.orgDao.ListMember(reqOrg)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if org.CreatedBy != reqUser.Id {
+		if utils.IsOrgAdmin(org, orgUsers, reqUser) == false {
+			return nil, status.Error(codes.PermissionDenied, utils.ErrNotOrgAdmin)
+		}
+	}
+
+	if req.Name != "" {
+		if !utils.IsLegalName(req.Name) {
+			return nil, status.Error(codes.InvalidArgument, "organization name can't be less than 5, and only allow letters, numbers, and underscores.")
+		}
+		org.Name = req.Name
+	}
+	if req.DisplayName != "" {
+		org.DisplayName = req.DisplayName
+	}
+	if req.Description != "" {
+		org.Description = req.Description
+	}
+
+	updatedOrg, err := s.orgDao.Update(org)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	var memberItems []*orgv1.OrgMember
+	for _, m := range orgUsers {
+		memberItems = append(memberItems, &orgv1.OrgMember{
+			Member: &userv1.User{
+				Id:    m.UserId.String(),
+				Name:  m.Member.Name,
+				Email: m.Member.Email,
+			},
+			IsAdmin: m.IsAdmin,
+		})
+	}
+
+	return &orgv1.OrgResponse{
+		Item: &orgv1.Org{
+			Id:          updatedOrg.Id.String(),
+			Name:        updatedOrg.Name,
+			DisplayName: updatedOrg.DisplayName,
+			Description: updatedOrg.Description,
+			CreatedBy:   updatedOrg.CreatedUser.Name,
+			MemberCount: int32(len(memberItems)),
+			Members:     memberItems,
+			MyRole:      utils.GetOrgRole(updatedOrg, orgUsers, reqUser),
+		},
+	}, nil
 }
 
 func (s OrgService) Delete(ctx context.Context, req *orgv1.DeleteOrgRequest) (*orgv1.DeleteOrgResponse, error) {
